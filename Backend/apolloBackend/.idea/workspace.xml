@@ -1,15 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1e9ad65b-99d6-4a81-97aa-9475faa93589" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/EventResource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/GroupResource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/UserResource.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/apolloBackend-service.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/apolloBackEnd/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/apolloBackEnd/App.class" afterDir="false" />
-    </list>
+    <list default="true" id="1e9ad65b-99d6-4a81-97aa-9475faa93589" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -171,6 +163,19 @@
               <item name="apolloBackend" type="b2602c69:ProjectViewProjectNode" />
               <item name="apolloBackend" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="apolloBackend" type="b2602c69:ProjectViewProjectNode" />
+              <item name="apolloBackend" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="apolloBackend" type="b2602c69:ProjectViewProjectNode" />
+              <item name="apolloBackend" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
@@ -183,7 +188,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552824012707" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1552824304449" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
@@ -232,12 +237,12 @@
       <workItem from="1552494223897" duration="1589000" />
       <workItem from="1552506750020" duration="3316000" />
       <workItem from="1552711096820" duration="1198000" />
-      <workItem from="1552764709101" duration="7535000" />
+      <workItem from="1552764709101" duration="7781000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="13638000" />
+    <option name="totallyTimeSpent" value="13884000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -251,7 +256,7 @@
   <component name="ToolWindowManager">
     <frame x="0" y="25" width="1920" height="1055" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17129135" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17129135" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -260,8 +265,8 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4994664" weight="0.32972974" />
-      <window_info anchor="bottom" id="Terminal" order="2" sideWeight="0.4909285" weight="0.32972974" />
-      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.58110994" visible="true" weight="0.32864866" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="2" sideWeight="0.4903949" visible="true" weight="0.32972974" />
+      <window_info anchor="bottom" id="Run" order="3" sideWeight="0.58110994" weight="0.32864866" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
@@ -269,7 +274,7 @@
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.4188901" side_tool="true" visible="true" weight="0.32864866" />
+      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5096051" side_tool="true" visible="true" weight="0.32972974" />
       <window_info anchor="bottom" id="Messages" order="12" sideWeight="0.49626467" weight="0.32864866" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
