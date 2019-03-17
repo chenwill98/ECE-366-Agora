@@ -9,6 +9,9 @@ import com.spotify.apollo.route.RouteProvider;
 
 import java.util.stream.Stream;
 import com.model.User;
+import com.store.UserStore;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 
 /**
@@ -48,7 +51,9 @@ public class UserResource implements RouteProvider {
 
 
         // create dummy user class
-        User test_user = new User(username, password_hash);
+        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
+        UserStore store = new UserStore(tmp_config);
+        User test_user = store.getUser(username);
         test_user.printUser();
 
         return Response.forPayload("Successful login attempt.\n");
