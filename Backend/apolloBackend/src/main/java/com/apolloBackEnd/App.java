@@ -6,6 +6,11 @@ import com.spotify.apollo.route.Route;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.httpservice.HttpService;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLClientInfoException;
+import java.sql.SQLException;
+
 
 public final class App {
 
@@ -17,6 +22,10 @@ public final class App {
      * @throws LoadingException if anything goes wrong during the service boot sequence
      */
     public static void main(String... args) throws LoadingException {
+
+
+
+        // run http server
         HttpService.boot(App::init, "apolloBackend", args);
     }
 
@@ -30,7 +39,7 @@ public final class App {
     private static void init(Environment environment) {
         environment.routingEngine()
                 .registerAutoRoute(Route.sync("GET", "/ping", ctx -> "pong"))
-                .registerAutoRoute(Route.sync("GET", "/", "!" /* how do I redirect to /login??? */ ))
+                .registerAutoRoute(Route.sync("GET", "/", ctx -> "!" /* how do I redirect to /login??? */ ))
                 .registerAutoRoutes(new EventResource())
                 .registerAutoRoutes(new GroupResource())
                 .registerAutoRoutes(new UserResource());
