@@ -3,10 +3,7 @@ package com.store;
 import com.model.User;
 import com.typesafe.config.Config;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 
 /**
@@ -19,7 +16,6 @@ public class UserStore {
 
 
     /* methods */
-
     /**
      * UserStore - The constructor of UserStore. This function sets up the
      * mysql connection based on the inputted configuration and throws a
@@ -29,9 +25,12 @@ public class UserStore {
      */
     public UserStore(final Config config) {
 
+        // register the database
+
+
         // try connecting to the database
         try {
-            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"));
+            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"), "guy", "");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -39,28 +38,42 @@ public class UserStore {
 
 
     /**
-     * getUser - Gets a user object from the database.
+     * getUser - Gets a user object from the database. For now simply a proof-of-concept
+     * by sending a query to the database, getting the result back from the database, and
+     * printing it out.
      *
      * @param usr - The username of the user to retrieve from the db.
      *
      * @return A User object of the inputted username.
      */
     public User getUser(final String usr) {
+        PreparedStatement find_user = null;
+        ResultSet result_set = null;
 
-        // TODO: The three steps below. For now there is a test dummy below.
         // prepare the sql statement
         try {
-            PreparedStatement find_user = connection.prepareStatement("select * from user where id =" + usr);
+                String concat ="select * from user where username ='" + usr + "'";
+            find_user = connection.prepareStatement(concat);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         // execute the sql
+        try {
+            result_set = find_user.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         //check the ResultSet
-
-
-        // temporary dummy return User
-        User test_user = new User("test-user", "password123");
+        User test_user = null;
+        try {
+            while (result_set.next()) {
+                test_user = new User(result_set.getString("username"), result_set.getString("password"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return test_user;
     }
 }
