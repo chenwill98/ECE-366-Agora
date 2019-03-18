@@ -50,7 +50,8 @@ public class UserResource implements RouteProvider {
         }
 
 
-        // create dummy user class
+        // For now, initialize jdbc connection here, just to get connection working.
+        // In future, should be moved closer to initialization of backend.
         Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
         UserStore store = new UserStore(tmp_config);
         User test_user = store.getUser(username);
