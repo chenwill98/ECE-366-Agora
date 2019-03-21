@@ -1,17 +1,16 @@
 package com.apolloBackEnd;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
-import com.spotify.apollo.Status;
-import com.spotify.apollo.route.AsyncHandler;
-import com.spotify.apollo.route.Route;
-import com.spotify.apollo.route.RouteProvider;
+import com.spotify.apollo.route.*;
 
 import java.util.stream.Stream;
 import com.model.User;
 import com.store.UserStore;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import okio.ByteString;
 
 
 /**
@@ -19,12 +18,41 @@ import com.typesafe.config.ConfigFactory;
  */
 public class UserResource implements RouteProvider {
 
+    /* fields */
+    private final UserStore store;                  /* the user store instance used in the UserResource class   */
+    private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
+
+
+
+    /* methods */
+    /**
+     * UserResource - A constructor for the UserResource class. This constructor
+     * sets up a userStore instance that will be used throughout the
+     */
+    public UserResource(final ObjectMapper objectMapper) {
+        this.object_mapper = objectMapper;
+
+        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
+        this.store = new UserStore(tmp_config);
+    }
+
+
+    /**
+     * routes - Defines the routes that are related to the UserResource. These include most of the
+     * functionality related to users (duh).
+     *
+     * @return - The asynchronous returns of the route handlers, converted into byteString through the middleware,
+     * which is basically an immutable byte array.
+     */
     @Override
-    public Stream<? extends Route<? extends AsyncHandler<?>>> routes() {
+    public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
-                Route.sync("GET", "/user/<id>", ctx -> String.format("you got user with id: %d\n", ctx.pathArgs().get("id"))),
-                Route.sync("GET", "/user", ctx -> "you have reached a user!\n"),
-                Route.sync( "GET", "/login/<usr>/<pw>",ctx -> attemptLogin(ctx))
+                Route.sync("GET", "/user/<id>", ctx -> String.format("you got user with id: %s\n", ctx.pathArgs().get("id")))
+                        .withMiddleware(jsonMiddleware()),
+                Route.sync("GET", "/user", ctx -> "you have reached a user!\n")
+                        .withMiddleware(jsonMiddleware()),
+                Route.sync( "GET", "/login/<usr>/<pw>", this::attemptLogin)
+                        .withMiddleware(jsonMiddleware())
         );
     }
 
@@ -39,25 +67,35 @@ public class UserResource implements RouteProvider {
      * This one will have a payload of a string and will state whether the function was successful
      * or not.
      */
-    private static Response<String> attemptLogin(RequestContext ctx) {
+    private User attemptLogin(RequestContext ctx) {
         String username = ctx.pathArgs().get("usr");
         String password_hash = ctx.pathArgs().get("pw");
 
         // confirm that the username and password were both sent
         if (username == null || username.isEmpty() || password_hash == null | password_hash.isEmpty()) {
-            return Response.forStatus(
-                    Status.BAD_REQUEST.withReasonPhrase("Mandatory query parameters 'usr' or 'pw' is missing"));
+            return null;
         }
 
-
-        // For now, initialize jdbc connection here, just to get connection working.
-        // In future, should be moved closer to initialization of backend.
-        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
-        UserStore store = new UserStore(tmp_config);
         User test_user = store.getUser(username);
-        test_user.printUser();
+        //test_user.printUser();
 
-        return Response.forPayload("Successful login attempt.\n");
+        return test_user;
     }
+
+
+    /**
+     * jsonMiddleware - Standard middlware function that converts a the return type of an async handler into json, or
+     * more specifically a ByteString type.
+     * @param <T>
+     * @return
+     */
+    private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
+
+            return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
+                    .and(Middlewares::httpPayloadSemantics)
+                    .and(responseAsyncHandler -> ctx2 ->
+                            responseAsyncHandler.invoke(ctx2)
+                                    .thenApply(response -> response.withHeader("Access-Control-Allow-Origin", "*")));
+        }
 
 }

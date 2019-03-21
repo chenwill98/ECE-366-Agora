@@ -1,6 +1,8 @@
 package com.store;
 
 import com.model.User;
+
+import com.model.UserBuilder;
 import com.typesafe.config.Config;
 
 import java.sql.*;
@@ -24,8 +26,6 @@ public class UserStore {
      * @param config A Config class that includes the mysql database location.
      */
     public UserStore(final Config config) {
-
-        // register the database
 
 
         // try connecting to the database
@@ -69,7 +69,10 @@ public class UserStore {
         User test_user = null;
         try {
             while (result_set.next()) {
-                test_user = new User(result_set.getString("username"), result_set.getString("password"));
+                test_user = new UserBuilder()
+                        .Username(result_set.getString("username"))
+                        .PassHash(result_set.getString("password"))
+                        .build();
             }
         } catch (SQLException e) {
             e.printStackTrace();
