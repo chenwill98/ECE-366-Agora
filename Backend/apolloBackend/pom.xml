@@ -10,7 +10,7 @@
 
     <!-- propreties act like variables inside the pom file -->
     <properties>
-        <apollo.version>1.1.0</apollo.version>
+        <apollo.version>1.2.4</apollo.version>
         <mainClass>com.apolloBackEnd.App</mainClass>
     </properties>
 
@@ -34,9 +34,10 @@
         </dependency>
 
         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.13</version>
+            <groupId>io.norberg</groupId>
+            <artifactId>auto-matter</artifactId>
+            <version>0.15.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
