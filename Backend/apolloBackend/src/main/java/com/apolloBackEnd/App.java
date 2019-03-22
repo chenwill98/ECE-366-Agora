@@ -25,8 +25,10 @@ public final class App {
 
 
     /**
-     * An implementation of the {@link AppInit} functional interface which simply sets
-     * up a "hello world" handler on the root route "/".
+     * An implementation of the {@link AppInit} functional interface which sets
+     * up the routes of the backEnd. It loads in the AutoMatter module, which is
+     * used as the model for our database and also equally importantly allows our object
+     * (such as users, groups, etc) to get serialized into jSON effortlessly.
      *
      * @param environment  The Apollo {@link Environment} that the service is in.
      */
@@ -39,10 +41,9 @@ public final class App {
         GroupResource group_resource = new GroupResource(object_mapper);
         EventResource event_resource = new EventResource(object_mapper);
 
-
         environment.routingEngine()
                 .registerAutoRoute(Route.sync("GET", "/ping", ctx -> "pong\n"))
-                .registerAutoRoute(Route.sync("GET", "/", ctx -> "you have reached Agora!\n" /* how do I redirect to /login??? */ ))
+                .registerAutoRoute(Route.sync("GET", "/", ctx -> "you have reached Agora!\n" ))
                 .registerRoutes(event_resource.routes())
                 .registerRoutes(group_resource.routes())
                 .registerRoutes(user_resource.routes());
