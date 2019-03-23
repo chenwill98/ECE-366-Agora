@@ -1,0 +1,6 @@
+
+Curl attemptLogin using a GET request:
+    curl -v http://localhost:8080/login/user_test2/12 | jq
+
+curl the attemptLogin using a POST request:
+    curl -v -d '{"user":"user_test2", "pass":"password 111"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
