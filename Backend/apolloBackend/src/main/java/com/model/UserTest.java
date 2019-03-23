@@ -2,9 +2,9 @@ package com.model;
 
 
 /**
- * User - A class for the user datatype.
+ * UserTest - A class for the user datatype.
  */
-public interface User {
+public interface UserTest {
 
     String Username();
     String PassHash();

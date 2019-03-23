@@ -1,6 +1,6 @@
 package com.store;
 
-import com.model.User;
+import com.model.UserTest;
 
 import com.model.UserBuilder;
 import com.typesafe.config.Config;
@@ -9,7 +9,7 @@ import java.sql.*;
 
 
 /**
- * UserStore - the user endpoint that interacts with the mysql User table.
+ * UserStore - the user endpoint that interacts with the mysql UserTest table.
  */
 public class UserStore {
 
@@ -38,15 +38,15 @@ public class UserStore {
 
 
     /**
-     * getUser - Gets a user object from the database. For now simply a proof-of-concept
+     * getUserTest - Gets a user object from the database. For now simply a proof-of-concept
      * by sending a query to the database, getting the result back from the database, and
      * printing it out.
      *
      * @param usr - The username of the user to retrieve from the db.
      *
-     * @return A User object of the inputted username.
+     * @return A UserTest object of the inputted username.
      */
-    public User getUser(final String usr) {
+    public UserTest getUserTest(final String usr) {
         PreparedStatement find_user = null;
         ResultSet result_set = null;
 
@@ -66,7 +66,7 @@ public class UserStore {
         }
 
         //check the ResultSet
-        User test_user = null;
+        UserTest test_user = null;
         try {
             while (result_set.next()) {
                 test_user = new UserBuilder()
