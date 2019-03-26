@@ -1,8 +1,10 @@
 package com.store;
 
+import com.model.User;
+import com.model.UserBuilder;
 import com.model.UserTest;
 
-import com.model.UserBuilder;
+import com.model.UserTestBuilder;
 import com.typesafe.config.Config;
 
 import java.sql.*;
@@ -69,7 +71,7 @@ public class UserStore {
         UserTest test_user = null;
         try {
             while (result_set.next()) {
-                test_user = new UserBuilder()
+                test_user = new UserTestBuilder()
                         .Username(result_set.getString("username"))
                         .PassHash(result_set.getString("password"))
                         .build();
@@ -78,5 +80,83 @@ public class UserStore {
             e.printStackTrace();
         }
         return test_user;
+    }
+
+
+    /**
+     * getUser - Gets a user from the MySQL database.
+     *
+     * @param email A string of the email of a user, a unique identifier for each user.
+     *
+     * @return A User object that contains the email, password hash, first name, and last name of the user with the
+     * inputted email.
+     */
+    public User getUser(String email) {
+
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select email, passhash, firstname, lastname from users where email = ?");
+            stmt.setString(1, email);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        User user = null;
+        try {
+            while (result_set.next()) {
+                user = new UserBuilder()
+                        .Email(result_set.getString("email"))
+                        .PassHash(result_set.getString("passhash"))
+                        .First_Name(result_set.getString("firstname"))
+                        .Last_Name(result_set.getString("lastname"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
+
+    /**
+     * updatePass - Updates the password of a user. Of course, we are dealing with hashed passwords because we are
+     * all about that security here in Agora. We aren't throwing no Facebook bullshit here.
+     *
+     * @param user_email The email of the user whos password will get updated.
+     * @param new_pass The hash of the new password that will replace the old pass word of the inputted user.
+     *
+     * @return A boolean, true on success, else false.
+     */
+    public boolean updatePass(String user_email, String new_pass) {
+
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("update users set passhash = ? where email = ?");
+            stmt.setString(1, new_pass);
+            stmt.setString(2, user_email);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            return stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

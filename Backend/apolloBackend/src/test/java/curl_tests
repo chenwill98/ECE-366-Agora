@@ -1,9 +1,12 @@
 
-curl the attemptLogin using a POST request:
-    curl -v -d '{"user":"user_test2", "pass":"password 111"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
+attemptLogin using a POST request:
+curl -v -d '{"email":"test@gmail.com", "pass":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
 ------------------------
 
-curl createUser:
+createUser:
 curl -v -d '{"email":"test@gmail.com", "firstname":"Bob", "lastname":"Vernen", "passhash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create
 
 ------------------------
+
+updatePass:
+curl -v -d '{"email":"test@gmail.com", "oldpass":"pass1234", "newpass":"pass12345"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/change-password
