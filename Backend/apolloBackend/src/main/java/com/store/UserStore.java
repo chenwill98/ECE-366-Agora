@@ -222,6 +222,7 @@ public class UserStore {
             return false;
         }
 
+        // add the creator as a member and admin of the group
         return userJoinGroup(user_id, new_group.name(), 1);
     }
 
@@ -256,7 +257,7 @@ public class UserStore {
             return false;
         }
 
-        // add the creator as a member and admin of the group
+        // add the user as a member of the group
         try {
             result_set.next();
         } catch (SQLException e) {
@@ -286,7 +287,7 @@ public class UserStore {
         PreparedStatement stmt = null;
         ResultSet  result_set;
 
-        // get the group id of the group we just created
+        // get the group id of the group
         try {
             stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
             stmt.setString(1, groupname);
@@ -302,7 +303,7 @@ public class UserStore {
             return false;
         }
 
-        // add the creator as a member and admin of the group
+        // disconnect between user and group
         try {
             result_set.next();
         } catch (SQLException e) {
@@ -324,5 +325,118 @@ public class UserStore {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    /**
+     * userJoinEvent - Joins a user and an event together
+     *
+     * @param user_id The id of the user who is joining.
+     * @param event_name The name of the event the user is joining.
+     * @param is_attending a 1, 2, or 3. 1: attending, 2, maybe, 3:not attending.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean userJoinEvent(String user_id, String event_name, int is_attending) {
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        // get the event id of the event name
+        try {
+            stmt = connection.prepareStatement("select eventid from events where event_name = ?");
+            stmt.setString(1, event_name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // connect user and event
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt = connection.prepareStatement( "insert into event_attendance (users_uid, events_eventid, is_attending)" +
+                                                " values (?, ?, ?)");
+            stmt.setString(1, user_id);
+            stmt.setString(2, result_set.getString("eventid"));
+            stmt.setInt(3, is_attending);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * userLeaveEvent - disconnects between a user and an event. Doesn't delete the connection between the two,
+     * rather just updates the status of the user as NOT attending.
+     *
+     * @param user_id The user in question.
+     * @param event_name The event name in question.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean userLeaveEvent(String user_id, String event_name) {
+
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        // get the event id of the event
+        try {
+            stmt = connection.prepareStatement("select eventid from events where event_name = ?");
+            stmt.setString(1, event_name);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // disconnect between user and event
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt = connection.prepareStatement( "update event_attendance set is_attending = 3 " +
+                                                "where users_uid = ? AND events_eventid=  ?");
+            stmt.setString(1, user_id);
+            stmt.setString(2, result_set.getString("eventid"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
     }
 }

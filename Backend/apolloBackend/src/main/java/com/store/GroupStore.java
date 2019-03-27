@@ -1,10 +1,11 @@
 package com.store;
 
-import com.model.Group;
-import com.model.GroupBuilder;
+import com.model.*;
 import com.typesafe.config.Config;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * GroupStore - the group endpoint that interacts with the mysql Group table.
@@ -76,5 +77,91 @@ public class GroupStore {
             e.printStackTrace();
         }
         return group;
+    }
+
+
+    /**
+     * getUsers - Gets the list of users who are members of a group.
+     *
+     * @param id The ID of the group we are interested in.
+     *
+     * @return A list of users.
+     */
+    public List<User> getUsers(String id) {
+
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname from group_memberships GM " +
+                                                "inner join users U on U.uid = GM.users_uid " +
+                                                "inner join `groups` G on G.gid = GM.groups_gid" +
+                                                " where G.gid = ?");
+            stmt.setString(1, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        List<User> users = new ArrayList<>();
+
+        try {
+            while (result_set.next()) {
+                users.add(new UserBuilder()
+                        .uid(result_set.getInt("uid"))
+                        .first_name(result_set.getString("lastname"))
+                        .last_name(result_set.getString("firstname"))
+                        .pass_hash("")
+                        .email("")
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+
+    /**
+     * createEvent - Adds an event to the database.
+     *
+     * @param gid The group id of the group that created the event.
+     * @param new_event The new event that is being added to the db.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean createEvent(String gid, Event new_event) {
+
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "insert into events (event_name, `desc`, groups_gid, Location, Date_Time)" +
+                                                "values (?, ?, ?, ?, ?)");
+            stmt.setString(1, new_event.name());
+            stmt.setString(2, new_event.description());
+            stmt.setInt(3, new_event.gid());
+            stmt.setString(4, new_event.location());
+            stmt.setString(5, new_event.date());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -1,10 +1,18 @@
 package com.apolloBackEnd;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.model.Event;
+import com.model.EventBuilder;
+import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.route.*;
+import com.store.EventStore;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import okio.ByteString;
 
+import java.io.IOException;
 import java.util.stream.Stream;
 
 
@@ -15,7 +23,8 @@ public class EventResource implements RouteProvider {
 
 
     /* fields */
-    private final ObjectMapper object_mapper;
+    private final EventStore store;             /* the event store instance used in the EventResource class */
+    private final ObjectMapper object_mapper;   /* used in the middleware for altering response formats     */
 
 
     /* methods */
@@ -26,6 +35,8 @@ public class EventResource implements RouteProvider {
      */
     public EventResource(ObjectMapper objectMapper) {
         this.object_mapper = objectMapper;
+        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
+        this.store = new EventStore(tmp_config);
     }
 
 
@@ -35,6 +46,23 @@ public class EventResource implements RouteProvider {
                 Route.sync("GET", "/event/<id>", ctx -> String.format("%s\n", ctx.pathArgs().get("id")))
                         .withMiddleware(jsonMiddleware())
         );
+    }
+
+
+    /**
+     * eventExists - Checks whether an event with the given name exists.
+     *
+     * @param name The name of the event to check for.
+     *
+     * @return boolean - true if it exists, else false.
+     */
+    public boolean eventExists(String name) {
+        Event event = store.getEvent(name);
+
+        if (event != null)
+            return true;
+        else
+            return false;
     }
 
 

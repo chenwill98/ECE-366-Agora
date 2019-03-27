@@ -16,9 +16,24 @@ curl -v -d '{"id": "1234567", "description": "told you there would be a second g
 ------------------------
 
 joinGroup:
-curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-group
+curl -v -d '{"userid": "1234569", "groupname": "test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-group
 ------------------------
 
 leaveGroup:
 curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-group
+------------------------
 
+getUsers:
+curl -v -H "Content-Type: application/json" http://localhost:8080/group/3/get-users
+------------------------
+
+createEvent:
+curl -v -d '{"name": "cool event", "description": "this is the first test event!", "location": "Foundation Building", "date":"2019-03-27"}' -H "Content-Type: application/json" -X POST http://localhost:8080/group/3/create-event
+------------------------
+
+joinEvent:
+curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-event
+------------------------
+
+LeaveEvent:
+curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-event

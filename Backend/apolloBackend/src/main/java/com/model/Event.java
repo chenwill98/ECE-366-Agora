@@ -10,8 +10,8 @@ import io.norberg.automatter.AutoMatter;
 public interface Event{
     int id();
     String name();
-    String desc();
+    String description();
     int gid();
     String location();
-    String time();
+    String date();
 }

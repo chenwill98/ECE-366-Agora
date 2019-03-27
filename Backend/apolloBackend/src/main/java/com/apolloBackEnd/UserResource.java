@@ -72,9 +72,9 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/leave-group", this::leaveGroup)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/user/<userID>/leave-event/<eventID>", this::leaveEvent)
+                Route.sync("POST", "/user/leave-event", this::leaveEvent)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/user/<userID>/join-event/<eventID>", this::joinEvent)
+                Route.sync("POST", "/user/join-event", this::joinEvent)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/<userID>/rsvp-event/<eventID>", this::rsvpEvent)
                         .withMiddleware(jsonMiddleware())
@@ -121,8 +121,6 @@ public class UserResource implements RouteProvider {
         else {
             return String.valueOf(false);
         }
-
-
     }
 
 
@@ -144,16 +142,15 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on success, and false otherwise.
      */
-    private boolean joinEvent(RequestContext ctx) {
+    private String joinEvent(RequestContext ctx) {
+
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
-            // todo @Rayhan: implement this store method
-//            return store.userJoinEvent(ctx.get("email").asText(), ids_json.get("eventname").asText());
-            return true;
+            return String.valueOf(store.userJoinEvent(node.get("userid").asText(), node.get("eventname").asText(), 1));
         }
         else
-            return false;
+            return String.valueOf(false);
     }
 
 
@@ -163,16 +160,14 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on sucess and false otherwise.
      */
-    private boolean leaveEvent(RequestContext ctx) {
+    private String leaveEvent(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
-            // todo @Rayhan: implement this store method
-//            return store.userLeaveEvent(ctx.get("email").asText(), ids_json.get("eventname").asText());
-            return true;
+            return String.valueOf(store.userLeaveEvent(node.get("userid").asText(), node.get("eventname").asText()));
         }
         else
-            return false;
+            return String.valueOf(false);
     }
 
 
@@ -183,14 +178,14 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relavant user and group IDs.
      * @return boolean - True of sucess, false otherwise.
      */
-    private boolean leaveGroup(RequestContext ctx) {
+    private String leaveGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
-            return store.userLeaveGroup(node.get("userid").asText(), node.get("groupname").asText());
+            return String.valueOf(store.userLeaveGroup(node.get("userid").asText(), node.get("groupname").asText()));
         }
         else
-            return false;
+            return String.valueOf(false);
 
     }
 
