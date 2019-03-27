@@ -117,8 +117,8 @@ public class GroupStore {
             while (result_set.next()) {
                 users.add(new UserBuilder()
                         .uid(result_set.getInt("uid"))
-                        .first_name(result_set.getString("lastname"))
-                        .last_name(result_set.getString("firstname"))
+                        .first_name(result_set.getString("firstname"))
+                        .last_name(result_set.getString("lastname"))
                         .pass_hash("")
                         .email("")
                         .build());

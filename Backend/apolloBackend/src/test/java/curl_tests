@@ -1,39 +1,40 @@
 
-attemptLogin using a POST request:
+attemptLogin:
+
 curl -v -d '{"email":"test@gmail.com", "pass":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
 ------------------------
-
 createUser:
+
 curl -v -d '{"email":"test@gmail.com", "firstname":"Bob", "lastname":"Vernen", "passhash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create
 ------------------------
-
 updatePass:
+
 curl -v -d '{"email":"test@gmail.com", "oldpass":"pass1234", "newpass":"pass12345"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/change-password
 ------------------------
+createGroup:
 
-getGroup:
-curl -v -d '{"id": "1234567", "description": "told you there would be a second group!", "name":"test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create-group
+curl -v -d '{"id": "1234567", "description": "told you there would be a third  group!", "name":"test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create-group
 ------------------------
-
 joinGroup:
+
 curl -v -d '{"userid": "1234569", "groupname": "test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-group
 ------------------------
-
 leaveGroup:
+
 curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-group
 ------------------------
-
 getUsers:
+
 curl -v -H "Content-Type: application/json" http://localhost:8080/group/3/get-users
 ------------------------
-
 createEvent:
+
 curl -v -d '{"name": "cool event", "description": "this is the first test event!", "location": "Foundation Building", "date":"2019-03-27"}' -H "Content-Type: application/json" -X POST http://localhost:8080/group/3/create-event
 ------------------------
-
 joinEvent:
+
 curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-event
 ------------------------
-
 LeaveEvent:
+
 curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-event
