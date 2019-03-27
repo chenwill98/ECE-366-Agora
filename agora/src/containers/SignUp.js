@@ -22,8 +22,8 @@ class SignUp extends Component {
     componentDidMount() {
         this.getData();
         if (!this.state.intervalSet) {
-            let interval = setInterval(this.getData(), 1000);
-            this.setState({intervalSet: interval})
+            let interval = setInterval(this.getData, 1000);
+            this.setState({intervalSet: interval});
         }
     }
 
@@ -37,7 +37,7 @@ class SignUp extends Component {
 
     //fetches data
     getData = () => {
-        fetch("http://localhost:3001/api/getData")
+        fetch("http://localhost:8080/somestuff")
             .then(data => data.json())
             .then(res => this.setState({ data: res.data }));
     };
@@ -58,7 +58,7 @@ class SignUp extends Component {
         if (this.state.email == "error") {
             this.setState({error: true})
         }
-        axios.post("http://localhost:3001/user/create", {
+        axios.post("http://localhost:8080/user/create", {
             email: this.state.email,
             pass: this.state.password
         });

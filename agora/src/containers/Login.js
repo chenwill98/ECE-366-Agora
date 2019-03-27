@@ -35,6 +35,12 @@ class Login extends Component {
         }
     }
 
+    getData = () => {
+        fetch("http://localhost:8080/somestuff")
+            .then(data => data.json())
+            .then(res => this.setState({ data: res.data }));
+    };
+
     //sets the values of the inputs as values in this.state
     handleChange = event => {
         this.setState({
@@ -48,7 +54,7 @@ class Login extends Component {
     };
 
     Login = () => {
-        axios.post("http://localhost:3001/login", {
+        axios.post("http://localhost:8080/login", {
             email: this.state.email,
             pass: this.state.password
         });
