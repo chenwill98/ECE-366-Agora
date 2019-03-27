@@ -9,6 +9,6 @@ import io.norberg.automatter.AutoMatter;
 @AutoMatter
 public interface Group {
     int gid();
-    String Name();
-    String Desc();
+    String name();
+    String description();
 }

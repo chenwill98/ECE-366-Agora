@@ -5,8 +5,20 @@ curl -v -d '{"email":"test@gmail.com", "pass":"pass1234"}' -H "Content-Type: app
 
 createUser:
 curl -v -d '{"email":"test@gmail.com", "firstname":"Bob", "lastname":"Vernen", "passhash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create
-
 ------------------------
 
 updatePass:
 curl -v -d '{"email":"test@gmail.com", "oldpass":"pass1234", "newpass":"pass12345"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/change-password
+------------------------
+
+getGroup:
+curl -v -d '{"id": "1234567", "description": "told you there would be a second group!", "name":"test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create-group
+------------------------
+
+joinGroup:
+curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-group
+------------------------
+
+leaveGroup:
+curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-group
+

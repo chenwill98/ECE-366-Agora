@@ -2,10 +2,8 @@ package com.apolloBackEnd;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.model.User;
+import com.model.*;
 
-import com.model.UserBuilder;
-import com.model.UserTest;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
@@ -70,9 +68,9 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/change-password", this::updatePassword)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/user/<userID>/join-group/<groupID>", this::joinGroup)
+                Route.sync("POST", "/user/join-group", this::joinGroup)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/user/<userID>/leave-group/<groupID>", this::leaveGroup)
+                Route.sync("POST", "/user/leave-group", this::leaveGroup)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/user/<userID>/leave-event/<eventID>", this::leaveEvent)
                         .withMiddleware(jsonMiddleware()),
@@ -90,7 +88,7 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant info.
      * @return boolean - True on success and false otherwise.
      */
-    private boolean createGroup(RequestContext ctx) {
+    private String createGroup(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -100,25 +98,33 @@ public class UserResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: What are the fields in groups!?
         // todo: give more relevant error message
         // check that all fields are filled
-        if (    node.get("email").asText() == null || node.get("email").asText().isEmpty() ||
-                node.get("groupname").asText() == null || node.get("groupname").asText().isEmpty() ) {
-            return false;
+        if (    node.get("id").asText() == null             || node.get("id").asText().isEmpty()            ||
+                node.get("description").asText() == null    || node.get("description").asText().isEmpty()   ||
+                node.get("name").asText() == null           || node.get("name").asText().isEmpty() ) {
+            return String.valueOf(false);
         }
 
-        // todo @Rayhan: Create the group model as well as store method
-//        UserTest new_group = new GroupBuilder()
-//                .groupName(node.get("email").asText())
-//                .firstName(node.get("firstname").asText())
-//                .lastName(node.get("lastname").asText())
-//                .passHash(node.get("passhash").asText())
-//                .build();
-//
-//        return store.createUser(new_user);
-        return true;
+        // make sure that the group does not exist yet
+        GroupResource tmp_group_resource = new GroupResource(object_mapper);
+
+        if (!tmp_group_resource.groupExists(node.get("name").asText())) {
+
+            Group new_group = new GroupBuilder()
+                    .name(node.get("name").asText())
+                    .description(node.get("description").asText())
+                    .build();
+
+            return String.valueOf(store.createGroup(node.get("id").asText(), new_group));
+        }
+        else {
+            return String.valueOf(false);
+        }
+
+
     }
+
 
     /**
      * rsvpEvent - Given a user and an event ID, this function rsvps the user to the event.
@@ -181,9 +187,7 @@ public class UserResource implements RouteProvider {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
-            // todo @Rayhan: implement this store method
-//            return store.userLeaveGroup(ids_json.get("email").asText(), ids_json.get("groupname").asText());
-            return true;
+            return store.userLeaveGroup(node.get("userid").asText(), node.get("groupname").asText());
         }
         else
             return false;
@@ -197,16 +201,21 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context which contains the relevant user and group ids.
      * @return boolean - true on success, else false.
      */
-    private boolean joinGroup(RequestContext ctx) {
+    private String joinGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
-            // todo @Rayhan: implement this store method
-//            return store.userJoinGroup(ids_json.get("email").asText(), ids_json.get("groupname").asText());
-            return true;
+            // confirm that group exists
+            GroupResource tmp_group_resource = new GroupResource(object_mapper);
+
+            if (tmp_group_resource.groupExists(node.get("groupname").asText()))
+                // add yourself to the group
+                return String.valueOf(store.userJoinGroup(node.get("userid").asText(), node.get("groupname").asText(), 0));
+            else
+                return String.valueOf(false);
         }
         else
-            return false;
+            return String.valueOf(false);
     }
 
 
@@ -223,7 +232,7 @@ public class UserResource implements RouteProvider {
         String entity_check = (toggle) ? "groupname" : "eventname";
 
         // convert request payload into JSON
-        JsonNode ids_json = null;
+        JsonNode ids_json;
         try {
             ids_json = object_mapper.readTree(ctx.request().payload().get().utf8());
         } catch (IOException e) {
@@ -233,8 +242,8 @@ public class UserResource implements RouteProvider {
 
         // todo: give more relevant error message
         // check that all fields are filled
-        if( ids_json.get("email").asText() != null && !ids_json.get("email").asText().isEmpty() &&
-                ids_json.get(entity_check).asText() != null && !ids_json.get(entity_check).asText().isEmpty() )
+        if( ids_json.get("userid").asText() != null && !ids_json.get("userid").asText().isEmpty() &&
+            ids_json.get(entity_check).asText() != null && !ids_json.get(entity_check).asText().isEmpty() )
             return ids_json;
         else
             return null;
@@ -247,7 +256,7 @@ public class UserResource implements RouteProvider {
      * @param ctx the request context containing the POST payload (user ID).
      * @return boolean - if the update is successful, returns true, otherwise returns false.
      */
-    private boolean updatePassword(RequestContext ctx) {
+    private String updatePassword(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -262,7 +271,7 @@ public class UserResource implements RouteProvider {
         if (    user_json.get("email").asText()     == null || user_json.get("email").asText().isEmpty()  ||
                 user_json.get("oldpass").asText() == null   || user_json.get("oldpass").asText().isEmpty()  ||
                 user_json.get("newpass").asText()  == null  || user_json.get("newpass").asText().isEmpty() ) {
-            return false;
+            return String.valueOf(false);
         }
 
         String user_email = user_json.get("email").asText();
@@ -270,12 +279,12 @@ public class UserResource implements RouteProvider {
         String new_pass = user_json.get("newpass").asText();
 
 
-        User test_user = store.getUser(user_email);
+        User db_user = store.getUser(user_email);
 
-        if (test_user != null && test_user.PassHash() == old_pass)
-            return store.updatePass(user_email, new_pass);
+        if (db_user != null && db_user.pass_hash().equals(old_pass))
+            return String.valueOf(store.updatePass(user_email, new_pass));
         else
-            return false;
+            return String.valueOf(false);
 
     }
 
@@ -287,7 +296,7 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context containing the POST request payload (all the user information).
      * @return A boolean, true if user successfully added to the database and false if not.
      */
-    private boolean createUser(RequestContext ctx) {
+    private String createUser(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -303,19 +312,26 @@ public class UserResource implements RouteProvider {
                 user_json.get("firstname").asText() == null || user_json.get("firstname").asText().isEmpty()    ||
                 user_json.get("lastname").asText()  == null || user_json.get("lastname").asText().isEmpty()    ||
                 user_json.get("passhash").asText()  == null || user_json.get("passhash").asText().isEmpty()  ) {
-            return false;
+            return String.valueOf(false);
         }
 
-        // todo @Rayhan: Create this user model as well as store method
-        User new_user = new UserBuilder()
-                .Email(user_json.get("email").asText())
-                .First_Name(user_json.get("firstname").asText())
-                .Last_Name(user_json.get("lastname").asText())
-                .PassHash(user_json.get("passhash").asText())
-                .build();
+        // first make sure that a user with this email doesn't already exist
+        User db_user = store.getUser(user_json.get("email").asText());
 
-        //return store.createUser(new_user);
-        return true;
+        if (db_user == null) {
+            // add new user to the db
+            User new_user = new UserBuilder()
+                    .email(user_json.get("email").asText())
+                    .first_name(user_json.get("firstname").asText())
+                    .last_name(user_json.get("lastname").asText())
+                    .pass_hash(user_json.get("passhash").asText())
+                    .build();
+
+            return String.valueOf(store.createUser(new_user));
+        }
+        else
+            return String.valueOf(false);
+
     }
 
 
@@ -348,7 +364,7 @@ public class UserResource implements RouteProvider {
         User auth_user = store.getUser(user_json.get("email").asText());
 
         // if it is the same, we return the user with all the info, otherwise we return a null object.
-        if (auth_user.PassHash().equals(user_json.get("pass").asText()))
+        if (auth_user.pass_hash().equals(user_json.get("pass").asText()))
             return auth_user;
         else
             return null;

@@ -1,17 +1,14 @@
 package com.store;
 
-import com.model.User;
-import com.model.UserBuilder;
-import com.model.UserTest;
+import com.model.*;
 
-import com.model.UserTestBuilder;
 import com.typesafe.config.Config;
 
 import java.sql.*;
 
 
 /**
- * UserStore - the user endpoint that interacts with the mysql UserTest table.
+ * UserStore - the user endpoint that interacts with the mysql User table.
  */
 public class UserStore {
 
@@ -49,20 +46,20 @@ public class UserStore {
      * @return A UserTest object of the inputted username.
      */
     public UserTest getUserTest(final String usr) {
-        PreparedStatement find_user = null;
+        PreparedStatement stmt = null;
         ResultSet result_set = null;
 
         // prepare the sql statement
         try {
-                String concat ="select * from user where username ='" + usr + "'";
-            find_user = connection.prepareStatement(concat);
+            stmt = connection.prepareStatement("select * from user where username = ?");
+            stmt.setString(1, usr);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         // execute the sql
         try {
-            result_set = find_user.executeQuery();
+            result_set = stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -116,10 +113,10 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 user = new UserBuilder()
-                        .Email(result_set.getString("email"))
-                        .PassHash(result_set.getString("passhash"))
-                        .First_Name(result_set.getString("firstname"))
-                        .Last_Name(result_set.getString("lastname"))
+                        .email(result_set.getString("email"))
+                        .pass_hash(result_set.getString("passhash"))
+                        .first_name(result_set.getString("firstname"))
+                        .last_name(result_set.getString("lastname"))
                         .build();
             }
         } catch (SQLException e) {
@@ -144,7 +141,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("update users set passhash = ? where email = ?");
+            stmt = connection.prepareStatement("update users set passhash = (?) where email = (?)");
             stmt.setString(1, new_pass);
             stmt.setString(2, user_email);
         } catch (SQLException e) {
@@ -153,7 +150,176 @@ public class UserStore {
 
         // execute the sql
         try {
-            return stmt.execute();
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * createUser - Creates a new User in the database.
+     *
+     * @param new_user The user object to be inserted into the database.
+     *
+     * @return boolean- True on success and false on error.
+     */
+    public boolean createUser(User new_user) {
+
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("insert into users (email, passhash, firstname, lastname) values (?, ?, ?, ?)");
+            stmt.setString(1, new_user.email());
+            stmt.setString(2, new_user.pass_hash());
+            stmt.setString(3, new_user.first_name());
+            stmt.setString(4, new_user.last_name());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * createGroup - Creates a new group and inserts it into the group database. Automatically makes the user who
+     * created it a member and admin.
+     *
+     * @param user_id The user who created the group.
+     * @param new_group The new group that gets added to the groups db.
+     *
+     * @return boolean - True of success, else false.
+     */
+    public boolean createGroup(String user_id, Group new_group) {
+
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("insert into `groups` (Name, Description) values (?, ?)");
+            stmt.setString(1, new_group.name());
+            stmt.setString(2, new_group.description());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return userJoinGroup(user_id, new_group.name(), 1);
+    }
+
+
+    /**
+     * userJoinGroup - Joins a user to a group.
+     *
+     * @param user_id The unique ID of the user who is joining the group.
+     * @param groupname The name of the group that the user is joining.
+     * @param is_admin int (0 or 1) where 0 means the user is NOT an amdin and 1 means the user IS an admin.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean userJoinGroup(String user_id, String groupname, int is_admin) {
+
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        // get the group id of the group we just created
+        try {
+            stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
+            stmt.setString(1, groupname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // add the creator as a member and admin of the group
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt = connection.prepareStatement("insert into group_memberships (users_uid, groups_gid, is_admin) values (?, ?, ?)");
+            stmt.setString(1, user_id);
+            stmt.setString(2, result_set.getString("gid"));
+            stmt.setInt(3, is_admin);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean userLeaveGroup(String userid, String groupname) {
+
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        // get the group id of the group we just created
+        try {
+            stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
+            stmt.setString(1, groupname);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        // add the creator as a member and admin of the group
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt = connection.prepareStatement("delete from group_memberships where users_uid = ? AND groups_gid =  ?");
+            stmt.setString(1, userid);
+            stmt.setString(2, result_set.getString("gid"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            stmt.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

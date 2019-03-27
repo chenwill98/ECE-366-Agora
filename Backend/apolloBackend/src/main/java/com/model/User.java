@@ -9,8 +9,8 @@ import io.norberg.automatter.AutoMatter;
 @AutoMatter
 public interface User {
     int uid();
-    String First_Name();
-    String Last_Name();
-    String PassHash();
-    String Email();
+    String first_name();
+    String last_name();
+    String pass_hash();
+    String email();
 }
