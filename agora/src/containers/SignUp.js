@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Form, Button, Card } from "react-bootstrap";
+import axios from "axios";
+import { Form, Button, Card, Alert } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 
@@ -8,24 +9,60 @@ class SignUp extends Component {
         super(props);
 
         this.state = {
+            data: [],
             email: "",
-            password: ""
+            password: "",
+            id: 0,
+            intervalSet: false,
+            error: false
         };
     }
 
+    //fetches all data when the component mounts
+    componentDidMount() {
+        this.getData();
+        if (!this.state.intervalSet) {
+            let interval = setInterval(this.getData(), 1000);
+            this.setState({intervalSet: interval})
+        }
+    }
+
+    //kills the process
+    componentWillUnmount() {
+        if (this.state.intervalSet) {
+            clearInterval(this.state.intervalSet);
+            this.setState({ intervalSet: null });
+        }
+    }
+
+    //fetches data
+    getData = () => {
+        fetch("http://localhost:3001/api/getData")
+            .then(data => data.json())
+            .then(res => this.setState({ data: res.data }));
+    };
+
+    //sets the values of the inputs as values in this.state
     handleChange = event => {
         this.setState({
             [event.target.id]: event.target.value
         });
-    }
+    };
 
+    //prevents the submission from refreshing
     handleSubmit = event => {
         event.preventDefault();
-    }
+    };
 
     SignUp = () => {
-        console.log('this.state,', this.state);
-    }
+        if (this.state.email == "error") {
+            this.setState({error: true})
+        }
+        axios.post("http://localhost:3001/user/create", {
+            email: this.state.email,
+            pass: this.state.password
+        });
+    };
 
     render() {
         return (
@@ -33,15 +70,22 @@ class SignUp extends Component {
                 <Navigation/>
                 <CenterView>
                     <Card border="primary" style={{ width: '40rem'}}>
+                        <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>
                         <Card.Body>
-                            <Card.Title>Sign Up Today!</Card.Title>
+                            <Card.Title>Sign Up</Card.Title>
                             <Card.Text>
                                 <Form onSubmit={this.handleSubmit}>
+
                                     <Form.Group controlId="email">
                                         <Form.Label>Email address</Form.Label>
                                         <Form.Control type="email"
                                                       placeholder="Enter email"
                                                       onChange={this.handleChange}/>
+                                        {this.state.error ?
+                                            <Alert variant="danger">
+                                                This username is invalid somehow, idk
+                                            </Alert>
+                                            : '' }
                                     </Form.Group>
                                     <Form.Group controlId="password">
                                         <Form.Label>Password</Form.Label>

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import axios from "axios";
 import { Form, Button, Card } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
@@ -8,24 +9,50 @@ class Login extends Component {
         super(props);
 
         this.state = {
+            data: [],
             email: "",
-            password: ""
+            password: "",
+            id: 0,
+            intervalSet: false,
+            error: false
         };
     }
 
+    //fetches all data when the component mounts
+    componentDidMount() {
+        this.getData();
+        if (!this.state.intervalSet) {
+            let interval = setInterval(this.getData(), 1000);
+            this.setState({intervalSet: interval})
+        }
+    }
+
+    //kills the process
+    componentWillUnmount() {
+        if (this.state.intervalIsSet) {
+            clearInterval(this.state.intervalIsSet);
+            this.setState({ intervalIsSet: null });
+        }
+    }
+
+    //sets the values of the inputs as values in this.state
     handleChange = event => {
         this.setState({
             [event.target.id]: event.target.value
         });
-    }
+    };
 
+    //prevents the submission from refreshing
     handleSubmit = event => {
         event.preventDefault();
-    }
+    };
 
     Login = () => {
-        console.log('this.state,', this.state);
-    }
+        axios.post("http://localhost:3001/login", {
+            email: this.state.email,
+            pass: this.state.password
+        });
+    };
 
     render() {
         return (
@@ -33,8 +60,9 @@ class Login extends Component {
                 <Navigation/>
                 <CenterView>
                     <Card border="primary" style={{ width: '40rem'}}>
+
                         <Card.Body>
-                            <Card.Title>Login Form</Card.Title>
+                            <Card.Title>Login</Card.Title>
                             <Card.Text>
                                 <Form onSubmit={this.handleSubmit}>
                                     <Form.Group controlId="email">
