@@ -19,6 +19,10 @@ public final class App {
      * @throws LoadingException if anything goes wrong during the service boot sequence
      */
     public static void main(String... args) throws LoadingException {
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/master
         // run http server
         HttpService.boot(App::init, "apolloBackend", args);
     }
