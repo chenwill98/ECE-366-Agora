@@ -1,0 +1,20 @@
+<html>
+<head></head>
+<body>
+Hello world
+<script type="text/javascript">
+    let getBook = async () => {
+        const result = await fetch('http://localhost:8080/login', {method:"POST", body: JSON.stringify({email: "test@gmail.com", pass: "pass1234"})});
+
+        console.log(await result.json());
+
+        const result2 = await fetch('http://localhost:8080/');
+
+        console.log(await result2.json());
+    };
+
+
+    getBook();
+</script>
+</body>
+</html>

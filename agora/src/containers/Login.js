@@ -54,10 +54,13 @@ class Login extends Component {
     };
 
     Login = () => {
-        axios.post("http://localhost:8080/login", {
-            email: this.state.email,
-            pass: this.state.password
-        });
+
+        return axios.post("http://localhost:8080/login",
+            JSON.stringify({email: this.state.email, pass: this.state.password})
+        ).then(response => {
+            return response.data
+        })
+
     };
 
     render() {
@@ -83,7 +86,11 @@ class Login extends Component {
                                                       placeholder="Password"
                                                       onChange={this.handleChange}/>
                                     </Form.Group>
-                                    <Button variant="primary" type="submit" onClick={() => this.Login()}>
+                                    <Button variant="primary" type="submit" onClick={() =>
+                                        this.Login().then(data => {
+                                            console.log(data)
+                                        })
+                                    }>
                                         Login
                                     </Button>
                                 </Form>

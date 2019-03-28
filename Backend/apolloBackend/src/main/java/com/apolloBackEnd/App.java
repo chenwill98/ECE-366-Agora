@@ -42,8 +42,6 @@ public final class App {
         EventResource event_resource = new EventResource(object_mapper);
 
         environment.routingEngine()
-                .registerAutoRoute(Route.sync("GET", "/ping", ctx -> "pong\n"))
-                .registerAutoRoute(Route.sync("GET", "/", ctx -> "you have reached Agora!\n" ))
                 .registerRoutes(event_resource.routes())
                 .registerRoutes(group_resource.routes())
                 .registerRoutes(user_resource.routes());

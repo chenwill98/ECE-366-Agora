@@ -8,6 +8,8 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import com.spotify.apollo.route.*;
@@ -55,6 +57,10 @@ public class UserResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
+                Route.sync("POST", "/ping", ctx -> "pong\n" )
+                        .withMiddleware(jsonMiddleware()),
+                Route.sync("GET", "/", ctx -> "you have reached Agora!\n" )
+                        .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/user/<id>", ctx ->
                         String.format("you got user with id: %s\n", ctx.pathArgs().get("id")))
                         .withMiddleware(jsonMiddleware()),
@@ -407,11 +413,15 @@ public class UserResource implements RouteProvider {
      */
     private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
-            return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST");
+
+        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
                     .and(Middlewares::httpPayloadSemantics)
                     .and(responseAsyncHandler -> ctx2 ->
                             responseAsyncHandler.invoke(ctx2)
-                                    .thenApply(response -> response.withHeader("Access-Control-Allow-Origin", "*")));
-        }
+                                    .thenApply(response -> response.withHeaders(headers)));
+    }
 
 }
