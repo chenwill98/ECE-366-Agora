@@ -70,18 +70,6 @@ http {
 
 	include /etc/nginx/conf.d/*.conf;
 	include /etc/nginx/sites-enabled/*;
-	server{
-		listen 443;
-		server_name _;
-		ssl off;
-		root /data/folder1;
-		location / {
-			proxy_pass http://localhost:8080;
-		}
-		location ~ \.(gif|jpg|png)$ {
-			root /data/images;
-		}
-	}
 }
 
 
@@ -105,4 +93,3 @@ http {
 #		proxy      on;
 #	}
 #}
-
