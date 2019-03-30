@@ -8,6 +8,7 @@ import com.model.Group;
 import com.model.User;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
+import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
 import com.store.GroupStore;
 import com.typesafe.config.Config;
@@ -15,7 +16,9 @@ import com.typesafe.config.ConfigFactory;
 import okio.ByteString;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class GroupResource implements RouteProvider {
@@ -62,16 +65,21 @@ public class GroupResource implements RouteProvider {
      *
      * @return A list of User objects that are members of the specified group.
      */
-    private List<User> getUsers(RequestContext ctx) {
+    private Response<List<User>> getUsers(RequestContext ctx) {
         String id = ctx.pathArgs().get("id");
 
         // some basic error checking
         if (id == null || id.isEmpty()) {
-            return null;
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // get the list of users from the database and return it
-        return store.getUsers(id);
+        List<User> tmp = store.getUsers(id);
+
+        if (tmp != null)
+            return Response.ok().withPayload(tmp);
+        else
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
 
 
 
@@ -102,7 +110,7 @@ public class GroupResource implements RouteProvider {
      * @param ctx The request context with the relevant info.
      * @return boolean - True on success and false otherwise.
      */
-    private String createEvent(RequestContext ctx) {
+    private Response<ByteString> createEvent(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -112,14 +120,13 @@ public class GroupResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: give more relevant error message
         // check that all fields are filled
         if (    node.get("name").asText() == null           || node.get("name").asText().isEmpty()          ||
                 node.get("description").asText() == null    || node.get("description").asText().isEmpty()   ||
                 ctx.pathArgs().get("id") == null            || ctx.pathArgs().get("id").isEmpty()           ||
                 node.get("location").asText() == null       || node.get("location").asText().isEmpty()      ||
                 node.get("date").asText() == null           || node.get("date").asText().isEmpty() ) {
-            return String.valueOf(false);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // make sure that the group does not exist yet
@@ -135,26 +142,30 @@ public class GroupResource implements RouteProvider {
                     .date(node.get("date").asText())
                     .build();
 
-            return String.valueOf(store.createEvent(ctx.pathArgs().get("id"), new_event));
+            if (store.createEvent(ctx.pathArgs().get("id"), new_event))
+                return Response.ok();
         }
-        else {
-            return String.valueOf(false);
-        }
+
+        return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
 
     /**
-     * jsonMiddleware - Standard middlware function that converts a the return type of an async handler into json, or
-     * more specifically a ByteString type.
-     * @param <T>
-     * @return
+     * jsonMiddleware - Standard middleware function that converts the return type of an async handler into json as
+     * well as sets it up as a standard HTTP response.
+     *
+     * @param <T>   The object returned by the handler (could be a user, group, etc).
+     * @return      Returns an HTTP response with the inputted object as a jSON payload.
      */
     private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
-        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
-                .and(Middlewares::httpPayloadSemantics)
-                .and(responseAsyncHandler -> requestContext ->
-                        responseAsyncHandler.invoke(requestContext)
-                                .thenApply(response -> response.withHeader("Access-Control-Allow-Origin", "*")));
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST");
+
+        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
+                .and(responseAsyncHandler -> ctx ->
+                        responseAsyncHandler.invoke(ctx)
+                                .thenApply(response -> response.withHeaders(headers)));
     }
 }

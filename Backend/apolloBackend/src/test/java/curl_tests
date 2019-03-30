@@ -9,19 +9,19 @@ curl -v -d '{"email":"test@gmail.com", "firstname":"Bob", "lastname":"Vernen", "
 ------------------------
 updatePass:
 
-curl -v -d '{"email":"test@gmail.com", "oldpass":"pass1234", "newpass":"pass12345"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/change-password
+curl -v --cookie "USER_TOKEN=___" -d '{"oldpass":"pass1234", "newpass":"pass12345"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/change-password
 ------------------------
 createGroup:
 
-curl -v -d '{"id": "1234567", "description": "told you there would be a third  group!", "name":"test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create-group
+curl -v --cookie "USER_TOKEN=___" -d '{"description": "told you there would be a third  group!", "name":"test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/create-group
 ------------------------
 joinGroup:
 
-curl -v -d '{"userid": "1234569", "groupname": "test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-group
+curl -v --cookie "USER_TOKEN=___" -d '{"groupname": "test group three"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/join-group
 ------------------------
 leaveGroup:
 
-curl -v -d '{"userid": "1234567", "groupname": "test group one"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-group
+curl -v --cookie "USER_TOKEN=___" -d '{"groupname": "test group four"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/leave-group
 ------------------------
 getUsers:
 
@@ -33,8 +33,12 @@ curl -v -d '{"name": "cool event", "description": "this is the first test event!
 ------------------------
 joinEvent:
 
-curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/join-event
+curl -v --cookie "USER_TOKEN=___" -d '{"eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/join-event
 ------------------------
 LeaveEvent:
 
-curl -v -d '{"userid": "1234567", "eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/leave-event
+curl -v --cookie "USER_TOKEN=___" -d '{"eventname": "cool event"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567/leave-event
+
+---------------------------------------------------------------------------------------------------------
+GetUser:
+curl -v --cookie "USER_TOKEN=___" -H "Content-Type: application/json" -X POST http://localhost:8080/user/1234567

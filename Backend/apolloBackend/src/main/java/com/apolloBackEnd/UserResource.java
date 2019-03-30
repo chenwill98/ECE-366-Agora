@@ -8,10 +8,14 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+
 import java.util.stream.Stream;
 
+import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
 import com.store.UserStore;
 import com.typesafe.config.Config;
@@ -32,6 +36,7 @@ public class UserResource implements RouteProvider {
     /* fields */
     private final UserStore store;                  /* the user store instance used in the UserResource class   */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
+    private static Map<Integer, Integer> cookie_db;        /* cookie IDs mapper: Key = user id, Value = cookie ID      */
 
 
     /* methods */
@@ -39,11 +44,15 @@ public class UserResource implements RouteProvider {
      * UserResource - A constructor for the UserResource class. This constructor
      * sets up a userStore instance that will be used throughout the
      */
-    public UserResource(final ObjectMapper objectMapper) {
+    UserResource(final ObjectMapper objectMapper) {
         this.object_mapper = objectMapper;
 
         Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
         this.store = new UserStore(tmp_config);
+
+        if (cookie_db == null) {  /* because it is static, we don't want it to be called twice */
+            UserResource.cookie_db = new HashMap<>();
+        }
     }
 
 
@@ -57,34 +66,60 @@ public class UserResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
-                Route.sync("POST", "/ping", ctx -> "pong\n" )
-                        .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/", ctx -> "you have reached Agora!\n" )
-                        .withMiddleware(jsonMiddleware()),
-                Route.sync("GET", "/user/<id>", ctx ->
-                        String.format("you got user with id: %s\n", ctx.pathArgs().get("id")))
+                Route.sync("GET", "/", ctx -> Response.ok().withPayload("you have reached Agora!\n"))
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login", this::attemptLogin)
-                        .withMiddleware(jsonMiddleware()),
+                .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login-test", this::attemptLoginTest)
-                        .withMiddleware(jsonMiddleware()),
+                .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
+                .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<User>>>create("POST", "/user/<id>", this::getUser)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/create-group", this::createGroup)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/create-group", this::createGroup)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/change-password", this::updatePassword)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/change-password", this::updatePassword)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/join-group", this::joinGroup)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/join-group", this::joinGroup)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/leave-group", this::leaveGroup)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/leave-group", this::leaveGroup)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/leave-event", this::leaveEvent)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/leave-event", this::leaveEvent)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/join-event", this::joinEvent)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/join-event", this::joinEvent)
+                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/<userID>/rsvp-event/<eventID>", this::rsvpEvent)
+                Route.sync("POST", "/user/<id>/rsvp-event/<eventID>", this::rsvpEvent)
                         .withMiddleware(jsonMiddleware())
                 );
+    }
+
+
+    /**
+     * getUser - Returns a User with the specific user id. Checks that the request header contains the user's cookie ID,
+     * otherwise doesn't satisfy request.
+     *
+     *  @param ctx The request context containing the user id.
+     *
+     *  @return The User object that was asked for, or a null object on error.
+     */
+    private Response<User> getUser(RequestContext ctx) {
+
+        // get and return user
+        return Response.ok().withPayload(store.getUserWithID(ctx.pathArgs().get("id")));
     }
 
 
@@ -94,7 +129,7 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant info.
      * @return boolean - True on success and false otherwise.
      */
-    private String createGroup(RequestContext ctx) {
+    private Response<ByteString> createGroup(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -104,12 +139,11 @@ public class UserResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: give more relevant error message
         // check that all fields are filled
-        if (    node.get("id").asText() == null             || node.get("id").asText().isEmpty()            ||
-                node.get("description").asText() == null    || node.get("description").asText().isEmpty()   ||
-                node.get("name").asText() == null           || node.get("name").asText().isEmpty() ) {
-            return String.valueOf(false);
+        if ((ctx.pathArgs().get("id") == null)          || ctx.pathArgs().get("id").isEmpty()           ||
+            (node.get("description").asText() == null)  || node.get("description").asText().isEmpty()   ||
+            (node.get("name").asText() == null)         || node.get("name").asText().isEmpty()  )  {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Entries"));
         }
 
         // make sure that the group does not exist yet
@@ -122,11 +156,11 @@ public class UserResource implements RouteProvider {
                     .description(node.get("description").asText())
                     .build();
 
-            return String.valueOf(store.createGroup(node.get("id").asText(), new_group));
+            if (store.createGroup(ctx.pathArgs().get("id"), new_group))
+                return Response.ok();
         }
-        else {
-            return String.valueOf(false);
-        }
+
+        return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Group already exists!"));
     }
 
 
@@ -137,8 +171,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant info.
      * @return boolean - true on success and false otherwise.
      */
-    private boolean rsvpEvent(RequestContext ctx) {
-        return false;
+    private Response<ByteString> rsvpEvent(RequestContext ctx) {
+        return Response.ok();
     }
 
 
@@ -148,15 +182,21 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on success, and false otherwise.
      */
-    private String joinEvent(RequestContext ctx) {
-
+    private Response<ByteString> joinEvent(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
-            return String.valueOf(store.userJoinEvent(node.get("userid").asText(), node.get("eventname").asText(), 1));
+            try {
+                if(store.userJoinEvent(ctx.pathArgs().get("id"), node.get("eventname").asText(),1))
+                    return Response.ok();
+                else
+                    return Response.forStatus(Status.BAD_REQUEST);
+            } catch (SQLException e) {
+                return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+            }
         }
         else
-            return String.valueOf(false);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
     }
 
 
@@ -166,14 +206,17 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on sucess and false otherwise.
      */
-    private String leaveEvent(RequestContext ctx) {
+    private Response<ByteString> leaveEvent(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
-            return String.valueOf(store.userLeaveEvent(node.get("userid").asText(), node.get("eventname").asText()));
+            if (store.userLeaveEvent(ctx.pathArgs().get("id"), node.get("eventname").asText()))
+                return Response.ok();
+            else
+                return Response.forStatus(Status.BAD_REQUEST);
         }
         else
-            return String.valueOf(false);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
     }
 
 
@@ -184,14 +227,17 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relavant user and group IDs.
      * @return boolean - True of sucess, false otherwise.
      */
-    private String leaveGroup(RequestContext ctx) {
+    private Response<ByteString> leaveGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
-            return String.valueOf(store.userLeaveGroup(node.get("userid").asText(), node.get("groupname").asText()));
+            if (store.userLeaveGroup(ctx.pathArgs().get("id"), node.get("groupname").asText()))
+                return Response.ok();
+            else
+                return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
         }
         else
-            return String.valueOf(false);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
 
     }
 
@@ -202,21 +248,25 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context which contains the relevant user and group ids.
      * @return boolean - true on success, else false.
      */
-    private String joinGroup(RequestContext ctx) {
+    private Response<ByteString> joinGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
             // confirm that group exists
             GroupResource tmp_group_resource = new GroupResource(object_mapper);
 
-            if (tmp_group_resource.groupExists(node.get("groupname").asText()))
+            if (tmp_group_resource.groupExists(node.get("groupname").asText())) {
                 // add yourself to the group
-                return String.valueOf(store.userJoinGroup(node.get("userid").asText(), node.get("groupname").asText(), 0));
+                if (store.userJoinGroup(ctx.pathArgs().get("id"), node.get("groupname").asText(), 0))
+                    return Response.ok();
+                else
+                    return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+            }
             else
-                return String.valueOf(false);
+                return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Invalid group name"));
         }
         else
-            return String.valueOf(false);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
     }
 
 
@@ -241,12 +291,11 @@ public class UserResource implements RouteProvider {
             return null;
         }
 
-        // todo: give more relevant error message
         // check that all fields are filled
-        if( ids_json.get("userid").asText() != null && !ids_json.get("userid").asText().isEmpty() &&
-            ids_json.get(entity_check).asText() != null && !ids_json.get(entity_check).asText().isEmpty() )
+        if( (ctx.pathArgs().get("id") != null)              && !ctx.pathArgs().get("id").isEmpty() &&
+            (ids_json.get(entity_check).asText() != null)   && !ids_json.get(entity_check).asText().isEmpty() ) {
             return ids_json;
-        else
+        } else
             return null;
     }
 
@@ -257,7 +306,7 @@ public class UserResource implements RouteProvider {
      * @param ctx the request context containing the POST payload (user ID).
      * @return boolean - if the update is successful, returns true, otherwise returns false.
      */
-    private String updatePassword(RequestContext ctx) {
+    private Response<ByteString> updatePassword(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -267,26 +316,27 @@ public class UserResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: give more relevant error message
         // check that all fields are filled
-        if (    user_json.get("email").asText()     == null || user_json.get("email").asText().isEmpty()  ||
-                user_json.get("oldpass").asText() == null   || user_json.get("oldpass").asText().isEmpty()  ||
-                user_json.get("newpass").asText()  == null  || user_json.get("newpass").asText().isEmpty() ) {
-            return String.valueOf(false);
+        if (    user_json != null && (
+                (ctx.pathArgs().get("id") == null)          || ctx.pathArgs().get("id").isEmpty() ||
+                (user_json.get("oldpass").asText() == null) || user_json.get("oldpass").asText().isEmpty() ||
+                (user_json.get("newpass").asText() == null) || user_json.get("newpass").asText().isEmpty()) ){
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
-        String user_email = user_json.get("email").asText();
+        String user_id = ctx.pathArgs().get("id");
         String old_pass = user_json.get("oldpass").asText();
         String new_pass = user_json.get("newpass").asText();
 
 
-        User db_user = store.getUser(user_email);
+        User db_user = store.getUserWithID(user_id);
 
-        if (db_user != null && db_user.pass_hash().equals(old_pass))
-            return String.valueOf(store.updatePass(user_email, new_pass));
+        if (db_user == null)
+            return Response.forStatus((Status.BAD_REQUEST.withReasonPhrase("No User Found")));
+        else if (db_user.pass_hash().equals(old_pass) && store.updatePass(user_id, new_pass))
+                return Response.ok();
         else
-            return String.valueOf(false);
-
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -297,7 +347,7 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context containing the POST request payload (all the user information).
      * @return A boolean, true if user successfully added to the database and false if not.
      */
-    private String createUser(RequestContext ctx) {
+    private Response<ByteString> createUser(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -307,32 +357,26 @@ public class UserResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: give more relevant error message
         // check that all fields are filled
-        if (    user_json.get("email").asText()     == null || user_json.get("email").asText().isEmpty()        ||
-                user_json.get("firstname").asText() == null || user_json.get("firstname").asText().isEmpty()    ||
-                user_json.get("lastname").asText()  == null || user_json.get("lastname").asText().isEmpty()    ||
-                user_json.get("passhash").asText()  == null || user_json.get("passhash").asText().isEmpty()  ) {
-            return String.valueOf(false);
+        if (    user_json!= null && (
+                (user_json.get("email").asText() == null)       || user_json.get("email").asText().isEmpty()        ||
+                (user_json.get("firstname").asText() == null)   || user_json.get("firstname").asText().isEmpty()    ||
+                (user_json.get("lastname").asText() == null)    || user_json.get("lastname").asText().isEmpty()     ||
+                (user_json.get("passhash").asText() == null)    || user_json.get("passhash").asText().isEmpty()) ) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
-        // first make sure that a user with this email doesn't already exist
-        User db_user = store.getUser(user_json.get("email").asText());
+        User new_user = new UserBuilder()
+                .email(user_json.get("email").asText())
+                .first_name(user_json.get("firstname").asText())
+                .last_name(user_json.get("lastname").asText())
+                .pass_hash(user_json.get("passhash").asText())
+                .build();
 
-        if (db_user == null) {
-            // add new user to the db
-            User new_user = new UserBuilder()
-                    .email(user_json.get("email").asText())
-                    .first_name(user_json.get("firstname").asText())
-                    .last_name(user_json.get("lastname").asText())
-                    .pass_hash(user_json.get("passhash").asText())
-                    .build();
-
-            return String.valueOf(store.createUser(new_user));
-        }
+        if (store.createUser(new_user))
+            return Response.ok();
         else
-            return String.valueOf(false);
-
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -344,7 +388,7 @@ public class UserResource implements RouteProvider {
      *
      * @return A UserTest object. If login is successful, than the actual user. Otherwise, a null object.
      */
-    private User attemptLogin(RequestContext ctx) {
+    private Response<Integer> attemptLogin(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -354,21 +398,43 @@ public class UserResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // todo: give more relevant error message
         // checking that all fields are filled
-        if (    user_json.get("email").asText() == null || user_json.get("email").asText().isEmpty()  ||
-                user_json.get("pass").asText()  == null || user_json.get("pass").asText().isEmpty() ) {
-            return null;
+        if (    user_json != null && (
+                (user_json.get("email").asText() == null) || user_json.get("email").asText().isEmpty() ||
+                (user_json.get("pass").asText() == null)  || user_json.get("pass").asText().isEmpty()) ) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // get the password of the user with that username from db and confirm it is the same.
-        User auth_user = store.getUser(user_json.get("email").asText());
+        User auth_user = store.getUserWithEmail(user_json.get("email").asText());
 
         // if it is the same, we return the user with all the info, otherwise we return a null object.
-        if (auth_user.pass_hash().equals(user_json.get("pass").asText()))
-            return auth_user;
+        if (auth_user.pass_hash().equals(user_json.get("pass").asText())) {
+            return Response.ok().withPayload(getCookieID(auth_user.uid()));
+        }
         else
-            return null;
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Incorrect email or password"));
+    }
+
+
+    /**
+     * getCookieID - Gets the cookie ID belonging to a user. If the cookie ID exists already in the cookie_db hashmap,
+     * simply returns it. If it doesn't, create a random cookie ID, update the cookie_db hashmap with it, and return it.
+     *
+     * @param user_id The user id of the user in question.
+     * @return The cookie ID.
+     */
+    private Integer getCookieID(Integer user_id) {
+
+        if (cookie_db.containsKey(user_id)) {
+            return cookie_db.get(user_id);
+        }
+        else {
+            Random rand = new Random();
+            Integer new_cookie_id = rand.nextInt(1000000);
+            cookie_db.put(user_id, new_cookie_id);
+            return new_cookie_id;
+        }
     }
 
 
@@ -379,7 +445,7 @@ public class UserResource implements RouteProvider {
      *
      * @return A UserTest object. If login is successful, than the actual user. Otherwise, a null object.
      */
-    private UserTest attemptLoginTest(RequestContext ctx) {
+    private Response<UserTest> attemptLoginTest(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -391,11 +457,12 @@ public class UserResource implements RouteProvider {
 
 
         // get the password of the user with that username from db and confirm it is the same.
+        assert user_json != null;
         UserTest test_user = store.getUserTest(user_json.get("user").asText());
 
         // if it is the same, we return the user with all the info, otherwise we return a null object.
         if (test_user.PassHash().equals(user_json.get("pass").asText()))
-            return test_user;
+            return Response.ok().withPayload(test_user);
         else
             return null;
     }
@@ -411,17 +478,55 @@ public class UserResource implements RouteProvider {
      * @param <T>   The object returned by the handler (could be a user, group, etc).
      * @return      Returns an HTTP response with the inputted object as a jSON payload.
      */
-    private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
+    private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Methods", "GET, POST");
 
-        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
-                    .and(Middlewares::httpPayloadSemantics)
-                    .and(responseAsyncHandler -> ctx2 ->
-                            responseAsyncHandler.invoke(ctx2)
-                                    .thenApply(response -> response.withHeaders(headers)));
+        return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
+                .and(Middlewares::httpPayloadSemantics)
+                .and(responseAsyncHandler -> ctx ->
+                    responseAsyncHandler.invoke(ctx)
+                            .thenApply(response -> response.withHeaders(headers)));
     }
 
+
+    /**
+     * userSessionMiddleware - Implements a user session checker on an incoming request, prior to the handler
+     * invokation. In actuality, it parses the header of the incoming request and  checks if there is a cookie header
+     * and that the cookie ID it contains matches the one saved in the classe's cookieID hash table. If all three of
+     * these conditions holds, the middleware calls the corresponding route's handler and returns it's response.
+     *
+     * If there is no cookie header, we return a 401 Unauthorized responses.
+     * If there is a cookie header and it does not contain the cookie ID corresponding to the same user ID that is
+     * specified in the route, we return a 403 Forbidden response.
+     *
+     * NOTE: This middleware needs to be followed by an Apollo-implemented middleware called Middleware::syncToAsync.
+     * This is so that the expected types of the route provider line up.
+     *
+     * @param innerHandler The handler function that corresponds with the route.
+     * @param <T> The object that is returned in the response of the handler function (User, Group, String, etc).
+     *
+     * @return A response wrapped as a handler function for concurrency with the methods are are called after this
+     * middleware. However what we are nevertheless returning from this middleware is a Response<T>, not a
+     * SyncHandler<Response<T>>.
+     */
+    private <T> SyncHandler<Response<T>> userSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
+
+        return ctx -> {
+            // check matching cookie id.
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+                return Response.forStatus(Status.UNAUTHORIZED);
+
+            String[] tokens = ctx.request().headers().get("Cookie").split("=");
+            String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
+
+            if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))
+                return Response.forStatus(Status.FORBIDDEN);
+
+            // Call inner handler
+            return innerHandler.invoke(ctx);
+        };
+    }
 }

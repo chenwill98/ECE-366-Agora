@@ -81,22 +81,22 @@ public class UserStore {
 
 
     /**
-     * getUser - Gets a user from the MySQL database.
+     * getUserWithID - Gets a user from the MySQL database.
      *
-     * @param email A string of the email of a user, a unique identifier for each user.
+     * @param user_id A string of the user ID of a user, a unique identifier for each user.
      *
      * @return A User object that contains the email, password hash, first name, and last name of the user with the
      * inputted email.
      */
-    public User getUser(String email) {
+    public User getUserWithID(String user_id) {
 
         PreparedStatement stmt = null;
         ResultSet result_set = null;
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select email, passhash, firstname, lastname from users where email = ?");
-            stmt.setString(1, email);
+            stmt = connection.prepareStatement("select email, passhash, firstname, lastname from users where uid = ?");
+            stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -125,25 +125,71 @@ public class UserStore {
         return user;
     }
 
+    /**
+     * getUserWithEmail - Gets a user from the MySQL database.
+     *
+     * @param email A string of the user ID of a user, a unique identifier for each user.
+     *
+     * @return A User object that contains the email, password hash, first name, and last name of the user with the
+     * inputted email.
+     */
+    public User getUserWithEmail(String email) {
+
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select uid, email, passhash, firstname, lastname from users where email = ?");
+            stmt.setString(1, email);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        User user = null;
+        try {
+            while (result_set.next()) {
+                user = new UserBuilder()
+                        .uid(result_set.getInt("uid"))
+                        .email(result_set.getString("email"))
+                        .pass_hash(result_set.getString("passhash"))
+                        .first_name(result_set.getString("firstname"))
+                        .last_name(result_set.getString("lastname"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return user;
+    }
+
 
     /**
      * updatePass - Updates the password of a user. Of course, we are dealing with hashed passwords because we are
      * all about that security here in Agora. We aren't throwing no Facebook bullshit here.
      *
-     * @param user_email The email of the user whos password will get updated.
+     * @param user_id The email of the user whos password will get updated.
      * @param new_pass The hash of the new password that will replace the old pass word of the inputted user.
      *
      * @return A boolean, true on success, else false.
      */
-    public boolean updatePass(String user_email, String new_pass) {
+    public boolean updatePass(String user_id, String new_pass) {
 
         PreparedStatement stmt = null;
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("update users set passhash = (?) where email = (?)");
+            stmt = connection.prepareStatement("update users set passhash = (?) where uid = (?)");
             stmt.setString(1, new_pass);
-            stmt.setString(2, user_email);
+            stmt.setString(2, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -169,6 +215,27 @@ public class UserStore {
     public boolean createUser(User new_user) {
 
         PreparedStatement stmt = null;
+        ResultSet result_set;
+
+        // prepare stmt to confirm that no user with the given email doesn't already exist
+        try {
+            stmt = connection.prepareStatement("select uid from users where email = ?");
+            stmt.setString(1, new_user.email());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql to confirm no such user already exists
+        try {
+            result_set = stmt.executeQuery();
+            if (!result_set.next())
+                return false;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
 
         // prepare the sql statement
         try {
@@ -231,12 +298,12 @@ public class UserStore {
      * userJoinGroup - Joins a user to a group.
      *
      * @param user_id The unique ID of the user who is joining the group.
-     * @param groupname The name of the group that the user is joining.
+     * @param group_name The name of the group that the user is joining.
      * @param is_admin int (0 or 1) where 0 means the user is NOT an amdin and 1 means the user IS an admin.
      *
      * @return boolean - true on success, else false.
      */
-    public boolean userJoinGroup(String user_id, String groupname, int is_admin) {
+    public boolean userJoinGroup(String user_id, String group_name, int is_admin) {
 
         PreparedStatement stmt = null;
         ResultSet  result_set;
@@ -244,7 +311,7 @@ public class UserStore {
         // get the group id of the group we just created
         try {
             stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
-            stmt.setString(1, groupname);
+            stmt.setString(1, group_name);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -333,11 +400,11 @@ public class UserStore {
      *
      * @param user_id The id of the user who is joining.
      * @param event_name The name of the event the user is joining.
-     * @param is_attending a 1, 2, or 3. 1: attending, 2, maybe, 3:not attending.
+     * @param is_attending a 1, 2, or 3. 1:attending \ 2:maybe \ 3:not attending.
      *
      * @return boolean - true on success, else false.
      */
-    public boolean userJoinEvent(String user_id, String event_name, int is_attending) {
+    public boolean userJoinEvent(String user_id, String event_name, int is_attending) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet  result_set;
 
@@ -363,23 +430,62 @@ public class UserStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        String event_id = result_set.getString("eventid");
 
+        // check that user isn't already rsvp-ed to the event.
         try {
-            stmt = connection.prepareStatement( "insert into event_attendance (users_uid, events_eventid, is_attending)" +
-                                                " values (?, ?, ?)");
+            stmt = connection.prepareStatement( "select users_uid, events_eventid, is_attending from event_attendance" +
+                                                " where users_uid = ? and events_eventid = ?");
             stmt.setString(1, user_id);
-            stmt.setString(2, result_set.getString("eventid"));
-            stmt.setInt(3, is_attending);
+            stmt.setString(2, event_id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         try {
-            stmt.execute();
-            return true;
+            result_set = stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+
+        if (result_set.next()) {
+            // update rsvp
+            try {
+                stmt = connection.prepareStatement( "update event_attendance set is_attending = 1 " +
+                                                    "where users_uid = ? AND events_eventid=  ?");
+                stmt.setString(1, user_id);
+                stmt.setString(2, event_id);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                stmt.execute();
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        else {  // create new relationship.
+            try {
+                stmt = connection.prepareStatement( "insert into event_attendance (users_uid, events_eventid, is_attending)" +
+                        " values (?, ?, ?)");
+                stmt.setString(1, user_id);
+                stmt.setString(2, result_set.getString("eventid"));
+                stmt.setInt(3, is_attending);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                stmt.execute();
+                return true;
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 
@@ -439,4 +545,5 @@ public class UserStore {
         }
 
     }
+
 }

@@ -3,6 +3,7 @@ package com.apolloBackEnd;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.apollo.AppInit;
 import com.spotify.apollo.Environment;
+import com.spotify.apollo.Response;
 import com.spotify.apollo.route.Route;
 import com.spotify.apollo.httpservice.LoadingException;
 import com.spotify.apollo.httpservice.HttpService;
@@ -42,6 +43,7 @@ public final class App {
         EventResource event_resource = new EventResource(object_mapper);
 
         environment.routingEngine()
+                .registerAutoRoute(Route.sync("GET", "/ping",ctx -> "ping"))
                 .registerRoutes(event_resource.routes())
                 .registerRoutes(group_resource.routes())
                 .registerRoutes(user_resource.routes());
