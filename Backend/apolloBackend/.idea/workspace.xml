@@ -3,11 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1e9ad65b-99d6-4a81-97aa-9475faa93589" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/App.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/App.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/GroupResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/GroupResource.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/UserResource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/apolloBackEnd/UserResource.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/store/UserStore.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/store/UserStore.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/curl_tests" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/curl_tests" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -34,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/apolloBackEnd/UserResource.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="52" column="33" selection-start-line="52" selection-start-column="33" selection-end-line="52" selection-end-column="33" />
+            <state relative-caret-position="270">
+              <caret line="89" column="44" lean-forward="true" selection-start-line="89" selection-start-column="44" selection-end-line="89" selection-end-column="44" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#2856#2885#0" expanded="true" />
@@ -253,7 +248,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553977375507" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1553977641483" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -307,12 +302,12 @@
       <workItem from="1553730233941" duration="1496000" />
       <workItem from="1553779842508" duration="6810000" />
       <workItem from="1553860671670" duration="15647000" />
-      <workItem from="1553950183941" duration="10527000" />
+      <workItem from="1553950183941" duration="10826000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="49085000" />
+    <option name="totallyTimeSpent" value="49384000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -327,7 +322,7 @@
     <frame x="1920" y="-2" width="1680" height="1052" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18359853" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18359853" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -336,7 +331,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4994664" weight="0.32972974" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="2" sideWeight="0.7974296" visible="true" weight="0.3253796" />
+      <window_info anchor="bottom" id="Terminal" order="2" sideWeight="0.7974296" visible="true" weight="0.3253796" />
       <window_info anchor="bottom" id="Run" order="3" sideWeight="0.4883721" weight="0.3373102" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
@@ -518,13 +513,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/test/java/curl_tests">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="520">
-          <caret line="39" column="146" selection-start-line="39" selection-start-column="146" selection-end-line="39" selection-end-column="146" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$MAVEN_REPOSITORY$/com/spotify/apollo-api/1.2.4/apollo-api-1.2.4-sources.jar!/com/spotify/apollo/route/SyncHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="720">
@@ -542,10 +530,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/java/curl_tests">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="520">
+          <caret line="39" column="146" selection-start-line="39" selection-start-column="146" selection-end-line="39" selection-end-column="146" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/apolloBackEnd/UserResource.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="52" column="33" selection-start-line="52" selection-start-column="33" selection-end-line="52" selection-end-column="33" />
+        <state relative-caret-position="270">
+          <caret line="89" column="44" lean-forward="true" selection-start-line="89" selection-start-column="44" selection-end-line="89" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#2856#2885#0" expanded="true" />
