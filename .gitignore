@@ -1,5 +1,10 @@
+# frontend stuff
+./agora/node_modules/*
+
+# hidden files in root
 .*
 
+# backend stuff
 /Backend/.idea/*
 /Backend/apolloBackend/target/*
 /Backend/apolloBackend/apolloBackend.iml
