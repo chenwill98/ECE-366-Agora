@@ -95,7 +95,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname from group_memberships GM " +
+            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname, U.email from group_memberships GM " +
                                                 "inner join users U on U.uid = GM.users_uid " +
                                                 "inner join `groups` G on G.gid = GM.groups_gid" +
                                                 " where G.gid = ?");
@@ -120,8 +120,8 @@ public class GroupStore {
                         .uid(result_set.getInt("uid"))
                         .first_name(result_set.getString("firstname"))
                         .last_name(result_set.getString("lastname"))
+                        .email(result_set.getString("email"))
                         .pass_hash("")
-                        .email("")
                         .build());
             }
         } catch (SQLException e) {
@@ -210,5 +210,196 @@ public class GroupStore {
             e.printStackTrace();
         }
         return false;
+    }
+
+
+    /**
+     * updateEventName - Updates the name of an event (the event is already confirmed to exist.
+     *
+     * @param event_id The id of the event
+     * @param new_name the name the event should change into
+     *
+     * @return  boolean: True on sucess, else false
+     */
+    public Boolean updateEventName(String event_id, String new_name) {
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "update events set event_name = ? where eventid = ?");
+            stmt.setString(1, new_name);
+            stmt.setString(2, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * updateEventDescription - Updates the name of an event in the database
+     * @param event_id The id of the event.
+     * @param new_description The new description the event should have.
+     *
+     * @return boolean - true on sucess, else false.
+     */
+    public Boolean updateEventDescription(String event_id, String new_description) {
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "update events set `desc` = ? where eventid = ?");
+            stmt.setString(1, new_description);
+            stmt.setString(2, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * updateEventLocation - Updates the location of an event in the database. This event was already confirmed to
+     * exist.
+     *
+     * @param event_id The id of the event.
+     * @param new_location The new locaiton the event is being held at.
+     *
+     * @return boolean - true on sucess, else false
+     */
+    public Boolean updateEventLocation(String event_id, String new_location) {
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "update events set Location = ? where eventid = ?");
+            stmt.setString(1, new_location);
+            stmt.setString(2, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * updateEventDate - Updates the date an event is taking place in the database. This event was already confirmed
+     * to exist.
+     *
+     * @param event_id The id of the event.
+     * @param new_date The new date the event is happening on.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public Boolean updateEventDate(String event_id, String new_date) {
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "update events set Date_Time = ? where eventid = ?");
+            stmt.setString(1, new_date);
+            stmt.setString(2, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
+     * deleteEvent - deletes an event from the database. This event was already confirmed to exist.
+     * Deleting an event automatically deletes all its related entries in the event_membership table also.
+     *
+     * @param event_id The id of the event.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean deleteEvent(String event_id) {
+
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "delete from events where eventid = ?");
+            stmt.setString(1, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+
+    /**
+     * updateAdmins - Change the admin status of a user for a group.
+     *
+     * @param group_id The id of the group.
+     * @param user_id The id of the user.
+     * @param make_admin Make the user an: 1=admin, 0=regular user.
+     *
+     * @return boolean - true on success, else false.
+     */
+    public boolean updateAdmins(String group_id, String user_id, Integer make_admin) {
+        PreparedStatement stmt = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "update group_memberships set is_admin = ? where " +
+                                                "users_uid = ? and groups_gid = ?");
+            stmt.setInt(1, make_admin);
+            stmt.setString(2, user_id);
+            stmt.setString(3, group_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

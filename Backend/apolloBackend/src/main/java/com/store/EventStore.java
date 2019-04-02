@@ -1,10 +1,15 @@
 package com.store;
 
+import com.apolloBackEnd.GroupResource;
 import com.model.Event;
 import com.model.EventBuilder;
+import com.model.User;
+import com.model.UserBuilder;
 import com.typesafe.config.Config;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * EventStore - the events endpoint that interacts with the mysql events table.
@@ -81,6 +86,105 @@ public class EventStore {
             e.printStackTrace();
         }
         return event;
+    }
+
+
+    /**
+     * isAdmin - This method determins if a user is an admin of the group that owns a specified event.
+     *
+     * @param user_id The id of the user in question.
+     * @param event_id The id of the event in question.
+     *
+     * @return boolean - True if the user is an admin, else false.
+     */
+    public boolean isAdmin(String user_id, String event_id) {
+
+        Event event = getEvent(event_id);
+        if (event == null)
+            return false;
+
+        PreparedStatement stmt = null;
+        ResultSet result_set;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select is_admin from group_memberships where" +
+                    "users_uid = ? and groups_gid =?");
+            stmt.setInt(1, Integer.valueOf(user_id));
+            stmt.setInt(2, event.gid());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return result_set.getBoolean("is_admin");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
+    /**
+     * getUsers - Get the users that are subscribed to an event.
+     *
+     * @param id The id of the event.
+     *
+     * @return A list of user objects with first names, last names, and emails.
+     */
+    public List<User> getUsers(String id) {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname, U.email from event_attendance EA " +
+                                                "inner join users U on U.uid = EA.users_uid " +
+                                                "inner join events E on E.gid = EA.events_eventid" +
+                                                " where G.gid = ?");
+            stmt.setString(1, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        List<User> users = new ArrayList<>();
+
+        try {
+            while (result_set.next()) {
+                users.add(new UserBuilder()
+                        .uid(result_set.getInt("uid"))
+                        .first_name(result_set.getString("firstname"))
+                        .last_name(result_set.getString("lastname"))
+                        .email(result_set.getString("email"))
+                        .pass_hash("")
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 }
 
