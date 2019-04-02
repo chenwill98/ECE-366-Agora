@@ -2,6 +2,8 @@ package com.apolloBackEnd;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.model.*;
 
 import com.spotify.apollo.RequestContext;
@@ -10,6 +12,7 @@ import com.spotify.apollo.Response;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -36,7 +39,7 @@ public class UserResource implements RouteProvider {
     /* fields */
     private final UserStore store;                  /* the user store instance used in the UserResource class   */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
-    private static Map<Integer, Integer> cookie_db;        /* cookie IDs mapper: Key = user id, Value = cookie ID      */
+    static BiMap<Integer, Integer> cookie_db;       /* cookie IDs mapper: Key = user id, Value = cookie ID      */
 
 
     /* methods */
@@ -51,7 +54,7 @@ public class UserResource implements RouteProvider {
         this.store = new UserStore(tmp_config);
 
         if (cookie_db == null) {  /* because it is static, we don't want it to be called twice */
-            UserResource.cookie_db = new HashMap<>();
+            UserResource.cookie_db = HashBiMap.create();
         }
     }
 
@@ -75,37 +78,46 @@ public class UserResource implements RouteProvider {
                 Route.sync("POST", "/user/create", this::createUser)
                 .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<User>>>create("POST", "/user/<id>", this::getUser)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<List<Group>>>>create("POST", "/user/<id>/groups", this::getGroups)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<List<Event>>>>create("POST", "/user/<id>/events", this::getEvents)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/create-group", this::createGroup)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/change-password", this::updatePassword)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/join-group", this::joinGroup)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/leave-group", this::leaveGroup)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/leave-event", this::leaveEvent)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/join-event", this::joinEvent)
-                        .withMiddleware(this::userSessionMiddleware)
+                        .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/<id>/rsvp-event/<eventID>", this::rsvpEvent)
                         .withMiddleware(jsonMiddleware())
                 );
     }
+
 
 
     /**
@@ -119,7 +131,48 @@ public class UserResource implements RouteProvider {
     private Response<User> getUser(RequestContext ctx) {
 
         // get and return user
-        return Response.ok().withPayload(store.getUserWithID(ctx.pathArgs().get("id")));
+        User tmp = store.getUserWithID(ctx.pathArgs().get("id"));
+
+        if (tmp == null)
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+        else
+            return Response.ok().withPayload(tmp);
+    }
+
+
+    /**
+     * getGroups - Queries the database to get the list of groups that a user belongs to.
+     *
+     * @param ctx The request context.
+     *
+     * @return A response with either the list of groups or some error code.
+     */
+    private Response<List<Group>> getGroups(RequestContext ctx) {
+
+        List<Group> tmp = store.getGroups(ctx.pathArgs().get("id"));
+
+        if (tmp == null)
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+        else
+            return Response.ok().withPayload(tmp);
+    }
+
+
+    /**
+     * getEvents - Queries the database to get the list of events associated with the user.
+     *
+     * @param ctx - the request context.
+     *
+     * @return A response with either the list of events or some error code.
+     */
+    private Response<List<Event>> getEvents(RequestContext ctx) {
+
+        List<Event> tmp = store.getEvents(ctx.pathArgs().get("id"));
+
+        if (tmp == null)
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+        else
+            return Response.ok().withPayload(tmp);
     }
 
 
@@ -512,7 +565,7 @@ public class UserResource implements RouteProvider {
      * middleware. However what we are nevertheless returning from this middleware is a Response<T>, not a
      * SyncHandler<Response<T>>.
      */
-    private <T> SyncHandler<Response<T>> userSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
+    public static <T> SyncHandler<Response<T>> userSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
 
         return ctx -> {
             // check matching cookie id.

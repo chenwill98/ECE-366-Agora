@@ -5,6 +5,8 @@ import com.model.*;
 import com.typesafe.config.Config;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -546,4 +548,98 @@ public class UserStore {
 
     }
 
+
+    /**
+     * getGroups - Returns a list of the groups a user belongs to.
+     *
+     * @param user_id the id of the user.
+     *
+     * @return a list of groups the user belongs to.
+     */
+    public List<Group> getGroups(String user_id) {
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        try {
+            stmt = connection.prepareStatement( "select G.gid, G.Name, G.description from group_memberships GM " +
+                                                "inner join users U on U.uid = GM.users_uid " +
+                                                "inner join `groups` G on G.gid = GM.groups_gid" +
+                                                " where U.uid = ?");
+            stmt.setString(1, user_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        List<Group> groups = new ArrayList<>();
+
+
+        try {
+            while (result_set.next()) {
+                groups.add( new GroupBuilder()
+                        .gid(result_set.getInt("gid"))
+                        .name(result_set.getString("Name"))
+                        .description(result_set.getString("Description"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return groups;
+    }
+
+
+    /**
+     * getEvents - Returns a list of the events a user is associated with.
+     *
+     * @param user_id the id of the user.
+     *
+     * @return a list of events that the user is associated with.
+     */
+    public List<Event> getEvents(String user_id) {
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        try {
+            stmt = connection.prepareStatement( "select E.eventid, E.event_name, E.desc, E.Location, E.Date_Time" +
+                                                "from event_attendance EA" +
+                                                "inner join users U on U.uid = EA.users_uid " +
+                                                "inner join events E on E.eventid = EA.events_eventid" +
+                                                " where U.uid = ?");
+            stmt.setString(1, user_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        List<Event> events = new ArrayList<>();
+
+
+        try {
+            while (result_set.next()) {
+                events.add( new EventBuilder()
+                        .id(result_set.getInt("eventid"))
+                        .name(result_set.getString("event_name"))
+                        .description(result_set.getString("desc"))
+                        .location(result_set.getString("Location"))
+                        .date(result_set.getString("Date_Time"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
+    }
 }

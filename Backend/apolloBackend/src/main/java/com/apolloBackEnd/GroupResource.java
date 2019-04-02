@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 public class GroupResource implements RouteProvider {
 
     /* fields */
-    private final GroupStore store;                 /* the group store instance used in the GroupResource class */
+    private static GroupStore store;                 /* the group store instance used in the GroupResource class */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
 
 
@@ -39,7 +39,9 @@ public class GroupResource implements RouteProvider {
 
         this.object_mapper = objectMapper;
         Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
-        this.store = new GroupStore(tmp_config);
+
+        if (this.store == null)
+            this.store = new GroupStore(tmp_config);
 
     }
 
@@ -47,15 +49,25 @@ public class GroupResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
-                Route.sync("GET", "/group/<id>", ctx -> String.format("You have reached group number %d.\n", ctx.pathArgs().get("id")))
+                Route.sync("GET", "/group/<id>", ctx ->
+                                    String.format("You have reached group # %d.\n", ctx.pathArgs().get("id")))
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/group/<id>/create-event", this::createEvent)
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/create-event", this::createEvent)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/edit-event", this::editEvent)
+                        .withMiddleware(GroupResource::groupAdminSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
+
+        /* TODO: editEvent(), deleteEvent(), changeAdmin(), notifyGroup(), viewContacts() */
 
         );
     }
+
 
 
     /**
@@ -80,9 +92,6 @@ public class GroupResource implements RouteProvider {
             return Response.ok().withPayload(tmp);
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
-
-
-
     }
 
 
@@ -123,7 +132,6 @@ public class GroupResource implements RouteProvider {
         // check that all fields are filled
         if (    node.get("name").asText() == null           || node.get("name").asText().isEmpty()          ||
                 node.get("description").asText() == null    || node.get("description").asText().isEmpty()   ||
-                ctx.pathArgs().get("id") == null            || ctx.pathArgs().get("id").isEmpty()           ||
                 node.get("location").asText() == null       || node.get("location").asText().isEmpty()      ||
                 node.get("date").asText() == null           || node.get("date").asText().isEmpty() ) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
@@ -151,6 +159,62 @@ public class GroupResource implements RouteProvider {
 
 
     /**
+     * editEvent - Edits an event.
+     *
+     * @param ctx The request context.
+     *
+     * @return Response ok on sucess, else some error code.
+     */
+    private Response<ByteString> editEvent(RequestContext ctx) {
+
+        // convert request payload into JSON
+        JsonNode node = null;
+        try {
+            node = object_mapper.readTree(ctx.request().payload().get().utf8());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // check that at least one field is filled (the field(s) to be edited
+        if (    node.get("id").asText() == null             || node.get("id").asText().isEmpty() || (
+                node.get("name").asText() == null           && node.get("name").asText().isEmpty()          &&
+                node.get("description").asText() == null    && node.get("description").asText().isEmpty()   &&
+                node.get("location").asText() == null       && node.get("location").asText().isEmpty()      &&
+                node.get("date").asText() == null           && node.get("date").asText().isEmpty() ) ) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
+        }
+
+        // make sure that the group does not exist yet
+        EventResource tmp_even_resource = new EventResource(object_mapper);
+
+        Boolean try1 = true;
+        Boolean try2 = true;
+        Boolean try3 = true;
+        Boolean try4 = true;
+
+        if (!tmp_even_resource.eventExists(node.get("id").asText())) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("No such event found"));
+        }
+        else {
+            if (node.get("id").asText() == null && node.get("name").asText().isEmpty())
+                try1 = store.updateEventName(node.get("id").asText(), node.get("name").asText());
+            if (node.get("id").asText() == null && node.get("description").asText().isEmpty())
+                try2 = store.updateEventDescription(node.get("id").asText(), node.get("description").asText());
+            if (node.get("id").asText() == null && node.get("location").asText().isEmpty())
+                try3 = store.updateEventLocation(node.get("id").asText(), node.get("location").asText());
+            if (node.get("id").asText() == null && node.get("date").asText().isEmpty())
+                try4 = store.updateEventDate(node.get("id").asText(), node.get("date").asText());
+        }
+
+        if (try1 && try2 && try3 && try4)
+            return Response.ok();
+        else
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+    }
+
+
+
+    /**
      * jsonMiddleware - Standard middleware function that converts the return type of an async handler into json as
      * well as sets it up as a standard HTTP response.
      *
@@ -167,5 +231,47 @@ public class GroupResource implements RouteProvider {
                 .and(responseAsyncHandler -> ctx ->
                         responseAsyncHandler.invoke(ctx)
                                 .thenApply(response -> response.withHeaders(headers)));
+    }
+
+
+    /**
+     * userSessionMiddleware - Implements a user session checker on an incoming request, prior to the handler
+     * invokation. In actuality, it parses the header of the incoming request and  checks if there is a cookie header
+     * and that the cookie ID it contains matches the one saved in the classe's cookieID hash table. If all three of
+     * these conditions holds, the middleware calls the corresponding route's handler and returns it's response.
+     *
+     * If there is no cookie header, we return a 401 Unauthorized responses.
+     * If there is a cookie header and it does not contain the cookie ID corresponding to the same user ID that is
+     * specified in the route, we return a 403 Forbidden response.
+     *
+     * NOTE: This middleware needs to be followed by an Apollo-implemented middleware called Middleware::syncToAsync.
+     * This is so that the expected types of the route provider line up.
+     *
+     * @param innerHandler The handler function that corresponds with the route.
+     * @param <T> The object that is returned in the response of the handler function (User, Group, String, etc).
+     *
+     * @return A response wrapped as a handler function for concurrency with the methods are are called after this
+     * middleware. However what we are nevertheless returning from this middleware is a Response<T>, not a
+     * SyncHandler<Response<T>>.
+     */
+    public static <T> SyncHandler<Response<T>> groupAdminSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
+
+        return ctx -> {
+            // check matching cookie id.
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+                return Response.forStatus(Status.UNAUTHORIZED);
+
+            String[] tokens = ctx.request().headers().get("Cookie").split("=");
+
+            // get the user id from the cookie database
+            String user_id = String.valueOf(UserResource.cookie_db.inverse().get(Integer.valueOf(tokens[1])));
+
+            // check that the user_id is an admin in the group
+            if (user_id == null || !store.isAdmin(user_id, ctx.pathArgs().get("id")))
+                return Response.forStatus(Status.FORBIDDEN);
+
+            // Call inner handler
+            return innerHandler.invoke(ctx);
+        };
     }
 }

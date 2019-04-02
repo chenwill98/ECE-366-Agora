@@ -3,6 +3,7 @@ package com.store;
 import com.model.*;
 import com.typesafe.config.Config;
 
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,5 +164,51 @@ public class GroupStore {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    /**
+     * isAdmin - Checks if a user is an admin of a group
+     *
+     * @param user_id The id of the user.
+     * @param group_id The id of the group.
+     *
+     * @return Boolean: True if the user is an admin, False else.
+     */
+    public boolean isAdmin(String user_id, String group_id) {
+
+        PreparedStatement stmt = null;
+        ResultSet result_set;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "select is_admin from group_memberships where" +
+                                                "users_uid = ? and groups_gid =?");
+            stmt.setString(1, user_id);
+            stmt.setString(2, group_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        try {
+            result_set.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            return result_set.getBoolean("is_admin");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

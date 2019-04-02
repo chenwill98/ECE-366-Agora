@@ -39,19 +39,19 @@ public class EventStore {
     /**
      * getEvent - Retrives an event with the specified name from the db.
      *
-     * @param name The name of the event.
+     * @param event_id The name of the event.
      *
      * @return The retrieved event. Returns a null object on error/ if not located.
      */
-    public Event getEvent(String name) {
+    public Event getEvent(String event_id) {
 
         PreparedStatement stmt = null;
         ResultSet result_set = null;
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select eventid, `desc`, groups_gid, Location, Date_Time from events where event_name = ?");
-            stmt.setString(1, name);
+            stmt = connection.prepareStatement("select event_name, `desc`, groups_gid, Location, Date_Time from events where eventid = ?");
+            stmt.setString(1, event_id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -69,7 +69,8 @@ public class EventStore {
         try {
             while (result_set.next()) {
                 event = new EventBuilder()
-                        .name(name)
+                        .id(Integer.valueOf(event_id))
+                        .name(result_set.getString("event_name"))
                         .description(result_set.getString("desc"))
                         .gid(result_set.getInt("groups_gid"))
                         .location(result_set.getString("Location"))

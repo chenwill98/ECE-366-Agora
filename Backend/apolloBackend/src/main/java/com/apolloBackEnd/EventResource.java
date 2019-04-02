@@ -45,6 +45,9 @@ public class EventResource implements RouteProvider {
         return Stream.of(
                 Route.sync("GET", "/event/<id>", ctx -> String.format("%s\n", ctx.pathArgs().get("id")))
                         .withMiddleware(jsonMiddleware())
+
+
+                /* TODO: notifyAttendies(), notifyUser() */
         );
     }
 
@@ -52,12 +55,12 @@ public class EventResource implements RouteProvider {
     /**
      * eventExists - Checks whether an event with the given name exists.
      *
-     * @param name The name of the event to check for.
+     * @param event_id The name of the event to check for.
      *
      * @return boolean - true if it exists, else false.
      */
-    public boolean eventExists(String name) {
-        Event event = store.getEvent(name);
+    public boolean eventExists(String event_id) {
+        Event event = store.getEvent(event_id);
 
         if (event != null)
             return true;
