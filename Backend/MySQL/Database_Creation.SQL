@@ -15,108 +15,98 @@ CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`users`
+-- Table `mydb`.`Users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`users` (
-  `uid` INT NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(45) NULL,
-  `firstname` VARCHAR(45) NOT NULL,
-  `lastname` VARCHAR(45) NOT NULL,
-  `passhash` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`uid`))
+CREATE TABLE IF NOT EXISTS `mydb`.`Users` (
+  `User_id` INT NOT NULL AUTO_INCREMENT,
+  `Email` VARCHAR(45) NULL,
+  `First_name` VARCHAR(45) NOT NULL,
+  `Last_name` VARCHAR(45) NOT NULL,
+  `Passhash` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`User_id`),
+  UNIQUE INDEX `User_id_UNIQUE` (`User_id` ASC) VISIBLE,
+  INDEX `email` (`Email` ASC) VISIBLE)
 ENGINE = InnoDB;
 
-CREATE UNIQUE INDEX `uid_UNIQUE` ON `mydb`.`users` (`uid` ASC) VISIBLE;
-
-CREATE INDEX `email` ON `mydb`.`users` (`email` ASC) VISIBLE;
-
 
 -- -----------------------------------------------------
--- Table `mydb`.`groups`
+-- Table `mydb`.`Groops`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`groups` (
-  `gid` INT NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `mydb`.`Groops` (
+  `Groop_id` INT NOT NULL AUTO_INCREMENT,
   `Description` VARCHAR(45) NOT NULL,
   `Name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`gid`))
+  PRIMARY KEY (`Groop_id`),
+  UNIQUE INDEX `Group_id_UNIQUE` (`Groop_id` ASC) VISIBLE)
 ENGINE = InnoDB;
 
-CREATE UNIQUE INDEX `gid_UNIQUE` ON `mydb`.`groups` (`gid` ASC) VISIBLE;
-
 
 -- -----------------------------------------------------
--- Table `mydb`.`events`
+-- Table `mydb`.`Events`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`events` (
-  `eventid` INT NOT NULL AUTO_INCREMENT,
-  `event_name` VARCHAR(45) NULL,
-  `desc` VARCHAR(45) NULL,
-  `groups_gid` INT NULL,
+CREATE TABLE IF NOT EXISTS `mydb`.`Events` (
+  `Event_id` INT NOT NULL AUTO_INCREMENT,
+  `Event_name` VARCHAR(45) NULL,
+  `Descrip` VARCHAR(45) NULL,
+  `Group_gid` INT NULL,
   `Location` VARCHAR(45) NULL,
-  `Date_Time` DATETIME NULL,
-  PRIMARY KEY (`eventid`),
+  `Date_time` DATETIME NULL,
+  PRIMARY KEY (`Event_id`),
+  UNIQUE INDEX `Event ID_UNIQUE` (`Event_id` ASC) VISIBLE,
+  FULLTEXT INDEX `Descripsearch` (`Descrip`) INVISIBLE,
+  INDEX `Fk_events_groups_idx` (`Group_gid` ASC) VISIBLE,
   CONSTRAINT `fk_events_groups`
-    FOREIGN KEY (`groups_gid`)
-    REFERENCES `mydb`.`groups` (`gid`)
+    FOREIGN KEY (`Group_gid`)
+    REFERENCES `mydb`.`Groops` (`Groop_id`)
     ON DELETE SET NULL
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
-CREATE UNIQUE INDEX `Event ID_UNIQUE` ON `mydb`.`events` (`eventid` ASC) VISIBLE;
-
-CREATE FULLTEXT INDEX `descsearch` ON `mydb`.`events` (`desc`) INVISIBLE;
-
-CREATE INDEX `fk_events_groups_idx` ON `mydb`.`events` (`groups_gid` ASC) VISIBLE;
-
 
 -- -----------------------------------------------------
--- Table `mydb`.`group_memberships`
+-- Table `mydb`.`Event_attendance`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`group_memberships` (
-  `users_uid` INT NOT NULL,
-  `groups_gid` INT NOT NULL,
-  `is_admin` TINYINT NULL,
-  PRIMARY KEY (`groups_gid`, `users_uid`),
-  CONSTRAINT `fk_users_has_groups_users1`
-    FOREIGN KEY (`users_uid`)
-    REFERENCES `mydb`.`users` (`uid`)
-    ON DELETE CASCADE
-    ON UPDATE RESTRICT,
-  CONSTRAINT `fk_users_has_groups_groups1`
-    FOREIGN KEY (`groups_gid`)
-    REFERENCES `mydb`.`groups` (`gid`)
-    ON DELETE CASCADE
-    ON UPDATE RESTRICT)
-ENGINE = InnoDB;
-
-CREATE INDEX `fk_users_has_groups_groups1_idx` ON `mydb`.`group_memberships` (`groups_gid` ASC) VISIBLE;
-
-CREATE INDEX `fk_users_has_groups_users1_idx` ON `mydb`.`group_memberships` (`users_uid` ASC) VISIBLE;
-
-
--- -----------------------------------------------------
--- Table `mydb`.`event_attendance`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`event_attendance` (
-  `users_uid` INT NOT NULL,
-  `events_eventid` INT NOT NULL,
-  `is_attending` ENUM("YES", "MAYBE", "NO") NULL,
-  PRIMARY KEY (`users_uid`, `events_eventid`),
+CREATE TABLE IF NOT EXISTS `mydb`.`Event_attendance` (
+  `User_id` INT NOT NULL,
+  `Event_id` INT NOT NULL,
+  `Is_attending` ENUM("YES", "MAYBE", "NO") NULL,
+  PRIMARY KEY (`User_id`, `Event_id`),
+  INDEX `fk_users_has_events_events1_idx` (`Event_id` ASC) VISIBLE,
+  INDEX `fk_users_has_events_users1_idx` (`User_id` ASC) VISIBLE,
   CONSTRAINT `fk_users_has_events_users1`
-    FOREIGN KEY (`users_uid`)
-    REFERENCES `mydb`.`users` (`uid`)
+    FOREIGN KEY (`User_id`)
+    REFERENCES `mydb`.`Users` (`User_id`)
     ON DELETE CASCADE
     ON UPDATE RESTRICT,
   CONSTRAINT `fk_users_has_events_events1`
-    FOREIGN KEY (`events_eventid`)
-    REFERENCES `mydb`.`events` (`eventid`)
+    FOREIGN KEY (`Event_id`)
+    REFERENCES `mydb`.`Events` (`Event_id`)
     ON DELETE CASCADE
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
-CREATE INDEX `fk_users_has_events_events1_idx` ON `mydb`.`event_attendance` (`events_eventid` ASC) VISIBLE;
 
-CREATE INDEX `fk_users_has_events_users1_idx` ON `mydb`.`event_attendance` (`users_uid` ASC) VISIBLE;
+-- -----------------------------------------------------
+-- Table `mydb`.`Groop_memberships`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `mydb`.`Groop_memberships` (
+  `User_id` INT NOT NULL,
+  `Groops_id` INT NOT NULL,
+  `Is_admin` TINYINT(1) NULL,
+  PRIMARY KEY (`User_id`, `Groops_id`),
+  INDEX `fk_Users_has_Groops_Groops1_idx` (`Groops_id` ASC) VISIBLE,
+  INDEX `fk_Users_has_Groops_Users1_idx` (`User_id` ASC) VISIBLE,
+  CONSTRAINT `fk_Users_has_Groops_Users1`
+    FOREIGN KEY (`User_id`)
+    REFERENCES `mydb`.`Users` (`User_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Users_has_Groops_Groops1`
+    FOREIGN KEY (`Groops_id`)
+    REFERENCES `mydb`.`Groops` (`Groop_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
