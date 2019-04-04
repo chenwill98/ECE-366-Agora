@@ -1,3 +1,8 @@
+# These curl tests are used for integration tests to confirm that the backend is
+# connected to and communicating correctly with the database.
+# Once nginx is up and running, these curls will also test that part of our application, thereby making these
+# requests replicate the front-ends communication with the rest of our application.
+
 
 attemptLogin:
 

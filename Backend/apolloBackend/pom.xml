@@ -14,6 +14,8 @@
         <mainClass>com.Resource.App</mainClass>
     </properties>
 
+    <packaging>jar</packaging>
+
     <!-- loading all spotify apollo artifact versions -->
     <dependencyManagement>
         <dependencies>

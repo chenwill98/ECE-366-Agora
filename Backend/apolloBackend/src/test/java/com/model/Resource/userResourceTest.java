@@ -28,14 +28,14 @@ public class userResourceTest {
 
 
     @Mock UserStore store;                      /* mock of the store class (interacting with db)    */
-    @Mock BiMap<Integer, Integer> cookie_db;    /* mock of the cookie_db                            */
+    @Mock BiMap<Integer, Integer> cookie_db;    /* mock of the cookie database.. not sure if we will need this yet */
 
     @Mock Request request_test;                 /* mock for the Request object recieved from front-end */
     @Mock RequestContext ctx_test;                   /* mock of the request context that contains the request above */
 
     ObjectMapper object_mapper;                 /* real object mapper - simplifies the testing - I think        */
     private UserResource test_user_resource;    /* the actual class we are testing - so obv shouldn't be mocked */
-    User test_user;
+    User test_user;                             /* A (real) user object that we will often use in our tests     */
 
 
     @Before
@@ -64,7 +64,6 @@ public class userResourceTest {
         when(store.createUser(test_user)).thenReturn(true);
 
         Response<ByteString> actual_response = test_user_resource.createUser(ctx_test);
-
 
         assertEquals(200, actual_response.status().code());
     }
