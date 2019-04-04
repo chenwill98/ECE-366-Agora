@@ -1,4 +1,4 @@
-package com.apolloBackEnd;
+package com.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.Event;
@@ -23,7 +23,7 @@ public class EventResource implements RouteProvider {
 
 
     /* fields */
-    private static EventStore store;             /* the event store instance used in the EventResource class */
+    private final EventStore store;             /* the event store instance used in the EventResource class */
     private final ObjectMapper object_mapper;   /* used in the middleware for altering response formats     */
 
 
@@ -33,12 +33,10 @@ public class EventResource implements RouteProvider {
      *
      * @param objectMapper The object mapper object used for altering the format of the route responses.
      */
-    public EventResource(ObjectMapper objectMapper) {
+    public EventResource(ObjectMapper objectMapper, EventStore input_store) {
         this.object_mapper = objectMapper;
-        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
 
-        if (EventResource.store == null)
-            EventResource.store = new EventStore(tmp_config);
+        store = input_store;
     }
 
 
@@ -48,7 +46,7 @@ public class EventResource implements RouteProvider {
                 Route.sync("GET", "/event/<id>", ctx -> String.format("%s\n", ctx.pathArgs().get("id")))
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<List<User>>>>create("POST", "/event/<id>/get-users", this::getUsers)
-                        .withMiddleware(EventResource::eventAuthorizationMiddleware)
+                        .withMiddleware(handler -> eventAuthorizationMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
         );
@@ -130,7 +128,7 @@ public class EventResource implements RouteProvider {
      * middleware. However what we are nevertheless returning from this middleware is a Response<T>, not a
      * SyncHandler<Response<T>>.
      */
-    public static <T> SyncHandler<Response<T>> eventAuthorizationMiddleware(SyncHandler<Response<T>> innerHandler) {
+    public <T> SyncHandler<Response<T>> eventAuthorizationMiddleware(SyncHandler<Response<T>> innerHandler) {
 
         return ctx -> {
             // check matching cookie id.

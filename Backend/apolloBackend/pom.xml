@@ -11,7 +11,7 @@
     <!-- propreties act like variables inside the pom file -->
     <properties>
         <apollo.version>1.2.4</apollo.version>
-        <mainClass>com.apolloBackEnd.App</mainClass>
+        <mainClass>com.Resource.App</mainClass>
     </properties>
 
     <!-- loading all spotify apollo artifact versions -->
@@ -28,11 +28,20 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Backend -->
         <dependency>
             <groupId>com.spotify</groupId>
             <artifactId>apollo-http-service</artifactId>
+            <version>1.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.spotify</groupId>
+            <artifactId>apollo-extra</artifactId>
+            <version>1.10.1</version>
         </dependency>
 
+
+        <!-- used for building our models -->
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
@@ -40,10 +49,32 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- mysql jdbc connector -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.15</version>
+        </dependency>
+
+        <!-- test only -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Used for creating JSON objects during testing -->
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 

@@ -1,6 +1,5 @@
 package com.store;
 
-import com.apolloBackEnd.GroupResource;
 import com.model.Event;
 import com.model.EventBuilder;
 import com.model.User;

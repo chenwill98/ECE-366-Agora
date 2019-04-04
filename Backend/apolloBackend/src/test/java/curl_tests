@@ -1,11 +1,11 @@
 
 attemptLogin:
 
-curl -v -d '{"email":"test@gmail.com", "pass":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
+curl -v -d '{"email":"test@gmail.com", "pass_hash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/login
 ------------------------
 createUser:
 
-curl -v -d '{"email":"test@gmail.com", "firstname":"Bob", "lastname":"Vernen", "passhash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create
+curl -v -d '{"email":"test@gmail.com", "first_name":"Bob", "last_name":"Vernen", "pass_hash":"pass1234"}' -H "Content-Type: application/json" -X POST http://localhost:8080/user/create
 ------------------------
 updatePass:
 

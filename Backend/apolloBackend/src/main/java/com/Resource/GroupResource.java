@@ -1,4 +1,4 @@
-package com.apolloBackEnd;
+package com.Resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,6 +7,7 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
+import com.store.EventStore;
 import com.store.GroupStore;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -22,7 +23,7 @@ import java.util.stream.Stream;
 public class GroupResource implements RouteProvider {
 
     /* fields */
-    private static GroupStore store;                 /* the group store instance used in the GroupResource class */
+    private final GroupStore store;                 /* the group store instance used in the GroupResource class */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
 
 
@@ -33,13 +34,12 @@ public class GroupResource implements RouteProvider {
      *
      * @param objectMapper The object mapper object used for altering the format of the route responses.
      */
-    public GroupResource(ObjectMapper objectMapper) {
+    public GroupResource(ObjectMapper objectMapper, GroupStore input_store) {
 
         this.object_mapper = objectMapper;
-        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
+//        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
 
-        if (GroupResource.store == null)
-            GroupResource.store = new GroupStore(tmp_config);
+        store = input_store;
 
     }
 
@@ -57,19 +57,19 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/edit-event", this::editEvent)
-                        .withMiddleware(GroupResource::groupAdminSessionMiddleware)
+                        .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/delete-event", this::deleteEvent)
-                        .withMiddleware(GroupResource::groupAdminSessionMiddleware)
+                        .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/update-admins", this::updateAdmins)
-                        .withMiddleware(GroupResource::groupAdminSessionMiddleware)
+                        .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<List<User>>>>create("POST", "/group/<id>/view-contacts", this::viewContacts)
-                        .withMiddleware(GroupResource::groupAdminSessionMiddleware)
+                        .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
         );
@@ -180,7 +180,8 @@ public class GroupResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-        EventResource tmp_even_resource = new EventResource(object_mapper);
+        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
+        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
 
         if (!tmp_even_resource.eventExists(node.get("name").asText())) {
 
@@ -218,7 +219,8 @@ public class GroupResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-        EventResource tmp_even_resource = new EventResource(object_mapper);
+        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
+        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
 
         Boolean try1 = true;
         Boolean try2 = true;
@@ -261,7 +263,8 @@ public class GroupResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-        EventResource tmp_even_resource = new EventResource(object_mapper);
+        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
+        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
 
         if (!tmp_even_resource.eventExists(node.get("id").asText())) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("No such event found"));
@@ -349,7 +352,7 @@ public class GroupResource implements RouteProvider {
      * middleware. However what we are nevertheless returning from this middleware is a Response<T>, not a
      * SyncHandler<Response<T>>.
      */
-    public static <T> SyncHandler<Response<T>> groupAdminSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
+    public <T> SyncHandler<Response<T>> groupAdminSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
 
         return ctx -> {
             // check matching cookie id.

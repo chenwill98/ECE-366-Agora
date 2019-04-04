@@ -1,11 +1,13 @@
-package com.apolloBackEnd;
+package com.Resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.model.*;
 
+import com.spotify.apollo.Environment;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
@@ -20,6 +22,7 @@ import java.util.stream.Stream;
 
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
+import com.store.GroupStore;
 import com.store.UserStore;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -47,11 +50,10 @@ public class UserResource implements RouteProvider {
      * UserResource - A constructor for the UserResource class. This constructor
      * sets up a userStore instance that will be used throughout the
      */
-    UserResource(final ObjectMapper objectMapper) {
+    public UserResource(final ObjectMapper objectMapper, UserStore input_store) {
         this.object_mapper = objectMapper;
 
-        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
-        this.store = new UserStore(tmp_config);
+        this.store = input_store;
 
         if (cookie_db == null) {  /* because it is static, we don't want it to be called twice */
             UserResource.cookie_db = HashBiMap.create();
@@ -128,7 +130,8 @@ public class UserResource implements RouteProvider {
      *
      *  @return The User object that was asked for, or a null object on error.
      */
-    private Response<User> getUser(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<User> getUser(RequestContext ctx) {
 
         // get and return user
         User tmp = store.getUserWithID(ctx.pathArgs().get("id"));
@@ -200,7 +203,8 @@ public class UserResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-        GroupResource tmp_group_resource = new GroupResource(object_mapper);
+        GroupStore tmp_store = new GroupStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
+        GroupResource tmp_group_resource = new GroupResource(object_mapper, tmp_store);
 
         if (!tmp_group_resource.groupExists(node.get("name").asText())) {
 
@@ -306,7 +310,8 @@ public class UserResource implements RouteProvider {
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
             // confirm that group exists
-            GroupResource tmp_group_resource = new GroupResource(object_mapper);
+            GroupStore tmp_store = new GroupStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
+            GroupResource tmp_group_resource = new GroupResource(object_mapper, tmp_store);
 
             if (tmp_group_resource.groupExists(node.get("groupname").asText())) {
                 // add yourself to the group
@@ -400,7 +405,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context containing the POST request payload (all the user information).
      * @return A boolean, true if user successfully added to the database and false if not.
      */
-    private Response<ByteString> createUser(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> createUser(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -411,25 +417,38 @@ public class UserResource implements RouteProvider {
         }
 
         // check that all fields are filled
-        if (    user_json!= null && (
+        if (    user_json != null && (
                 (user_json.get("email").asText() == null)       || user_json.get("email").asText().isEmpty()        ||
-                (user_json.get("firstname").asText() == null)   || user_json.get("firstname").asText().isEmpty()    ||
-                (user_json.get("lastname").asText() == null)    || user_json.get("lastname").asText().isEmpty()     ||
-                (user_json.get("passhash").asText() == null)    || user_json.get("passhash").asText().isEmpty()) ) {
+                (user_json.get("first_name").asText() == null)   || user_json.get("first_name").asText().isEmpty()    ||
+                (user_json.get("last_name").asText() == null)    || user_json.get("last_name").asText().isEmpty()     ||
+                (user_json.get("pass_hash").asText() == null)    || user_json.get("pass_hash").asText().isEmpty()) ) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
-        User new_user = new UserBuilder()
-                .email(user_json.get("email").asText())
-                .first_name(user_json.get("firstname").asText())
-                .last_name(user_json.get("lastname").asText())
-                .pass_hash(user_json.get("passhash").asText())
-                .build();
+        /* this if statement is useful for conducting the unit tests. Not optimal (ie not needed) during production */
+        User new_user;
+        if (user_json.get("uid").asText() != null )
+            new_user = new UserBuilder()
+                    .uid(Integer.valueOf(user_json.get("uid").asText()))
+                    .email(user_json.get("email").asText())
+                    .first_name(user_json.get("first_name").asText())
+                    .last_name(user_json.get("last_name").asText())
+                    .pass_hash(user_json.get("pass_hash").asText())
+                    .build();
+        else
+            new_user = new UserBuilder()
+                    .email(user_json.get("email").asText())
+                    .first_name(user_json.get("first_name").asText())
+                    .last_name(user_json.get("last_name").asText())
+                    .pass_hash(user_json.get("pass_hash").asText())
+                    .build();
+
 
         if (store.createUser(new_user))
             return Response.ok();
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+
     }
 
 
@@ -441,7 +460,8 @@ public class UserResource implements RouteProvider {
      *
      * @return A UserTest object. If login is successful, than the actual user. Otherwise, a null object.
      */
-    private Response<Integer> attemptLogin(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<Integer> attemptLogin(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -454,7 +474,7 @@ public class UserResource implements RouteProvider {
         // checking that all fields are filled
         if (    user_json != null && (
                 (user_json.get("email").asText() == null) || user_json.get("email").asText().isEmpty() ||
-                (user_json.get("pass").asText() == null)  || user_json.get("pass").asText().isEmpty()) ) {
+                (user_json.get("pass_hash").asText() == null)  || user_json.get("pass_hash").asText().isEmpty()) ) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
@@ -462,7 +482,7 @@ public class UserResource implements RouteProvider {
         User auth_user = store.getUserWithEmail(user_json.get("email").asText());
 
         // if it is the same, we return the user with all the info, otherwise we return a null object.
-        if (auth_user.pass_hash().equals(user_json.get("pass").asText())) {
+        if (auth_user.pass_hash().equals(user_json.get("pass_hash").asText())) {
             return Response.ok().withPayload(getCookieID(auth_user.uid()));
         }
         else
@@ -478,12 +498,11 @@ public class UserResource implements RouteProvider {
      * @return The cookie ID.
      */
     private Integer getCookieID(Integer user_id) {
-
         if (cookie_db.containsKey(user_id)) {
             return cookie_db.get(user_id);
         }
         else {
-            Random rand = new Random();
+            Random rand = new Random(1234);     /* seed corresponds to testing seed so that we can run unit tests */
             Integer new_cookie_id = rand.nextInt(1000000);
             cookie_db.put(user_id, new_cookie_id);
             return new_cookie_id;

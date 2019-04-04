@@ -115,6 +115,7 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 user = new UserBuilder()
+                        .uid(Integer.valueOf(user_id))
                         .email(result_set.getString("email"))
                         .pass_hash(result_set.getString("passhash"))
                         .first_name(result_set.getString("firstname"))
