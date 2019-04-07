@@ -69,7 +69,6 @@ class Login extends Component {
                 <Navigation/>
                 <CenterView>
                     <Card border="primary" style={{ width: '40rem'}}>
-
                         <Card.Body>
                             <Card.Title>Login</Card.Title>
                             <Card.Text>
