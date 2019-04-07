@@ -1,6 +1,7 @@
 package com.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.model.Event;
 import com.model.User;
 import com.spotify.apollo.RequestContext;
@@ -58,40 +59,23 @@ public class EventResource implements RouteProvider {
      *
      * @param ctx The request context.
      *
-     * @return A list of User objects with their first name, last name, and emails.
+     * @return A dynamic response. On success, payload contains a list of User objects with their first name, last
+     * name, and emails.
      */
-    private Response<List<User>> getUsers(RequestContext ctx) {
-        String id = ctx.pathArgs().get("id");
-
+    @VisibleForTesting
+    public Response<List<User>> getUsers(RequestContext ctx) {
         // some basic error checking
-        if (id == null || id.isEmpty()) {
+        if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // get the list of users from the database and return it
-        List<User> users = store.getUsers(id);
+        List<User> users = store.getUsers(ctx.pathArgs().get("id"));
 
         if (!users.isEmpty())
             return Response.ok().withPayload(users);
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
-    }
-
-
-    /**
-     * eventExists - Checks whether an event with the given name exists.
-     *
-     * @param event_id The name of the event to check for.
-     *
-     * @return boolean - true if it exists, else false.
-     */
-    public boolean eventExists(String event_id) {
-        Event event = store.getEvent(event_id);
-
-        if (event != null)
-            return true;
-        else
-            return false;
     }
 
 

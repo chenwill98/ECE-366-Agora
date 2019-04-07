@@ -46,8 +46,8 @@ public final class App {
 
 
         /* instantiate the resources before initializing the routes */
-        UserResource user_resource = new UserResource(object_mapper, user_store);
-        GroupResource group_resource = new GroupResource(object_mapper, group_store);
+        UserResource user_resource = new UserResource(object_mapper, user_store, group_store);
+        GroupResource group_resource = new GroupResource(object_mapper, group_store, event_store);
         EventResource event_resource = new EventResource(object_mapper, event_store);
 
         environment.routingEngine()

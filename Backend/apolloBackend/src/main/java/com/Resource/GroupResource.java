@@ -2,6 +2,7 @@ package com.Resource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.model.*;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -25,6 +26,7 @@ public class GroupResource implements RouteProvider {
     /* fields */
     private final GroupStore store;                 /* the group store instance used in the GroupResource class */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
+    private final EventStore event_store;
 
 
 
@@ -34,12 +36,12 @@ public class GroupResource implements RouteProvider {
      *
      * @param objectMapper The object mapper object used for altering the format of the route responses.
      */
-    public GroupResource(ObjectMapper objectMapper, GroupStore input_store) {
+    public GroupResource(ObjectMapper objectMapper, GroupStore input_store, EventStore event_store) {
 
         this.object_mapper = objectMapper;
-//        Config tmp_config = ConfigFactory.parseResources("apolloBackend.conf").resolve();
 
         store = input_store;
+        this.event_store = event_store;
 
     }
 
@@ -82,9 +84,11 @@ public class GroupResource implements RouteProvider {
      *
      * @param ctx The request context.
      *
-     * @return A list of User objects, with their first names, last names, and emails filled in.
+     * @return A dynamic response. On success, a list of User objects, with their first names, last names,
+     * and emails filled in.
      */
-    private Response<List<User>> viewContacts(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<List<User>> viewContacts(RequestContext ctx) {
         String id = ctx.pathArgs().get("id");
 
         // some basic error checking
@@ -110,7 +114,8 @@ public class GroupResource implements RouteProvider {
      *
      * @return A list of User objects that are members of the specified group.
      */
-    private Response<List<User>> getUsers(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<List<User>> getUsers(RequestContext ctx) {
         // some basic error checking
         if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
@@ -138,30 +143,13 @@ public class GroupResource implements RouteProvider {
 
 
     /**
-     * groupExists - Determines if a group with the inputted name exists or not.
-     *
-     * @param name The name of the group to check for (a name is unique in the group db).
-     *
-     * @return boolean - true if the name exists, false if it doesn't.
-     */
-    public boolean groupExists(String name) {
-
-        Group group = store.getGroup(name);
-
-        if (group != null)
-            return true;
-        else
-            return false;
-    }
-
-
-    /**
      * createEvent - Creates an event & saves it to the events table in the db.
      *
      * @param ctx The request context with the relevant info.
      * @return boolean - True on success and false otherwise.
      */
-    private Response<ByteString> createEvent(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> createEvent(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -180,23 +168,35 @@ public class GroupResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
-        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
 
-        if (!tmp_even_resource.eventExists(node.get("name").asText())) {
+        if (event_store.getEvent(node.get("name").asText()) != null) {
 
-            Event new_event = new EventBuilder()
-                    .name(node.get("name").asText())
-                    .description(node.get("description").asText())
-                    .gid(Integer.valueOf(ctx.pathArgs().get("id")))
-                    .location(node.get("description").asText())
-                    .date(node.get("date").asText())
-                    .build();
+            Event new_event;
+
+            /* this logic is needed soley for unit testing */
+            if (node.get("id") != null && !node.get("id").asText().isEmpty()) {
+                new_event = new EventBuilder()
+                        .id(Integer.valueOf(node.get("id").asText()))
+                        .name(node.get("name").asText())
+                        .description(node.get("description").asText())
+                        .gid(Integer.valueOf(ctx.pathArgs().get("id")))
+                        .location(node.get("location").asText())
+                        .date(node.get("date").asText())
+                        .build();
+            }
+            else {
+                new_event = new EventBuilder()
+                        .name(node.get("name").asText())
+                        .description(node.get("description").asText())
+                        .gid(Integer.valueOf(ctx.pathArgs().get("id")))
+                        .location(node.get("location").asText())
+                        .date(node.get("date").asText())
+                        .build();
+            }
 
             if (store.createEvent(ctx.pathArgs().get("id"), new_event))
                 return Response.ok();
         }
-
         return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
@@ -208,7 +208,8 @@ public class GroupResource implements RouteProvider {
      *
      * @return Response ok on sucess, else some error code.
      */
-    private Response<ByteString> editEvent(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> editEvent(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -218,16 +219,12 @@ public class GroupResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // make sure that the group does not exist yet
-        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
-        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
-
         Boolean try1 = true;
         Boolean try2 = true;
         Boolean try3 = true;
         Boolean try4 = true;
 
-        if (!tmp_even_resource.eventExists(node.get("id").asText())) {
+        if (event_store.getEvent(node.get("id").asText()) != null) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("No such event found"));
         }
         else {
@@ -249,11 +246,14 @@ public class GroupResource implements RouteProvider {
 
 
     /**
+     *deleteEvent - deletes an event from the database.
      *
-     * @param ctx
-     * @return
+     * @param ctx The request context that contains the event id.
+     *
+     * @return Response with 200 on success, otherwise some error code with reason phrase.
      */
-    private Response<ByteString> deleteEvent(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> deleteEvent(RequestContext ctx) {
         // convert request payload into JSON
         JsonNode node = null;
         try {
@@ -262,17 +262,13 @@ public class GroupResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        // make sure that the group does not exist yet
-        EventStore tmp_store = new EventStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
-        EventResource tmp_even_resource = new EventResource(object_mapper, tmp_store);
-
-        if (!tmp_even_resource.eventExists(node.get("id").asText())) {
+        if (node.get("id").asText() == null && node.get("id").asText().isEmpty())
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
+        else if (event_store.getEvent(node.get("id").asText()) == null) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("No such event found"));
         }
-        else if (node.get("event_id").asText() == null && node.get("name").asText().isEmpty())
-            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
 
-        if (store.deleteEvent(node.get("event_id").asText()))
+        if (store.deleteEvent(node.get("id").asText()))
             return Response.ok();
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
@@ -284,9 +280,10 @@ public class GroupResource implements RouteProvider {
      *
      * @param ctx The request context.
      *
-     * @return Boolean - True on success, else false.
+     * @return dynamic response.
      */
-    private Response<ByteString> updateAdmins(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> updateAdmins(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;

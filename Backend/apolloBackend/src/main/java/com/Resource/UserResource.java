@@ -7,7 +7,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.model.*;
 
-import com.spotify.apollo.Environment;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
@@ -24,8 +23,6 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
 import com.store.GroupStore;
 import com.store.UserStore;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import okio.ByteString;
 
 
@@ -44,13 +41,15 @@ public class UserResource implements RouteProvider {
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
     static BiMap<Integer, Integer> cookie_db;       /* cookie IDs mapper: Key = user id, Value = cookie ID      */
 
+    // used to confirm that group exists. for order, kept in a different resource class.
+    private GroupStore group_store;
 
     /* methods */
     /**
      * UserResource - A constructor for the UserResource class. This constructor
      * sets up a userStore instance that will be used throughout the
      */
-    public UserResource(final ObjectMapper objectMapper, UserStore input_store) {
+    public UserResource(final ObjectMapper objectMapper, UserStore input_store, GroupStore group_store) {
         this.object_mapper = objectMapper;
 
         this.store = input_store;
@@ -58,6 +57,8 @@ public class UserResource implements RouteProvider {
         if (cookie_db == null) {  /* because it is static, we don't want it to be called twice */
             UserResource.cookie_db = HashBiMap.create();
         }
+
+        this.group_store = group_store;
     }
 
 
@@ -150,7 +151,8 @@ public class UserResource implements RouteProvider {
      *
      * @return A response with either the list of groups or some error code.
      */
-    private Response<List<Group>> getGroups(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<List<Group>> getGroups(RequestContext ctx) {
 
         List<Group> tmp = store.getGroups(ctx.pathArgs().get("id"));
 
@@ -168,7 +170,8 @@ public class UserResource implements RouteProvider {
      *
      * @return A response with either the list of events or some error code.
      */
-    private Response<List<Event>> getEvents(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<List<Event>> getEvents(RequestContext ctx) {
 
         List<Event> tmp = store.getEvents(ctx.pathArgs().get("id"));
 
@@ -185,7 +188,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant info.
      * @return boolean - True on success and false otherwise.
      */
-    private Response<ByteString> createGroup(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> createGroup(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode node = null;
@@ -196,22 +200,29 @@ public class UserResource implements RouteProvider {
         }
 
         // check that all fields are filled
-        if ((ctx.pathArgs().get("id") == null)          || ctx.pathArgs().get("id").isEmpty()           ||
-            (node.get("description").asText() == null)  || node.get("description").asText().isEmpty()   ||
-            (node.get("name").asText() == null)         || node.get("name").asText().isEmpty()  )  {
+        if ((ctx.pathArgs().get("id") == null)  || ctx.pathArgs().get("id").isEmpty()           ||
+            (node.get("description") == null)  || node.get("description").asText().isEmpty()   ||
+            (node.get("name") == null)          || node.get("name").asText().isEmpty()  )  {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Entries"));
         }
 
-        // make sure that the group does not exist yet
-        GroupStore tmp_store = new GroupStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
-        GroupResource tmp_group_resource = new GroupResource(object_mapper, tmp_store);
+        if (group_store.getGroup(node.get("name").asText()) == null) {
 
-        if (!tmp_group_resource.groupExists(node.get("name").asText())) {
-
-            Group new_group = new GroupBuilder()
-                    .name(node.get("name").asText())
-                    .description(node.get("description").asText())
-                    .build();
+            Group new_group;
+            /* this logic is only needed for the unit testing */
+            if (node.get("gid") != null && !node.get("gid").asText().isEmpty()) {
+                new_group = new GroupBuilder()
+                        .name(node.get("name").asText())
+                        .description(node.get("description").asText())
+                        .gid(Integer.valueOf(node.get("gid").asText()))
+                        .build();
+            }
+            else {
+                new_group = new GroupBuilder()
+                        .name(node.get("name").asText())
+                        .description(node.get("description").asText())
+                        .build();
+            }
 
             if (store.createGroup(ctx.pathArgs().get("id"), new_group))
                 return Response.ok();
@@ -239,7 +250,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on success, and false otherwise.
      */
-    private Response<ByteString> joinEvent(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> joinEvent(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
@@ -263,7 +275,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relevant user and event IDs.
      * @return boolean - true on sucess and false otherwise.
      */
-    private Response<ByteString> leaveEvent(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> leaveEvent(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, false);
         if (node != null) {
@@ -284,7 +297,8 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context with the relavant user and group IDs.
      * @return boolean - True of sucess, false otherwise.
      */
-    private Response<ByteString> leaveGroup(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> leaveGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
@@ -305,15 +319,13 @@ public class UserResource implements RouteProvider {
      * @param ctx The request context which contains the relevant user and group ids.
      * @return boolean - true on success, else false.
      */
-    private Response<ByteString> joinGroup(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> joinGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
         if (node != null) {
-            // confirm that group exists
-            GroupStore tmp_store = new GroupStore(ConfigFactory.parseResources("apolloBackend.conf").resolve());
-            GroupResource tmp_group_resource = new GroupResource(object_mapper, tmp_store);
 
-            if (tmp_group_resource.groupExists(node.get("groupname").asText())) {
+            if (group_store.getGroup(node.get("groupname").asText()) != null) {
                 // add yourself to the group
                 if (store.userJoinGroup(ctx.pathArgs().get("id"), node.get("groupname").asText(), 0))
                     return Response.ok();
@@ -364,7 +376,8 @@ public class UserResource implements RouteProvider {
      * @param ctx the request context containing the POST payload (user ID).
      * @return boolean - if the update is successful, returns true, otherwise returns false.
      */
-    private Response<ByteString> updatePassword(RequestContext ctx) {
+    @VisibleForTesting
+    public Response<ByteString> updatePassword(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;

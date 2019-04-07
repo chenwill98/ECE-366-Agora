@@ -3,12 +3,12 @@ package com.model.Resource;
 
 import com.Resource.UserResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.BiMap;
-import com.model.User;
-import com.model.UserBuilder;
+import com.google.common.collect.ImmutableMap;
+import com.model.*;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
+import com.store.GroupStore;
 import com.store.UserStore;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import okio.ByteString;
@@ -23,25 +23,30 @@ import java.util.*;
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 @RunWith(MockitoJUnitRunner.class)
 public class userResourceTest {
 
 
     @Mock UserStore store;                      /* mock of the store class (interacting with db)    */
-    @Mock BiMap<Integer, Integer> cookie_db;    /* mock of the cookie database.. not sure if we will need this yet */
 
     @Mock Request request_test;                 /* mock for the Request object recieved from front-end */
-    @Mock RequestContext ctx_test;                   /* mock of the request context that contains the request above */
+    @Mock RequestContext ctx_test;              /* mock of the request context that contains the request above */
+    @Mock GroupStore group_store;
 
-    ObjectMapper object_mapper;                 /* real object mapper - simplifies the testing - I think        */
+    private ObjectMapper object_mapper;         /* real object mapper - simplifies the testing - I think        */
     private UserResource test_user_resource;    /* the actual class we are testing - so obv shouldn't be mocked */
-    User test_user;                             /* A (real) user object that we will often use in our tests     */
+    private User test_user;                     /* a (real) user object that we will often use in our tests     */
+    private Group test_group;                   /* a (real) group object that we will use in our tests          */
+    private Event test_event;                   /* a (real) event object that we will use in our tests          */
 
 
     @Before
     public void setup() {
         object_mapper = new ObjectMapper().registerModule(new AutoMatterModule());
-        test_user_resource = new UserResource(object_mapper, store);
+        test_user_resource = new UserResource(object_mapper, store, group_store);
+        when(ctx_test.request()).thenReturn(request_test);
+
         test_user = new UserBuilder()
                 .uid(1)
                 .email("teser@gmail.com")
@@ -50,15 +55,29 @@ public class userResourceTest {
                 .pass_hash("Password1234")
                 .build();
 
-        when(ctx_test.request()).thenReturn(request_test);
+        test_group = new GroupBuilder()
+                .gid(1)
+                .name("Test Group")
+                .description("This is a test group")
+                .build();
 
+        test_event = new EventBuilder()
+                .id(1)
+                .name("Test Event")
+                .date("someDate")
+                .description("this is a test event")
+                .location("test place")
+                .build();
+
+        when(ctx_test.pathArgs()).thenReturn(Collections.singletonMap("id", String.valueOf(test_user.uid())));
     }
 
+
+    /*
+     * Each @Test function is called the same name as the method that it calls and tests in the UserResource class.
+     */
     @Test
     public void createUser() throws Exception {
-
-        when(ctx_test.request()).thenReturn(request_test);
-
         when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(test_user))));
 
         when(store.createUser(test_user)).thenReturn(true);
@@ -68,14 +87,8 @@ public class userResourceTest {
         assertEquals(200, actual_response.status().code());
     }
 
-
-    /*
-     * Each @Test function is called the same name as the method that it calls and tests in the UserResource class.
-     */
-
     @Test
     public void attemptLogin() throws Exception {
-
         when(store.getUserWithEmail(test_user.email())).thenReturn(test_user);
 
         when(request_test.payload())
@@ -94,8 +107,6 @@ public class userResourceTest {
 
     @Test
     public void getUser() {
-        when(ctx_test.pathArgs()).thenReturn(Collections.singletonMap("id", String.valueOf(test_user.uid())));
-
         when(store.getUserWithID(String.valueOf(test_user.uid()))).thenReturn(test_user);
 
         Response<User> actual_response = test_user_resource.getUser(ctx_test);
@@ -105,36 +116,94 @@ public class userResourceTest {
 
     @Test
     public void getGroups() {
+        when(store.getGroups(String.valueOf(test_user.uid()))).thenReturn(Collections.singletonList(test_group));
 
+        Response<List<Group>> actual_response = test_user_resource.getGroups(ctx_test);
+
+        assertEquals(Collections.singletonList(test_group), actual_response.payload().get());
     }
 
     @Test
     public void getEvents() {
+        when(store.getEvents(String.valueOf(test_user.uid()))).thenReturn(Collections.singletonList(test_event));
 
+        Response<List<Event>> actual_response = test_user_resource.getEvents(ctx_test);
+
+        assertEquals(Collections.singletonList(test_event), actual_response.payload().get());
     }
 
     @Test
-    public void createGroup() {
+    public void createGroup() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(test_group))));
 
+        when(store.createGroup(String.valueOf(test_user.uid()), test_group)).thenReturn(true);
+
+        Response<ByteString> actual_response = test_user_resource.createGroup(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
     }
 
     @Test
-    public void updatePassword() {
+    public void updatePassword() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+                .of("oldpass", test_user.pass_hash(), "newpass", "456")))));
 
+        when(store.getUserWithID(String.valueOf(test_user.uid()))).thenReturn(test_user);
+        when(store.updatePass(String.valueOf(test_user.uid()), "456")).thenReturn(true);
+
+        Response<ByteString> actual_response = test_user_resource.updatePassword(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
     }
 
     @Test
-    public void joinGroup() {
+    public void joinGroup() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+                .of("groupname", test_group.name())))));
 
+        when(store.userJoinGroup(String.valueOf(test_user.uid()), test_group.name(), 0)).thenReturn(true);
+        when(group_store.getGroup(test_group.name())).thenReturn(test_group);
+
+        Response<ByteString> actual_response = test_user_resource.joinGroup(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
     }
 
     @Test
-    public void leaveGroup() {
+    public void leaveGroup() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+                .of("groupname", test_group.name())))));
 
+        when(store.userLeaveGroup(String.valueOf(test_user.uid()), test_group.name())).thenReturn(true);
+        when(group_store.getGroup(test_group.name())).thenReturn(test_group);
+
+        Response<ByteString> actual_response = test_user_resource.leaveGroup(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
     }
 
     @Test
-    public void joinEvent() {
+    public void joinEvent() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+                .of("eventname", test_event.name())))));
 
+        when(store.userJoinEvent(String.valueOf(test_user.uid()), test_event.name(), 1)).thenReturn(true);
+
+        Response<ByteString> actual_response = test_user_resource.joinEvent(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
     }
+
+    @Test
+    public void leaveEvent() throws Exception {
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+                .of("eventname", test_event.name())))));
+
+        when(store.userLeaveEvent(String.valueOf(test_user.uid()), test_event.name())).thenReturn(true);
+
+        Response<ByteString> actual_response = test_user_resource.leaveEvent(ctx_test);
+
+        assertEquals(200, actual_response.status().code());
+    }
+
 }
