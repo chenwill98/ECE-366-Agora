@@ -26,13 +26,13 @@ public class GroupResource implements RouteProvider {
     /* fields */
     private final GroupStore store;                 /* the group store instance used in the GroupResource class */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
-    private final EventStore event_store;
+    private final EventStore event_store;           /* used to access the events table in the database          */
 
 
 
     /* methods */
     /**
-     * Constructor for the Group Resource. Initialized the object mapper and the group store fields.
+     * Constructor for the Group Resource. Initializes the class' object mapper and the store fields.
      *
      * @param objectMapper The object mapper object used for altering the format of the route responses.
      */
@@ -84,8 +84,8 @@ public class GroupResource implements RouteProvider {
      *
      * @param ctx The request context.
      *
-     * @return A dynamic response. On success, a list of User objects, with their first names, last names,
-     * and emails filled in.
+     * @return A response which, on success, contains a payload containing a list of User objects, with their first
+     * names, last names, and emails filled in.
      */
     @VisibleForTesting
     public Response<List<User>> viewContacts(RequestContext ctx) {
@@ -112,7 +112,8 @@ public class GroupResource implements RouteProvider {
      *
      * @param ctx The request context that contains the group ID to get the users of.
      *
-     * @return A list of User objects that are members of the specified group.
+     * @return A response which, on success, contains a paylod with a list of User objects, with only their first names
+     * and last names filled in.
      */
     @VisibleForTesting
     public Response<List<User>> getUsers(RequestContext ctx) {
@@ -145,8 +146,10 @@ public class GroupResource implements RouteProvider {
     /**
      * createEvent - Creates an event & saves it to the events table in the db.
      *
-     * @param ctx The request context with the relevant info.
-     * @return boolean - True on success and false otherwise.
+     * @param ctx The request context with the relevant info: A request with a payload containing the keys: "name",
+     *            "description", "location", and "date". The date needs to be in the format: "2019-03-27".
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> createEvent(RequestContext ctx) {
@@ -202,11 +205,13 @@ public class GroupResource implements RouteProvider {
 
 
     /**
-     * editEvent - Edits an event.
+     * editEvent - Edits an event. Needs to contain at least one of the following things in the request payload to
+     * have a chance of returning success: "name", "description", "location", "date". At least one of these keys needs
+     * to be in the payload, but more than one is of course okay.
      *
      * @param ctx The request context.
      *
-     * @return Response ok on sucess, else some error code.
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> editEvent(RequestContext ctx) {
@@ -246,9 +251,10 @@ public class GroupResource implements RouteProvider {
 
 
     /**
-     *deleteEvent - deletes an event from the database.
+     * deleteEvent - Deletes an event from the database.
      *
-     * @param ctx The request context that contains the event id.
+     * @param ctx The request context that contains the event id. Note that the group ID needs to be specified in the
+     *            routes, and the request payload's event id key should be "id".
      *
      * @return Response with 200 on success, otherwise some error code with reason phrase.
      */
@@ -278,9 +284,10 @@ public class GroupResource implements RouteProvider {
     /**
      * updateAdmins - Updates the admin status of a user in a group.
      *
-     * @param ctx The request context.
+     * @param ctx The request context containing the group ID in the routes and a request payload with the following
+     *            fields: "user_id" and "make_admin", where make_admin should be either: 1=admin, 0=regular user.
      *
-     * @return dynamic response.
+     * @return Response with 200 on success, otherwise some error code with reason phrase.
      */
     @VisibleForTesting
     public Response<ByteString> updateAdmins(RequestContext ctx) {

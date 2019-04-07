@@ -2,15 +2,12 @@ package com.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
-import com.model.Event;
 import com.model.User;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
 import com.store.EventStore;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import okio.ByteString;
 
 import java.util.List;

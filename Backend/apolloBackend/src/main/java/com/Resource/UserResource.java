@@ -41,20 +41,19 @@ public class UserResource implements RouteProvider {
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
     static BiMap<Integer, Integer> cookie_db;       /* cookie IDs mapper: Key = user id, Value = cookie ID      */
 
-    // used to confirm that group exists. for order, kept in a different resource class.
-    private GroupStore group_store;
+    private GroupStore group_store;                 /* used to confirm a group exists                           */
 
     /* methods */
     /**
      * UserResource - A constructor for the UserResource class. This constructor
-     * sets up a userStore instance that will be used throughout the
+     * sets up a userStore instance that will be used.
      */
     public UserResource(final ObjectMapper objectMapper, UserStore input_store, GroupStore group_store) {
         this.object_mapper = objectMapper;
 
         this.store = input_store;
 
-        if (cookie_db == null) {  /* because it is static, we don't want it to be called twice */
+        if (cookie_db == null) {    /* because it is static, we don't want it to be called twice */
             UserResource.cookie_db = HashBiMap.create();
         }
 
@@ -64,10 +63,21 @@ public class UserResource implements RouteProvider {
 
     /**
      * routes - Defines the routes that are related to the UserResource. These include most of the
-     * functionality related to users (duh).
+     * functionality related to users.
      *
-     * @return The asynchronous returns of the route handlers, converted into byteString through the middleware,
-     * which is basically an immutable byte array.
+     * NOTE: the request context contains a way to get both the id in the url as well as the request payload. Note that
+     * in some of the URLs specified there exists <id> tags, this specifies that the request context can use whatever
+     * variable is in this location in the url. Ex: If you have a route '/this/is/a/<id>/route' and an http request
+     * comes in to '/this/is/a/1234/route', the request context will have a field called 'id' that equals 1234. This is
+     * used heavily in implementing user sessions.
+     *
+     * NOTE 2: The routes that have the "userSessionMiddleware" middleware are those that require a cookie to be sent
+     * in the header. Further information of the BackEnd's user sessions is deferred to the middleware's description.
+     *
+     * @return The asynchronous responses of the route handlers. These will be dynamic in the sense that different
+     * routes require different request payloads and headers (for example some require a cookie header), and based on
+     * these requests the response might be a 200 (ok) with or without a payload, 400-bad request, along with a
+     * description of what went wrong, 500-internal server error, etc.
      */
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
@@ -124,12 +134,12 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * getUser - Returns a User with the specific user id. Checks that the request header contains the user's cookie ID,
-     * otherwise doesn't satisfy request.
+     * getUser - Gets a User object with the specific user id.
      *
      *  @param ctx The request context containing the user id.
      *
-     *  @return The User object that was asked for, or a null object on error.
+     *  @return A response, which on success will return the desired User object. On error it will return a 400- Bad
+     *  Request status code.
      */
     @VisibleForTesting
     public Response<User> getUser(RequestContext ctx) {
@@ -138,7 +148,7 @@ public class UserResource implements RouteProvider {
         User tmp = store.getUserWithID(ctx.pathArgs().get("id"));
 
         if (tmp == null)
-            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+            return Response.forStatus(Status.BAD_REQUEST);
         else
             return Response.ok().withPayload(tmp);
     }
@@ -149,7 +159,7 @@ public class UserResource implements RouteProvider {
      *
      * @param ctx The request context.
      *
-     * @return A response with either the list of groups or some error code.
+     * @return A response which if successful contains the list of groups in its payload, else an error code.
      */
     @VisibleForTesting
     public Response<List<Group>> getGroups(RequestContext ctx) {
@@ -168,7 +178,7 @@ public class UserResource implements RouteProvider {
      *
      * @param ctx - the request context.
      *
-     * @return A response with either the list of events or some error code.
+     * @return A response which if successful contains the list of events, or some error code.
      */
     @VisibleForTesting
     public Response<List<Event>> getEvents(RequestContext ctx) {
@@ -183,10 +193,11 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * createGroup - Creates a group given the specified info.
+     * createGroup - Creates a group and adds it to the database.
      *
-     * @param ctx The request context with the relevant info.
-     * @return boolean - True on success and false otherwise.
+     * @param ctx The request context with the following relevant info: "description", "name".
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> createGroup(RequestContext ctx) {
@@ -200,9 +211,8 @@ public class UserResource implements RouteProvider {
         }
 
         // check that all fields are filled
-        if ((ctx.pathArgs().get("id") == null)  || ctx.pathArgs().get("id").isEmpty()           ||
-            (node.get("description") == null)  || node.get("description").asText().isEmpty()   ||
-            (node.get("name") == null)          || node.get("name").asText().isEmpty()  )  {
+        if (node.get("description") == null  || node.get("description").asText().isEmpty()   ||
+            node.get("name") == null         || node.get("name").asText().isEmpty()  ) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Entries"));
         }
 
@@ -233,11 +243,10 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * rsvpEvent - Given a user and an event ID, this function rsvps the user to the event.
-     * Not sure about this one quite yet...
+     * rsvpEvent - Not sure about this one quite yet...
      *
-     * @param ctx The request context with the relevant info.
-     * @return boolean - true on success and false otherwise.
+     * @param ctx
+     * @return
      */
     private Response<ByteString> rsvpEvent(RequestContext ctx) {
         return Response.ok();
@@ -245,10 +254,12 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * joinEvent - Given a user and event ID, this funciton tells DB to update user to be attending the event.
+     * joinEvent - Given a user and event ID, this function tells DB to update a user to be attending the event.
      *
-     * @param ctx The request context with the relevant user and event IDs.
-     * @return boolean - true on success, and false otherwise.
+     * @param ctx The request context with the relevant user and event name. It needs the User ID to be in the route
+     *            and the event name to be in the request payload with the key "eventname".
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> joinEvent(RequestContext ctx) {
@@ -270,10 +281,12 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * leaveEvent - Given a user and event ID, this function makes a user not attend the event
+     * leaveEvent - Given a user id and an event name, this function makes a user not attend the event
      *
-     * @param ctx The request context with the relevant user and event IDs.
-     * @return boolean - true on sucess and false otherwise.
+     * @param ctx The request context with the relevant user and event name. It needs the User ID to be in the route
+     *            and the event name to be in the request payload with the key "eventname".
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> leaveEvent(RequestContext ctx) {
@@ -292,10 +305,12 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * leaveGroup - Given a user ID and group ID, this function makes user leave the group.
+     * leaveGroup - Given a user ID and a group name, this function makes a user leave a group.
      *
-     * @param ctx The request context with the relavant user and group IDs.
-     * @return boolean - True of sucess, false otherwise.
+     * @param ctx The request context with the relevant user and group name. User ID should be in the route and the
+     *            group name should be specified in request payload with the "groupname" key.
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> leaveGroup(RequestContext ctx) {
@@ -316,8 +331,10 @@ public class UserResource implements RouteProvider {
     /**
      * joinGroup - This function adds a user to a group.
      *
-     * @param ctx The request context which contains the relevant user and group ids.
-     * @return boolean - true on success, else false.
+     * @param ctx The request context with the relevant user and group name. User ID should be in the route and the
+     *            group name should be specified in request payload with the "groupname" key.
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> joinGroup(RequestContext ctx) {
@@ -346,6 +363,7 @@ public class UserResource implements RouteProvider {
      *
      * @param ctx   The request context that contains the HTTP POST request payload.
      * @param toggle boolean: true: check for groupname, false: check for eventname.
+     *
      * @return JsonNode A JsonNode if this request is valid, null otherwise.
      */
     private JsonNode validateEmailHelper(RequestContext ctx, boolean toggle) {
@@ -371,10 +389,13 @@ public class UserResource implements RouteProvider {
 
 
     /**
-     * updatePassword - Given a username, this function updates the users password in the database.
+     * updatePassword - This function updates the users password in the database.
      *
-     * @param ctx the request context containing the POST payload (user ID).
-     * @return boolean - if the update is successful, returns true, otherwise returns false.
+     * @param ctx the request context containing the relevant info: User ID specified in the route, and in the request
+     *            payload the old and new passwords with the key "oldpass" and "newpass" respectively. NOTE that these
+     *            are the hash-ed versions of the passwords.
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> updatePassword(RequestContext ctx) {
@@ -415,8 +436,11 @@ public class UserResource implements RouteProvider {
     /**
      * createUser - Creates a new user, adding them to the database.
      *
-     * @param ctx The request context containing the POST request payload (all the user information).
-     * @return A boolean, true if user successfully added to the database and false if not.
+     * @param ctx The request context with the relevant info: In the request payload there should be specified an email,
+     *            first name, last name, and password hash, with the keys: "email", "first_name", "last_name", and
+     *            "pass_hash".
+     *
+     * @return Response with status code 200 on success, else some error status code.
      */
     @VisibleForTesting
     public Response<ByteString> createUser(RequestContext ctx) {
@@ -469,9 +493,11 @@ public class UserResource implements RouteProvider {
     /**
      * attemptLogin - Attempts to login and authenticate a user.
      *
-     * @param ctx A request context that contains a username "usr" and a hashed password "pw".
+     * @param ctx A request context that contains an email and hashed password of the user who wants to login. These
+     *            will have the keys "email" and "pass_hash", respectively.
      *
-     * @return A UserTest object. If login is successful, than the actual user. Otherwise, a null object.
+     * @return Response which on success contains a payload with the cookie ID corresponding with the user who logged
+     * in, else some error status code.
      */
     @VisibleForTesting
     public Response<Integer> attemptLogin(RequestContext ctx) {
@@ -515,7 +541,7 @@ public class UserResource implements RouteProvider {
             return cookie_db.get(user_id);
         }
         else {
-            Random rand = new Random(1234);     /* seed corresponds to testing seed so that we can run unit tests */
+            Random rand = new Random(1234);  /* seed corresponds to testing seed so that we can run unit tests */
             Integer new_cookie_id = rand.nextInt(1000000);
             cookie_db.put(user_id, new_cookie_id);
             return new_cookie_id;
