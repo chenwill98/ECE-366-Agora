@@ -20,9 +20,9 @@ class Login extends Component {
 
     //fetches all data when the component mounts
     componentDidMount() {
-        this.getData();
+        // this.getData();
         if (!this.state.intervalSet) {
-            let interval = setInterval(this.getData(), 1000);
+            let interval = setInterval(this.getData, 1000);
             this.setState({intervalSet: interval})
         }
     }
@@ -35,11 +35,12 @@ class Login extends Component {
         }
     }
 
-    getData = () => {
-        fetch("http://localhost:8080/somestuff")
-            .then(data => data.json())
-            .then(res => this.setState({ data: res.data }));
-    };
+    //method for fetching data
+    // getData = () => {
+    //     fetch("http://localhost:8080/somestuff")
+    //         .then(data => data.json())
+    //         .then(res => this.setState({ data: res.data }));
+    // };
 
     //sets the values of the inputs as values in this.state
     handleChange = event => {
@@ -53,14 +54,13 @@ class Login extends Component {
         event.preventDefault();
     };
 
+    //posts posts the input email, password, and then returns the response
     Login = () => {
-
         return axios.post("http://localhost:8080/login",
             JSON.stringify({email: this.state.email, pass: this.state.password})
         ).then(response => {
-            return response.data
+            return response.data;
         })
-
     };
 
     render() {
@@ -87,7 +87,7 @@ class Login extends Component {
                                     </Form.Group>
                                     <Button variant="primary" type="submit" onClick={() =>
                                         this.Login().then(data => {
-                                            console.log(data)
+                                            localStorage.setItem('cookie', data);
                                         })
                                     }>
                                         Login
