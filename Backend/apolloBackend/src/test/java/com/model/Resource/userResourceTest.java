@@ -106,6 +106,13 @@ public class userResourceTest {
     }
 
     @Test
+    public void attemptLogoff() throws Exception{
+        Response<ByteString> actual_response = test_user_resource.attemptLogout(ctx_test);
+        assertEquals(200, actual_response.status().code());
+    }
+
+
+    @Test
     public void getUser() {
         when(store.getUserWithID(String.valueOf(test_user.uid()))).thenReturn(test_user);
 

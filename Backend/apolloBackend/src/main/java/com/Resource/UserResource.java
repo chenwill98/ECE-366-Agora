@@ -86,6 +86,10 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login", this::attemptLogin)
                 .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/logout", this::attemptLogout)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login-test", this::attemptLoginTest)
                 .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
@@ -486,6 +490,21 @@ public class UserResource implements RouteProvider {
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
 
+    }
+
+
+    /**
+     * attemptLogout - Logs a user out- in essence just stopping the user session by deleting the user's cookie id from
+     * the database.
+     *
+     * @param ctx The request context that contains the id of the user in the route.
+     *
+     * @return Response with status code 200 on success.
+     */
+    @VisibleForTesting
+    public Response<ByteString> attemptLogout(RequestContext ctx) {
+        cookie_db.remove(Integer.valueOf(ctx.pathArgs().get("id")));
+        return Response.ok();
     }
 
 
