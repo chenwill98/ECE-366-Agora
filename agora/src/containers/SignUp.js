@@ -20,7 +20,8 @@ class SignUp extends Component {
 
     //fetches all data when the component mounts
     componentDidMount() {
-        this.getData();
+        // this.getData();
+        console.log(localStorage.getItem('cookie'));
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
             this.setState({intervalSet: interval});
@@ -36,11 +37,11 @@ class SignUp extends Component {
     }
 
     //fetches data
-    getData = () => {
-        fetch("http://localhost:8080/somestuff")
-            .then(data => data.json())
-            .then(res => this.setState({ data: res.data }));
-    };
+    // getData = () => {
+    //     fetch("http://localhost:8080/somestuff")
+    //         .then(data => data.json())
+    //         .then(res => this.setState({ data: res.data }));
+    // };
 
     //sets the values of the inputs as values in this.state
     handleChange = event => {
@@ -81,11 +82,7 @@ class SignUp extends Component {
                                         <Form.Control type="email"
                                                       placeholder="Enter email"
                                                       onChange={this.handleChange}/>
-                                        {this.state.error ?
-                                            <Alert variant="danger">
-                                                This username is invalid somehow, idk
-                                            </Alert>
-                                            : '' }
+                                        {this.state.error ? console.log("hello") : '' }
                                     </Form.Group>
                                     <Form.Group controlId="password">
                                         <Form.Label>Password</Form.Label>

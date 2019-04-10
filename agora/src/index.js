@@ -16,8 +16,7 @@ import Events from './containers/Events.js';
 const routing = (
     <Router>
         <div>
-            <Route path="/helloworld" component={App} />
-            <Route path="/welcome" component={Welcome} />
+            <Route exact path="/" component={Welcome} />
             <Route path="/home" component={Home} />
             <Route path="/events" component={Events} />
             <Route path="/groups" component={Groups} />
