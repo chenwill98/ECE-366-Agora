@@ -26,16 +26,16 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @RunWith(MockitoJUnitRunner.class)
-public class groupResourceTest {
+public class GroupResourceTest {
 
 
-    @Mock GroupStore store;                     /* mock of the store class (interacting with db)    */
-    @Mock Request request_test;                 /* mock for the Request object recieved from front-end */
-    @Mock RequestContext ctx_test;              /* mock of the request context that contains the request above */
-    @Mock EventStore event_store;
+    @Mock GroupStore store;                     /* mock of the store class (interacting with db)                */
+    @Mock Request request_test;                 /* mock for the Request object received from front-end          */
+    @Mock RequestContext ctx_test;              /* mock of the request context that contains the request above  */
+    @Mock EventStore event_store;               /* mock of an event_store                                       */
+    @Mock ObjectMapper object_mapper;           /* mock of an object mapper - cleans testing                    */
 
-
-    private ObjectMapper object_mapper;         /* real object mapper - simplifies the testing - I think        */
+    private ObjectMapper real_obj_mapper;       /* a real object mapper that will help test the methods         */
     private GroupResource test_group_resource;  /* the actual class we are testing - so obv shouldn't be mocked */
     private User test_user;                     /* a (real) user object that we will often use in our tests     */
     private Group test_group;                   /* a (real) group object that we will use in our tests          */
@@ -44,7 +44,7 @@ public class groupResourceTest {
 
     @Before
     public void setup() {
-        object_mapper = new ObjectMapper().registerModule(new AutoMatterModule());
+        real_obj_mapper = new ObjectMapper().registerModule(new AutoMatterModule());
         test_group_resource = new GroupResource(object_mapper, store, event_store);
         when(ctx_test.request()).thenReturn(request_test);
 
@@ -89,7 +89,12 @@ public class groupResourceTest {
 
     @Test
     public void createEvent() throws Exception {
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(test_event))));
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))));
+
+        when(object_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()))
+                .thenReturn(real_obj_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()));
 
         when(event_store.getEvent(test_event.name())).thenReturn(test_event);
 
@@ -102,7 +107,12 @@ public class groupResourceTest {
 
     @Test
     public void editEvent() throws Exception {
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(test_event))));
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))));
+
+        when(object_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()))
+                .thenReturn(real_obj_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()));
 
         when(event_store.getEvent(test_event.name())).thenReturn(test_event);
 
@@ -118,7 +128,12 @@ public class groupResourceTest {
 
     @Test
     public void deleteEvent() throws Exception {
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(test_event))));
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))));
+
+        when(object_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()))
+                .thenReturn(real_obj_mapper.readTree(Optional
+                        .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()));
 
         when(event_store.getEvent(String.valueOf(test_event.id()))).thenReturn(test_event);
 
@@ -133,7 +148,14 @@ public class groupResourceTest {
     public void updateAdmins() throws Exception {
         when(store.getGroup(String.valueOf(test_group.gid()))).thenReturn(test_group);
 
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(object_mapper.writeValueAsBytes(ImmutableMap
+        when(object_mapper.readTree(Optional
+                .of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap
+                        .of("user_id", test_user.uid(), "make_admin", 1)))).get().utf8()))
+                .thenReturn(real_obj_mapper.readTree(Optional
+                        .of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap
+                                .of("user_id", test_user.uid(), "make_admin", 1)))).get().utf8()));
+
+        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap
                 .of("user_id", test_user.uid(), "make_admin", 1)))));
 
         when(store.updateAdmins(String.valueOf(test_group.gid()), String.valueOf(test_user.uid()), 1))

@@ -27,6 +27,7 @@ To build our HTTP Server as a *jar* file simply call `mnv package`. The *jar* fi
 
 The default port that our HTTP server is listening on is 8080. This can be changed in two ways. One is in the file [/APPLICATION/FOLDER/Backend/apolloBackend/src/main/resources/apolloBackend.conf](https://github.com/chenwill98/ECE-366-Agora/blob/master/Backend/apolloBackend/src/main/resources/apolloBackend.conf), changing the default port. The second way is to choose the port every time you run the server, adding the argument `HTTP_PORT=9000` into the maven command.
 
+To run a test in which one cleans up the previously generated *target* directory, do `mvn clean package`.
 
 #### MySQL Server
 

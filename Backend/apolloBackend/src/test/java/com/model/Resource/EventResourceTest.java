@@ -1,15 +1,12 @@
 package com.model.Resource;
 
 import com.Resource.EventResource;
-import com.Resource.GroupResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.model.*;
 import com.spotify.apollo.Request;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 import com.store.EventStore;
-import com.store.GroupStore;
-import io.norberg.automatter.jackson.AutoMatterModule;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,16 +21,14 @@ import static org.mockito.Mockito.when;
 
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 @RunWith(MockitoJUnitRunner.class)
-public class eventResourceTest {
+public class EventResourceTest {
 
 
-    @Mock EventStore store;                     /* mock of the store class (interacting with db)    */
-    @Mock Request request_test;                 /* mock for the Request object recieved from front-end */
-    @Mock RequestContext ctx_test;              /* mock of the request context that contains the request above */
-    @Mock EventStore event_store;
+    @Mock EventStore store;                     /* mock of the store class (interacting with db)                */
+    @Mock Request request_test;                 /* mock for the Request object recieved from front-end          */
+    @Mock RequestContext ctx_test;              /* mock of the request context that contains the request above  */
+    @Mock ObjectMapper object_mapper;           /* mock of an object mapper - cleans the testing                */
 
-
-    private ObjectMapper object_mapper;         /* real object mapper - simplifies the testing - I think        */
     private EventResource test_event_resource;  /* the actual class we are testing - so obv shouldn't be mocked */
     private User test_user;                     /* a (real) user object that we will often use in our tests     */
     private Group test_group;                   /* a (real) group object that we will use in our tests          */
@@ -42,7 +37,6 @@ public class eventResourceTest {
 
     @Before
     public void setup() {
-        object_mapper = new ObjectMapper().registerModule(new AutoMatterModule());
         test_event_resource = new EventResource(object_mapper, store);
         when(ctx_test.request()).thenReturn(request_test);
 

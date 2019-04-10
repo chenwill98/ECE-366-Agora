@@ -10,8 +10,6 @@ import com.spotify.apollo.Status;
 import com.spotify.apollo.route.*;
 import com.store.EventStore;
 import com.store.GroupStore;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import okio.ByteString;
 
 import java.io.IOException;
@@ -29,7 +27,6 @@ public class GroupResource implements RouteProvider {
     private final EventStore event_store;           /* used to access the events table in the database          */
 
 
-
     /* methods */
     /**
      * Constructor for the Group Resource. Initializes the class' object mapper and the store fields.
@@ -39,7 +36,6 @@ public class GroupResource implements RouteProvider {
     public GroupResource(ObjectMapper objectMapper, GroupStore input_store, EventStore event_store) {
 
         this.object_mapper = objectMapper;
-
         store = input_store;
         this.event_store = event_store;
 
