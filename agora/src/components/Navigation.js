@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import axios from "axios";
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 
 
@@ -19,9 +18,7 @@ export default class Navigation extends Component {
                             <NavDropdown.Item href="/account">My Account</NavDropdown.Item>
                             <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item onClick={() =>
-                                    // this.deleteCookie()
-                            }>Sign Out</NavDropdown.Item>
+                            <NavDropdown.Item>Sign Out</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
                 </Navbar.Collapse>
