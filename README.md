@@ -14,6 +14,7 @@ This is an event sharing platform built for Cooper Union's ECE-366: Software Eng
 ### Block Diagram
 ![Block Diagram Picture](./diagrams/AgoraBlockDiagram.png)
 
+
 ### BackEnd Setup
 
 Our BackEnd consists of restful API services along with a database.

@@ -80,6 +80,47 @@ public class GroupStore {
         return group;
     }
 
+    /**
+     * getGroup - Tries to fetch the group with the given name.
+     *
+     * @param name The name of the group being searched for. This name is a unique identifier for the group.
+     *
+     * @return The group if it exists, otherwise null.
+     */
+    public Group getGroupByID(String id) {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select Name, Description from `groups` where gid = ?");
+            stmt.setString(1, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        Group group = null;
+
+        try {
+            while (result_set.next()) {
+                group = new GroupBuilder()
+                        .name(result_set.getString("Name"))
+                        .description(result_set.getString("Description"))
+                        .build();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return group;
+    }
 
     /**
      * getUsers - Gets the list of users who are members of a group.

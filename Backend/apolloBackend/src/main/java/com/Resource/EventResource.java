@@ -2,6 +2,8 @@ package com.Resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.model.Event;
+import com.model.Group;
 import com.model.User;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -10,7 +12,9 @@ import com.spotify.apollo.route.*;
 import com.store.EventStore;
 import okio.ByteString;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
@@ -41,13 +45,30 @@ public class EventResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
-                Route.sync("GET", "/event/<id>", ctx -> String.format("%s\n", ctx.pathArgs().get("id")))
+                Route.sync("GET", "/event/<id>", this::getEventByID)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<List<User>>>>create("POST", "/event/<id>/get-users", this::getUsers)
                         .withMiddleware(handler -> eventAuthorizationMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
         );
+    }
+
+    private Response<Event> getEventByID(RequestContext ctx) {
+
+        String id = ctx.pathArgs().get("id");
+        // some basic error checking
+        if (id == null || id.isEmpty()) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing event id"));
+        }
+
+        // get the list of users from the database and return it
+        Event event = store.getEvent(id);
+
+        if (event != null)
+            return Response.ok().withPayload(event);
+        else
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -77,18 +98,23 @@ public class EventResource implements RouteProvider {
 
 
     /**
-     * jsonMiddleware - Standard middlware function that converts a the return type of an async handler into json, or
-     * more specifically a ByteString type.
-     * @param <T>
-     * @return
+     * jsonMiddleware - Standard middleware function that converts the return type of an async handler into json as
+     * well as sets it up as a standard HTTP response.
+     *
+     * @param <T>   The object returned by the handler (could be a user, group, etc).
+     * @return      Returns an HTTP response with the inputted object as a jSON payload.
      */
-    private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
-        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
-                .and(Middlewares::httpPayloadSemantics)
-                .and(responseAsyncHandler -> requestContext ->
-                        responseAsyncHandler.invoke(requestContext)
-                                .thenApply(response -> response.withHeader("Access-Control-Allow-Origin", "*")));
+    private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "GET, POST");
+
+        return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
+                .and(Middlewares::httpPayloadSemantics)
+                .and(responseAsyncHandler -> ctx ->
+                        responseAsyncHandler.invoke(ctx)
+                                .thenApply(response -> response.withHeaders(headers)));
     }
 
 

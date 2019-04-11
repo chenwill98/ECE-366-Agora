@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Form, Button, Card } from "react-bootstrap";
-import CenterView from '../components/CenterView.js';
+import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
 
 class Event extends Component {
@@ -9,35 +8,51 @@ class Event extends Component {
         super(props);
 
         this.state = {
-            event_id;
+            // backend related states
+            ip: "http://localhost",
+            port: "8080",
 
-            data: [],
-            email: "",
-            password: "",
-            id: 0,
+            // events related states
+            event_id: this.props.match.params.event_id,
+            event_description: "description",
+            event_name: "Name",
+            event_gid: "456",
+            event_location: "Here",
+            event_date: "03/18/1994",
+
+            // error related states
             intervalSet: false,
-            error: false
+            error: false,
+            error_msg: ""
         };
     }
 
 
-    //fetches all data when the component mounts
+    //fetches all data when the component mounts (called right after constructor)
     componentDidMount () {
-        const { handle } = this.props.match.params
-
-        fetch(`/event/${event_id}`)
-            .then((id) => {
-                this.setState(() => ({ id }))
+        axios.get( `${this.state.ip}:${this.state.port}/event/${this.state.event_id}`)
+            .then(res => {
+                this.setState( {
+                    event_description: res.data.description,
+                    event_name: res.data.name,
+                    event_gid: res.data.gid,
+                    event_location: res.data.location,
+                    event_date: res.data.date
+                });
             })
+            .catch(error => {
+                this.setState({
+                    error: true,
+                    error_msg: error.message
+                });
+                console.log("Error on request: " + error.message);
+            });
 
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
             this.setState({intervalSet: interval})
         }
     }
-
-
-
 
 
     //kills the process
@@ -49,4 +64,43 @@ class Event extends Component {
     }
 
 
+    render() {
+        if (this.state.error) {
+            return (
+                <div className='mt-5'>
+                    <Navigation/>
+                    <SinglebObjectView>
+                        <p> {this.state.error_msg}</p>
+                    </SinglebObjectView>
+                </div>
+                    );
+        }
+        else {
+            return (
+                <div className='mt-5'>
+                    <Navigation/>
+
+                    <SinglebObjectView>
+                        <h1>
+                            {this.state.event_name}
+                        </h1>
+                        <p>
+                            {this.state.event_id}
+                        </p>
+                        <p>
+                            {this.state.event_description}
+                        </p>
+                        <p>
+                            {this.state.event_location}
+                        </p>
+                        <p>
+                            {this.state.event_date}
+                        </p>
+                    </SinglebObjectView>
+                </div>
+            );
+        }
+    }
 }
+
+export default Event;

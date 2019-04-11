@@ -45,8 +45,7 @@ public class GroupResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
-                Route.sync("GET", "/group/<id>", ctx ->
-                                    String.format("You have reached group # %d.\n", ctx.pathArgs().get("id")))
+                Route.sync("GET", "/group/<id>", this::getGroup)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware()),
@@ -71,6 +70,23 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
         );
+    }
+
+    private Response<Group> getGroup(RequestContext ctx) {
+        String id = ctx.pathArgs().get("id");
+
+        // some basic error checking
+        if (id == null || id.isEmpty()) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing group id"));
+        }
+
+        // get the list of users from the database and return it
+        Group group = store.getGroupByID(id);
+
+        if (group != null)
+            return Response.ok().withPayload(group);
+        else
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -322,13 +338,14 @@ public class GroupResource implements RouteProvider {
      * @param <T>   The object returned by the handler (could be a user, group, etc).
      * @return      Returns an HTTP response with the inputted object as a jSON payload.
      */
-    private <T> Middleware<AsyncHandler<T>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
+    private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Methods", "GET, POST");
 
-        return JsonSerializerMiddlewares.<T>jsonSerialize(object_mapper.writer())
+        return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
+                .and(Middlewares::httpPayloadSemantics)
                 .and(responseAsyncHandler -> ctx ->
                         responseAsyncHandler.invoke(ctx)
                                 .thenApply(response -> response.withHeaders(headers)));
