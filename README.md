@@ -39,4 +39,6 @@ where *database_name* will be the name of the created database and */APPLICATION
 
 Note that to run the database locally you need to update config file located at [/APPLICATION/FOLDER/Backend/apolloBackend/src/main/resources/apolloBackend.conf](https://github.com/chenwill98/ECE-366-Agora/blob/master/Backend/apolloBackend/src/main/resources/apolloBackend.conf) with your username, password, and sql database location.
 
+#### NginX
 
+We currently have NginX working to serve static react pages. We configured NginX to listen on port 8000. NginX works as a reverse proxy to `localhost:8080` which is where the MySQL server is listening. Using `npm run build` on the react app creates a `/build/` directory with an `index.html` file in it. Point the root to that file sets the home page of our service.
