@@ -1,5 +1,6 @@
 # frontend stuff
 /agora/node_modules/*
+/agora/build/*
 
 # hidden files in root
 .*
