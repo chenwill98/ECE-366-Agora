@@ -3,7 +3,7 @@ import axios from "axios";
 import Navigation from '../components/Navigation.js';
 import SinglebObjectView from '../components/SingleObjectView.js';
 
-class Group extends Component {
+class GroupPage extends Component {
     constructor(props) {
         super(props);
 
@@ -92,4 +92,4 @@ class Group extends Component {
 
 }
 
-export default Group;
+export default GroupPage;

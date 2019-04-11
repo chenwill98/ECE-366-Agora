@@ -3,7 +3,7 @@ import axios from "axios";
 import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
 
-class Event extends Component {
+class EventPage extends Component {
     constructor(props) {
         super(props);
 
@@ -103,4 +103,4 @@ class Event extends Component {
     }
 }
 
-export default Event;
+export default EventPage;

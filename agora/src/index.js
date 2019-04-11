@@ -11,8 +11,8 @@ import Welcome from './components/Welcome.js';
 import Home from './containers/Home.js';
 import Groups from './containers/Groups.js';
 import Events from './containers/Events.js';
-import Event from './containers/Event.js';
-import Group from './containers/Group.js';
+import EventPage from './containers/EventPage.js';
+import GroupPage from './containers/GroupPage.js';
 
 const routing = (
     <Router>
@@ -23,8 +23,8 @@ const routing = (
             <Route path="/groups" component={Groups} />
             <Route path="/signup" component={SignUp} />
             <Route path="/login" component={Login} />
-            <Route path="/group/:group_id" component={Group} />
-            <Route path="/event/:event_id" component={Event} />
+            <Route path="/group/:group_id" component={GroupPage} />
+            <Route path="/event/:event_id" component={EventPage} />
         </div>
     </Router>
 )
