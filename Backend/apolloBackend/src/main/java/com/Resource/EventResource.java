@@ -3,7 +3,6 @@ package com.Resource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.model.Event;
-import com.model.Group;
 import com.model.User;
 import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
@@ -18,9 +17,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 
-/**
- * EventResource -
- */
 public class EventResource implements RouteProvider {
 
 
@@ -47,13 +43,12 @@ public class EventResource implements RouteProvider {
         return Stream.of(
                 Route.sync("GET", "/event/<id>", this::getEventByID)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<User>>>>create("POST", "/event/<id>/get-users", this::getUsers)
-                        .withMiddleware(handler -> eventAuthorizationMiddleware(handler))
-                        .withMiddleware(Middleware::syncToAsync)
+                Route.sync("GET", "/event/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware())
         );
     }
 
+    /* todo: add comments and unit tests */
     private Response<Event> getEventByID(RequestContext ctx) {
 
         String id = ctx.pathArgs().get("id");
@@ -72,8 +67,11 @@ public class EventResource implements RouteProvider {
     }
 
 
+
+
+
     /**
-     * getUsers - Returns the users that are subscribed to an event.
+     * getUsersAdmin - Returns the users that are subscribed to an event.
      *
      * @param ctx The request context.
      *
@@ -88,9 +86,20 @@ public class EventResource implements RouteProvider {
         }
 
         // get the list of users from the database and return it
-        List<User> users = store.getUsers(ctx.pathArgs().get("id"));
+        List<User> users;
+        if (ctx.request().headers().get("Cookie") != null) {
 
-        if (!users.isEmpty())
+            String[] tokens = ctx.request().headers().get("Cookie").split("=");
+            users = store.getUsers(ctx.pathArgs().get("id"),
+                    String.valueOf(UserResource.cookie_db.inverse().get(Integer.valueOf(tokens[1]))));
+        }
+        else {
+            users = store.getUsers(ctx.pathArgs().get("id"),null);
+        }
+
+
+
+        if (users != null)
             return Response.ok().withPayload(users);
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
@@ -147,9 +156,8 @@ public class EventResource implements RouteProvider {
             // get the user id from the cookie database
             String user_id = String.valueOf(UserResource.cookie_db.inverse().get(Integer.valueOf(tokens[1])));
 
-            // check that the user_id is an admin in the group that owns the event with the url-ed id
-            String event_id = ctx.pathArgs().get("id");
-            if (user_id == null || !store.isAdmin(user_id, event_id))
+            // check that the user_id exists
+            if (user_id == null)
                 return Response.forStatus(Status.FORBIDDEN);
 
             // Call inner handler

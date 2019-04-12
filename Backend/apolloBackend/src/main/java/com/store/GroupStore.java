@@ -123,7 +123,7 @@ public class GroupStore {
     }
 
     /**
-     * getUsers - Gets the list of users who are members of a group.
+     * getUsersAdmin - Gets the list of users who are members of a group.
      *
      * @param id The ID of the group we are interested in.
      *
@@ -442,5 +442,46 @@ public class GroupStore {
             e.printStackTrace();
             return false;
         }
+    }
+
+
+    /* todo: add comments */
+    public List<Event> getEvents(String id) {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select event_name, eventid from events where groups_gid = ?");
+            stmt.setInt(1, Integer.valueOf(id));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        List<Event> events = new ArrayList<>();
+
+        try {
+            while (result_set.next()) {
+                events.add(new EventBuilder()
+                        .id(Integer.valueOf(result_set.getString("eventid")))
+                        .name(result_set.getString("event_name"))
+                        .description("")
+                        .date("")
+                        .location("")
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return events;
     }
 }

@@ -49,6 +49,12 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware()),
+                Route.sync("GET", "/group/<id>/get-events", this::getEvents)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<gid>/is-admin/<uid>", this::isAdmin)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/create-event", this::createEvent)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
@@ -72,6 +78,39 @@ public class GroupResource implements RouteProvider {
         );
     }
 
+    /* todo: comments and unit tests */
+    private Response<Boolean> isAdmin(RequestContext ctx) {
+        // some basic error checking
+        if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
+            ctx.pathArgs().get("uid") == null || ctx.pathArgs().get("uid").isEmpty()) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
+        }
+
+
+        return Response.ok().withPayload(
+                store.isAdmin(ctx.pathArgs().get("uid"), ctx.pathArgs().get("gid"))
+        );
+    }
+
+
+    /* todo: comments and unit tests */
+    private Response<List<Event>> getEvents(RequestContext ctx) {
+        // some basic error checking
+        if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
+        }
+
+        // get the list of users from the database and return it
+        List<Event> events = store.getEvents(ctx.pathArgs().get("id"));
+
+        if (events != null)
+            return Response.ok().withPayload(events);
+        else
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+    }
+
+
+    /* todo: comments and unit tests */
     private Response<Group> getGroup(RequestContext ctx) {
         String id = ctx.pathArgs().get("id");
 
@@ -120,7 +159,7 @@ public class GroupResource implements RouteProvider {
 
 
     /**
-     * getUsers - Returns a list of users who are members of a certain group
+     * getUsersAdmin - Returns a list of users who are members of a certain group
      *
      * @param ctx The request context that contains the group ID to get the users of.
      *
@@ -131,7 +170,7 @@ public class GroupResource implements RouteProvider {
     public Response<List<User>> getUsers(RequestContext ctx) {
         // some basic error checking
         if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
-            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group id"));
         }
 
         // get the list of users from the database and return it
@@ -148,7 +187,7 @@ public class GroupResource implements RouteProvider {
                     .pass_hash("")
                     .build());
 
-        if (!restricted_info_users.isEmpty())
+        if (restricted_info_users != null)
             return Response.ok().withPayload(restricted_info_users);
         else
             return Response.forStatus(Status.INTERNAL_SERVER_ERROR);

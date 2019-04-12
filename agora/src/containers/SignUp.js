@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card, Alert } from "react-bootstrap";
+import { Form, Button, Card } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 
@@ -56,7 +56,7 @@ class SignUp extends Component {
     };
 
     SignUp = () => {
-        if (this.state.email == "error") {
+        if (this.state.email === "error") {
             this.setState({error: true})
         }
         axios.post("http://localhost:8080/user/create", {

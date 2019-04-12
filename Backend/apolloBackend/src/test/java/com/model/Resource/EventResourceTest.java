@@ -72,7 +72,8 @@ public class EventResourceTest {
      */
     @Test
     public void getUsers() {
-        when(store.getUsers(String.valueOf(test_event.id()))).thenReturn(Collections.singletonList(test_user));
+        when(store.getUsers(String.valueOf(test_event.id()), String.valueOf(test_user.uid())))
+                .thenReturn(Collections.singletonList(test_user));
 
         Response<List<User>> actual_response = test_event_resource.getUsers(ctx_test);
 

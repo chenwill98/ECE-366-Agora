@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col, Container} from "react-bootstrap";
+import {Col} from "react-bootstrap";
 import Jumbotron from "react-bootstrap/Jumbotron";
 
 export default class SingleObjectView extends Component {

@@ -1,10 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// import $ from 'jquery';
-// import Popper from 'popper.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
-//import './styles/index.css';
-import { Route, Link, BrowserRouter as Router } from 'react-router-dom'
+import { Route, BrowserRouter as Router } from 'react-router-dom'
 import SignUp from './containers/SignUp.js';
 import Login from './containers/Login.js';
 import Welcome from './components/Welcome.js';

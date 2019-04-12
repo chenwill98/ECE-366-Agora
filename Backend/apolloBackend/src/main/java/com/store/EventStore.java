@@ -98,6 +98,9 @@ public class EventStore {
      */
     public boolean isAdmin(String user_id, String event_id) {
 
+        if (user_id == null || event_id == null || user_id.isEmpty() || event_id.isEmpty())
+            return false;
+
         Event event = getEvent(event_id);
         if (event == null)
             return false;
@@ -145,16 +148,19 @@ public class EventStore {
      *
      * @return A list of user objects with first names, last names, and emails.
      */
-    public List<User> getUsers(String id) {
+    public List<User> getUsers(String id, String user_id) {
         PreparedStatement stmt = null;
         ResultSet result_set = null;
+
+
+        Boolean is_admin = isAdmin(user_id, id);
 
         // prepare the sql statement
         try {
             stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname, U.email from event_attendance EA " +
                                                 "inner join users U on U.uid = EA.users_uid " +
-                                                "inner join events E on E.gid = EA.events_eventid" +
-                                                " where G.gid = ?");
+                                                "inner join events E on E.eventid = EA.events_eventid" +
+                                                " where E.eventid = ?");
             stmt.setString(1, id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -172,13 +178,24 @@ public class EventStore {
 
         try {
             while (result_set.next()) {
-                users.add(new UserBuilder()
-                        .uid(result_set.getInt("uid"))
-                        .first_name(result_set.getString("firstname"))
-                        .last_name(result_set.getString("lastname"))
-                        .email(result_set.getString("email"))
-                        .pass_hash("")
-                        .build());
+                if (isAdmin(user_id, id)) {
+                    users.add(new UserBuilder()
+                            .uid(result_set.getInt("uid"))
+                            .first_name(result_set.getString("firstname"))
+                            .last_name(result_set.getString("lastname"))
+                            .email(result_set.getString("email"))
+                            .pass_hash("")
+                            .build());
+                }
+                else {
+                    users.add(new UserBuilder()
+                            .uid(result_set.getInt("uid"))
+                            .first_name(result_set.getString("firstname"))
+                            .last_name(result_set.getString("lastname"))
+                            .email("")
+                            .pass_hash("")
+                            .build());
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
