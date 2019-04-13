@@ -11,7 +11,7 @@ class GroupPage extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
+            ip: "http://199.98.27.114",
             port: "8080",
 
             // group related states
@@ -23,7 +23,6 @@ class GroupPage extends Component {
 
             // if in a user session
             user_id: "",
-            user_cookie: "",
             user_isAdmin: false,
 
             // error related states
@@ -113,7 +112,7 @@ class GroupPage extends Component {
         // get the group's events
         axios.post(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/view-contacts`,
                 {},
-            { headers: { 'Cookie': 'USER_TOKEN=' + this.state.user_id} })
+            { headers: { 'Cookie': 'USER_TOKEN=' + localStorage.getItem('cookie')} })
             .then ( res => {
                 console.log(res.data);
                 this.setState( {

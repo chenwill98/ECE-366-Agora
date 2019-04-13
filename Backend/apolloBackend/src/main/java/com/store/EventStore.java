@@ -33,8 +33,10 @@ public class EventStore {
 
         // try connecting to the database
         try {
-            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"), "guy", "");
-        } catch (SQLException e) {
+            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"),
+                    config.getString("mysql.username"), config.getString("mysql.password"));
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
@@ -54,7 +56,7 @@ public class EventStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select event_name, `desc`, groups_gid, Location, Date_Time from events where eventid = ?");
+            stmt = connection.prepareStatement("select Event_name, Description, Groop_id, Location, Date_time from Events where Event_id = ?");
             stmt.setString(1, event_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -74,11 +76,11 @@ public class EventStore {
             while (result_set.next()) {
                 event = new EventBuilder()
                         .id(Integer.valueOf(event_id))
-                        .name(result_set.getString("event_name"))
-                        .description(result_set.getString("desc"))
-                        .gid(result_set.getInt("groups_gid"))
+                        .name(result_set.getString("Event_name"))
+                        .description(result_set.getString("Description"))
+                        .gid(result_set.getInt("Groop_id"))
                         .location(result_set.getString("Location"))
-                        .date(result_set.getString("Date_Time"))
+                        .date(result_set.getString("Date_time"))
                         .build();
             }
         } catch (SQLException e) {
@@ -110,8 +112,8 @@ public class EventStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select is_admin from group_memberships where" +
-                    "users_uid = ? and groups_gid =?");
+            stmt = connection.prepareStatement("select Is_admin from Groop_memberships where" +
+                    "User_id = ? and Group_id =?");
             stmt.setInt(1, Integer.valueOf(user_id));
             stmt.setInt(2, event.gid());
         } catch (SQLException e) {
@@ -133,7 +135,7 @@ public class EventStore {
         }
 
         try {
-            return result_set.getBoolean("is_admin");
+            return result_set.getBoolean("Is_admin");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -157,10 +159,10 @@ public class EventStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname, U.email from event_attendance EA " +
-                                                "inner join users U on U.uid = EA.users_uid " +
-                                                "inner join events E on E.eventid = EA.events_eventid" +
-                                                " where E.eventid = ?");
+            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email from Event_attendance EA " +
+                                                "inner join Users U on U.User_id = EA.User_id " +
+                                                "inner join Events E on E.Event_id = EA.Event_id" +
+                                                " where E.Event_id = ?");
             stmt.setString(1, id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -180,18 +182,18 @@ public class EventStore {
             while (result_set.next()) {
                 if (isAdmin(user_id, id)) {
                     users.add(new UserBuilder()
-                            .uid(result_set.getInt("uid"))
-                            .first_name(result_set.getString("firstname"))
-                            .last_name(result_set.getString("lastname"))
-                            .email(result_set.getString("email"))
+                            .uid(result_set.getInt("User_id"))
+                            .first_name(result_set.getString("First_name"))
+                            .last_name(result_set.getString("Last_name"))
+                            .email(result_set.getString("Email"))
                             .pass_hash("")
                             .build());
                 }
                 else {
                     users.add(new UserBuilder()
-                            .uid(result_set.getInt("uid"))
-                            .first_name(result_set.getString("firstname"))
-                            .last_name(result_set.getString("lastname"))
+                            .uid(result_set.getInt("User_id"))
+                            .first_name(result_set.getString("First_name"))
+                            .last_name(result_set.getString("Last_name"))
                             .email("")
                             .pass_hash("")
                             .build());

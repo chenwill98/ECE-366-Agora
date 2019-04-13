@@ -31,7 +31,8 @@ public class GroupStore {
 
         // try connecting to the database
         try {
-            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"), "guy", "");
+            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"),
+                    config.getString("mysql.username"), config.getString("mysql.password"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -51,7 +52,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select Name, Description from `groups` where Name = ?");
+            stmt = connection.prepareStatement("select Name, Description from Groops where Name = ?");
             stmt.setString(1, name);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -93,7 +94,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select Name, Description from `groups` where gid = ?");
+            stmt = connection.prepareStatement("select Name, Description from Groops where Groop_id = ?");
             stmt.setString(1, id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -136,10 +137,10 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select U.uid, U.firstname, U.lastname, U.email from group_memberships GM " +
-                                                "inner join users U on U.uid = GM.users_uid " +
-                                                "inner join `groups` G on G.gid = GM.groups_gid" +
-                                                " where G.gid = ?");
+            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email from Groop_memberships GM " +
+                                                "inner join Users U on U.User_id = GM.User_id " +
+                                                "inner join Groops G on G.Groop_id = GM.Groop_id" +
+                                                " where G.Groop_id = ?");
             stmt.setString(1, id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -158,10 +159,10 @@ public class GroupStore {
         try {
             while (result_set.next()) {
                 users.add(new UserBuilder()
-                        .uid(result_set.getInt("uid"))
-                        .first_name(result_set.getString("firstname"))
-                        .last_name(result_set.getString("lastname"))
-                        .email(result_set.getString("email"))
+                        .uid(result_set.getInt("User_id"))
+                        .first_name(result_set.getString("First_name"))
+                        .last_name(result_set.getString("Last_name"))
+                        .email(result_set.getString("Email"))
                         .pass_hash("")
                         .build());
             }
@@ -186,7 +187,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "insert into events (event_name, `desc`, groups_gid, Location, Date_Time)" +
+            stmt = connection.prepareStatement( "insert into Events (Event_name, Description, Groop_id, Location, Date_time)" +
                                                 "values (?, ?, ?, ?, ?)");
             stmt.setString(1, new_event.name());
             stmt.setString(2, new_event.description());
@@ -223,8 +224,8 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select is_admin from group_memberships where" +
-                                                "users_uid = ? and groups_gid =?");
+            stmt = connection.prepareStatement( "select Is_admin from Groop_memberships where" +
+                                                "User_id = ? and Groop_id =?");
             stmt.setString(1, user_id);
             stmt.setString(2, group_id);
         } catch (SQLException e) {
@@ -246,7 +247,7 @@ public class GroupStore {
         }
 
         try {
-            return result_set.getBoolean("is_admin");
+            return result_set.getBoolean("Is_admin");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -267,7 +268,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "update events set event_name = ? where eventid = ?");
+            stmt = connection.prepareStatement( "update Events set Event_name = ? where Event_id = ?");
             stmt.setString(1, new_name);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -297,7 +298,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "update events set `desc` = ? where eventid = ?");
+            stmt = connection.prepareStatement( "update Events set Description = ? where Event_id = ?");
             stmt.setString(1, new_description);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -329,7 +330,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "update events set Location = ? where eventid = ?");
+            stmt = connection.prepareStatement( "update Events set Location = ? where Event_id = ?");
             stmt.setString(1, new_location);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -361,7 +362,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "update events set Date_Time = ? where eventid = ?");
+            stmt = connection.prepareStatement( "update Events set Date_time = ? where Event_id = ?");
             stmt.setString(1, new_date);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -393,7 +394,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "delete from events where eventid = ?");
+            stmt = connection.prepareStatement( "delete from Events where Event_id = ?");
             stmt.setString(1, event_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -425,8 +426,8 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "update group_memberships set is_admin = ? where " +
-                                                "users_uid = ? and groups_gid = ?");
+            stmt = connection.prepareStatement( "update Groop_memberships set Is_admin = ? where " +
+                                                "User_id = ? and Groop_id= ?");
             stmt.setInt(1, make_admin);
             stmt.setString(2, user_id);
             stmt.setString(3, group_id);
@@ -452,7 +453,7 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select event_name, eventid from events where groups_gid = ?");
+            stmt = connection.prepareStatement("select Event_name, Event_id from Events where Groop_id = ?");
             stmt.setInt(1, Integer.valueOf(id));
         } catch (SQLException e) {
             e.printStackTrace();
@@ -471,8 +472,8 @@ public class GroupStore {
         try {
             while (result_set.next()) {
                 events.add(new EventBuilder()
-                        .id(Integer.valueOf(result_set.getString("eventid")))
-                        .name(result_set.getString("event_name"))
+                        .id(Integer.valueOf(result_set.getString("Event_id")))
+                        .name(result_set.getString("Event_name"))
                         .description("")
                         .date("")
                         .location("")

@@ -90,8 +90,6 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/login-test", this::attemptLoginTest)
-                .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
                 .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<User>>>create("POST", "/user/<id>", this::getUser)
@@ -566,39 +564,6 @@ public class UserResource implements RouteProvider {
             return new_cookie_id;
         }
     }
-
-
-    /**
-     * attemptLoginTest - Attempts to login a test user (only username and password).
-     *
-     * @param ctx A request context that contains a username "usr" and a hashed password "pw".
-     *
-     * @return A UserTest object. If login is successful, than the actual user. Otherwise, a null object.
-     */
-    private Response<UserTest> attemptLoginTest(RequestContext ctx) {
-
-        // convert request payload into JSON
-        JsonNode user_json = null;
-        try {
-            user_json = object_mapper.readTree(ctx.request().payload().get().utf8());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        // get the password of the user with that username from db and confirm it is the same.
-        assert user_json != null;
-        UserTest test_user = store.getUserTest(user_json.get("user").asText());
-
-        // if it is the same, we return the user with all the info, otherwise we return a null object.
-        if (test_user.PassHash().equals(user_json.get("pass").asText()))
-            return Response.ok().withPayload(test_user);
-        else
-            return null;
-    }
-
-
-
 
 
     /**

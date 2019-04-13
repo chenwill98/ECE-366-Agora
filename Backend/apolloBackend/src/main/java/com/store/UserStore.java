@@ -31,54 +31,11 @@ public class UserStore {
 
         // try connecting to the database
         try {
-            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"), "guy", "");
+            this.connection = DriverManager.getConnection(config.getString("mysql.jdbc"),
+                    config.getString("mysql.username"), config.getString("mysql.password"));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    /**
-     * getUserTest - Gets a user object from the database. For now simply a proof-of-concept
-     * by sending a query to the database, getting the result back from the database, and
-     * printing it out.
-     *
-     * @param usr - The username of the user to retrieve from the db.
-     *
-     * @return A UserTest object of the inputted username.
-     */
-    public UserTest getUserTest(final String usr) {
-        PreparedStatement stmt = null;
-        ResultSet result_set = null;
-
-        // prepare the sql statement
-        try {
-            stmt = connection.prepareStatement("select * from user where username = ?");
-            stmt.setString(1, usr);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // execute the sql
-        try {
-            result_set = stmt.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        //check the ResultSet
-        UserTest test_user = null;
-        try {
-            while (result_set.next()) {
-                test_user = new UserTestBuilder()
-                        .Username(result_set.getString("username"))
-                        .PassHash(result_set.getString("password"))
-                        .build();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return test_user;
     }
 
 
@@ -97,7 +54,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select email, passhash, firstname, lastname from users where uid = ?");
+            stmt = connection.prepareStatement("select Email, Passhash, First_name, Last_name from Users where User_id = ?");
             stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -116,10 +73,10 @@ public class UserStore {
             while (result_set.next()) {
                 user = new UserBuilder()
                         .uid(Integer.valueOf(user_id))
-                        .email(result_set.getString("email"))
-                        .pass_hash(result_set.getString("passhash"))
-                        .first_name(result_set.getString("firstname"))
-                        .last_name(result_set.getString("lastname"))
+                        .email(result_set.getString("Email"))
+                        .pass_hash(result_set.getString("Passhash"))
+                        .first_name(result_set.getString("First_name"))
+                        .last_name(result_set.getString("Last_name"))
                         .build();
             }
         } catch (SQLException e) {
@@ -143,7 +100,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("select uid, email, passhash, firstname, lastname from users where email = ?");
+            stmt = connection.prepareStatement("select User_id, Email, Passhash, First_name, Last_name from Users where Email = ?");
             stmt.setString(1, email);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -161,11 +118,11 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 user = new UserBuilder()
-                        .uid(result_set.getInt("uid"))
-                        .email(result_set.getString("email"))
-                        .pass_hash(result_set.getString("passhash"))
-                        .first_name(result_set.getString("firstname"))
-                        .last_name(result_set.getString("lastname"))
+                        .uid(result_set.getInt("User_id"))
+                        .email(result_set.getString("Email"))
+                        .pass_hash(result_set.getString("Passhash"))
+                        .first_name(result_set.getString("First_name"))
+                        .last_name(result_set.getString("Last_name"))
                         .build();
             }
         } catch (SQLException e) {
@@ -190,7 +147,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("update users set passhash = (?) where uid = (?)");
+            stmt = connection.prepareStatement("update Users set Passhash = (?) where User_id = (?)");
             stmt.setString(1, new_pass);
             stmt.setString(2, user_id);
         } catch (SQLException e) {
@@ -222,7 +179,7 @@ public class UserStore {
 
         // prepare stmt to confirm that no user with the given email doesn't already exist
         try {
-            stmt = connection.prepareStatement("select uid from users where email = ?");
+            stmt = connection.prepareStatement("select User_id from Users where Email = ?");
             stmt.setString(1, new_user.email());
         } catch (SQLException e) {
             e.printStackTrace();
@@ -242,7 +199,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("insert into users (email, passhash, firstname, lastname) values (?, ?, ?, ?)");
+            stmt = connection.prepareStatement("insert into Users (Email, Passhash, First_name, Last_name) values (?, ?, ?, ?)");
             stmt.setString(1, new_user.email());
             stmt.setString(2, new_user.pass_hash());
             stmt.setString(3, new_user.first_name());
@@ -277,7 +234,7 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("insert into `groups` (Name, Description) values (?, ?)");
+            stmt = connection.prepareStatement("insert into Groops (Name, Description) values (?, ?)");
             stmt.setString(1, new_group.name());
             stmt.setString(2, new_group.description());
         } catch (SQLException e) {
@@ -313,7 +270,7 @@ public class UserStore {
 
         // get the group id of the group we just created
         try {
-            stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
+            stmt = connection.prepareStatement("select Groop_id from Groops where Name = ?");
             stmt.setString(1, group_name);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -335,9 +292,9 @@ public class UserStore {
         }
 
         try {
-            stmt = connection.prepareStatement("insert into group_memberships (users_uid, groups_gid, is_admin) values (?, ?, ?)");
+            stmt = connection.prepareStatement("insert into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?)");
             stmt.setString(1, user_id);
-            stmt.setString(2, result_set.getString("gid"));
+            stmt.setString(2, result_set.getString("Groop_id"));
             stmt.setInt(3, is_admin);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -359,7 +316,7 @@ public class UserStore {
 
         // get the group id of the group
         try {
-            stmt = connection.prepareStatement("select gid from `groups` where Name = ?");
+            stmt = connection.prepareStatement("select Groop_id from Groops where Name = ?");
             stmt.setString(1, groupname);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -381,9 +338,9 @@ public class UserStore {
         }
 
         try {
-            stmt = connection.prepareStatement("delete from group_memberships where users_uid = ? AND groups_gid =  ?");
+            stmt = connection.prepareStatement("delete from Groop_memberships where User_id = ? AND Groop_id =  ?");
             stmt.setString(1, userid);
-            stmt.setString(2, result_set.getString("gid"));
+            stmt.setString(2, result_set.getString("Groop_id"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -413,7 +370,7 @@ public class UserStore {
 
         // get the event id of the event name
         try {
-            stmt = connection.prepareStatement("select eventid from events where event_name = ?");
+            stmt = connection.prepareStatement("select Event_id from Events where Event_name = ?");
             stmt.setString(1, event_name);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -433,12 +390,12 @@ public class UserStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        String event_id = result_set.getString("eventid");
+        String event_id = result_set.getString("Event_id");
 
         // check that user isn't already rsvp-ed to the event.
         try {
-            stmt = connection.prepareStatement( "select users_uid, events_eventid, is_attending from event_attendance" +
-                                                " where users_uid = ? and events_eventid = ?");
+            stmt = connection.prepareStatement( "select User_id, Event_id, Is_attending from Event_attendance" +
+                                                " where User_id = ? and Event_id= ?");
             stmt.setString(1, user_id);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -455,8 +412,8 @@ public class UserStore {
         if (result_set.next()) {
             // update rsvp
             try {
-                stmt = connection.prepareStatement( "update event_attendance set is_attending = 1 " +
-                                                    "where users_uid = ? AND events_eventid=  ?");
+                stmt = connection.prepareStatement( "update Event_attendance set Is_attending = 1 " +
+                                                    "where User_id = ? AND Event_id =  ?");
                 stmt.setString(1, user_id);
                 stmt.setString(2, event_id);
             } catch (SQLException e) {
@@ -473,10 +430,10 @@ public class UserStore {
         }
         else {  // create new relationship.
             try {
-                stmt = connection.prepareStatement( "insert into event_attendance (users_uid, events_eventid, is_attending)" +
+                stmt = connection.prepareStatement( "insert into Event_attendance (User_id, Event_id, Is_attending)" +
                         " values (?, ?, ?)");
-                stmt.setString(1, user_id);
-                stmt.setString(2, result_set.getString("eventid"));
+                stmt.setInt(1, Integer.valueOf(user_id));
+                stmt.setInt(2, Integer.valueOf(result_set.getString("Event_id")));
                 stmt.setInt(3, is_attending);
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -509,7 +466,7 @@ public class UserStore {
 
         // get the event id of the event
         try {
-            stmt = connection.prepareStatement("select eventid from events where event_name = ?");
+            stmt = connection.prepareStatement("select Event_id from Events where Event_name = ?");
             stmt.setString(1, event_name);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -531,10 +488,10 @@ public class UserStore {
         }
 
         try {
-            stmt = connection.prepareStatement( "update event_attendance set is_attending = 3 " +
-                                                "where users_uid = ? AND events_eventid=  ?");
+            stmt = connection.prepareStatement( "update Event_attendance set Is_attending = 3 " +
+                                                "where User_id = ? AND Event_id =  ?");
             stmt.setString(1, user_id);
-            stmt.setString(2, result_set.getString("eventid"));
+            stmt.setString(2, result_set.getString("Event_id"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -562,10 +519,10 @@ public class UserStore {
         ResultSet  result_set;
 
         try {
-            stmt = connection.prepareStatement( "select G.gid, G.Name, G.description from group_memberships GM " +
-                                                "inner join users U on U.uid = GM.users_uid " +
-                                                "inner join `groups` G on G.gid = GM.groups_gid" +
-                                                " where U.uid = ?");
+            stmt = connection.prepareStatement( "select G.Groop_id, G.Name, G.Description from Groop_memberships GM " +
+                                                "inner join Users U on U.User_id = GM.User_id " +
+                                                "inner join Groops G on G.Groop_id = GM.Groop_id" +
+                                                " where U.User_id= ?");
             stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -584,7 +541,7 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 groups.add( new GroupBuilder()
-                        .gid(result_set.getInt("gid"))
+                        .gid(result_set.getInt("Groop_id"))
                         .name(result_set.getString("Name"))
                         .description(result_set.getString("Description"))
                         .build());
@@ -608,11 +565,11 @@ public class UserStore {
         ResultSet  result_set;
 
         try {
-            stmt = connection.prepareStatement( "select E.eventid, E.event_name, E.desc, E.Location, E.Date_Time" +
-                                                "from event_attendance EA" +
-                                                "inner join users U on U.uid = EA.users_uid " +
-                                                "inner join events E on E.eventid = EA.events_eventid" +
-                                                " where U.uid = ?");
+            stmt = connection.prepareStatement( "select E.Event_id, E.Event_name, E.Description, E.Location, E.Date_time" +
+                                                "from Event_attendance EA" +
+                                                "inner join Users U on U.User_id = EA.User_id" +
+                                                "inner join Events E on E.Event_id= EA.Event_id" +
+                                                " where U.User_id = ?");
             stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -631,11 +588,11 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 events.add( new EventBuilder()
-                        .id(result_set.getInt("eventid"))
-                        .name(result_set.getString("event_name"))
-                        .description(result_set.getString("desc"))
+                        .id(result_set.getInt("Event_id"))
+                        .name(result_set.getString("Event_name"))
+                        .description(result_set.getString("Description"))
                         .location(result_set.getString("Location"))
-                        .date(result_set.getString("Date_Time"))
+                        .date(result_set.getString("Date_time"))
                         .build());
             }
         } catch (SQLException e) {
