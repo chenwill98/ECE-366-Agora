@@ -42,4 +42,21 @@ Note that to run the database locally you need to update config file located at 
 
 #### NginX
 
-We currently have NginX working to serve static react pages. We configured NginX to listen on port 8000. NginX works as a reverse proxy to `localhost:8080` which is where the MySQL server is listening. Using `npm run build` on the react app creates a `/build/` directory with an `index.html` file in it. Point the root to that file sets the home page of our service.
+We use [NginX](https://www.nginx.com/) to serve our static as well as act as a proxy server to the BackEnd. Our application has NginX configured to listen on port 8000 and it acts as a reverse proxy to `localhost:8080` which is where the BackEnd server is listening. These configurations can be changed in the *nginx.conf* configuration file. This file resides in different locations depending on OS- on linux it can be found in */etc/nginx/nginx.conf*.
+
+To run NginX locally, first install it (on Ubuntu one could do `sudo apt get nginx`). One could then configure NginX using the configuration file describe in the paragraph above. To run our application, first produce a */build* folder for the react app using `yarn run build`. 
+
+Next, set up a server block in the configuration file to look like so:
+```
+server {
+    listen 8000;
+    server_name localhost;
+    root /PATH/TO/BUILD/DIRECTORY/build;
+    index index.html;
+    location / {
+        try_files $uri /index.html;
+    }
+}
+```
+For more information on how to set up NginX, we recommend looking at the official [beginner's guide](http://nginx.org/en/docs/beginners_guide.html). A great (and brief) explination on the specific configuraiton required for react apps can be found [here](https://stackoverflow.com/questions/43555282/react-js-application-showing-404-not-found-in-nginx-server).
+
