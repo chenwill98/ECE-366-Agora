@@ -12,6 +12,8 @@
     <properties>
         <apollo.version>1.2.4</apollo.version>
         <mainClass>com.Resource.App</mainClass>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
     </properties>
 
     <packaging>jar</packaging>
@@ -50,6 +52,11 @@
             <version>0.15.2</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.norberg</groupId>
+            <artifactId>auto-matter-jackson</artifactId>
+            <version>0.15.1</version>
+        </dependency>
 
         <!-- mysql jdbc connector -->
         <dependency>
@@ -85,37 +92,42 @@
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>                 <!-- configure application to run Java 8 -->
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <compilerArgs>
-                        <compilerArg>-Xlint:all</compilerArg>
-                    </compilerArgs>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <!-- put your configurations here -->
                 </configuration>
-            </plugin>
-
-            <!-- configures all runtime dependencies to be saved {project.build.dir}/lib -->
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>copy-dependencies</goal>
+                            <goal>shade</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <useBaseVersion>false</useBaseVersion>
-                    <overWriteReleases>false</overWriteReleases>
-                    <overWriteSnapshots>true</overWriteSnapshots>
-                    <includeScope>runtime</includeScope>
-                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                </configuration>
             </plugin>
+
+            <!-- configures all runtime dependencies to be saved {project.build.dir}/lib -->
+            <!--<plugin>-->
+                <!--<artifactId>maven-dependency-plugin</artifactId>-->
+                <!--<version>2.10</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<phase>prepare-package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy-dependencies</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<useBaseVersion>false</useBaseVersion>-->
+                    <!--<overWriteReleases>false</overWriteReleases>-->
+                    <!--<overWriteSnapshots>true</overWriteSnapshots>-->
+                    <!--<includeScope>runtime</includeScope>-->
+                    <!--<outputDirectory>${project.build.directory}/lib</outputDirectory>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
 
             <!-- adds the classpath jars to the manifest prefixed with lib/.
                  also specifies the entry to the main class.    -->

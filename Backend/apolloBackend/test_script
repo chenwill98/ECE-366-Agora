@@ -1,6 +1,0 @@
-# a small script to test creating a file.
-# Because AutoMatter generates the code whenever we build using 'mvn package',
-# we need to first remove the old files so that it can regenerate the code.
-# So here we just combine the 2 commands into 1.
-
-mvn clean package

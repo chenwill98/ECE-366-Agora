@@ -38,7 +38,7 @@ class SignUp extends Component {
 
     //fetches data
     // getData = () => {
-    //     fetch("http://localhost:8080/somestuff")
+    //     fetch("http://199.98.27.114:8080/somestuff")
     //         .then(data => data.json())
     //         .then(res => this.setState({ data: res.data }));
     // };
@@ -59,7 +59,7 @@ class SignUp extends Component {
         if (this.state.email === "error") {
             this.setState({error: true})
         }
-        axios.post("http://localhost:8080/user/create", {
+        axios.post("http://199.98.27.114:8080/user/create", {
             email: this.state.email,
             pass: this.state.password
         });

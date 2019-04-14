@@ -1,0 +1,14 @@
+insert into Users (Email, Passhash, First_name, Last_name) values ("first@gmail.com", "pass1234", "Luna", "Lovegood");
+
+insert into Users (Email, Passhash, First_name, Last_name) values ("nev@gmail.com", "Don't Forget It", "Neville", "Longbottom");
+
+
+insert into Groops (Name, Description) values ("Dumbledore's Army", "What the ministry fears most!");
+
+
+insert into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?);
+
+
+insert into Events (Event_name, Description, Groop_id, Location, Date_time) values ( "Quidditch Part", "After the house cup!", 1, "Griffindor Common Room", "2019-05-05");
+
+insert into Event_attendance (User_id, Event_id, Is_attending) values (1, 1, 1);

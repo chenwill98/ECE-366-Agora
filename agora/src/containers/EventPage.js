@@ -10,7 +10,7 @@ class EventPage extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
+            ip: "http://199.98.27.114",
             port: "8080",
 
             // events related states
@@ -24,7 +24,6 @@ class EventPage extends Component {
 
             // if in a user session
             user_id: "",
-            user_cookie: "",
             user_isAdmin: false,
 
             // error related states
@@ -51,7 +50,7 @@ class EventPage extends Component {
             .catch(error => {
                 this.setState({
                     error: true,
-                    error_msg: error.message
+                    error_msg:  "Error requesting the details of an event: " + error.message
                 });
                 console.log("Error requesting event: " + error.message);
             });
@@ -66,7 +65,7 @@ class EventPage extends Component {
             .catch( error => {
                 this.setState({
                     error: true,
-                    error_msg: error.message
+                    error_msg: "Error requesting the users belonging to an event: " + error.message
                 });
                 console.log("Error requesting event-users: " + error.message);
             })

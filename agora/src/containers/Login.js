@@ -57,7 +57,7 @@ class Login extends Component {
 
     //posts posts the input email, password, and then returns the response
     Login = () => {
-        return axios.post("http://localhost:8080/login",
+        return axios.post("http://199.98.27.114:8080/login",
             JSON.stringify({email: this.state.email, pass: this.state.password})
         ).then(response => {
             return response.data;

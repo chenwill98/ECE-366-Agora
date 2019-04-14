@@ -5,19 +5,19 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema AgoraDB
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema AgoraDB
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
+CREATE SCHEMA IF NOT EXISTS `AgoraDB` DEFAULT CHARACTER SET utf8 ;
+USE `AgoraDB` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`Users`
+-- Table `AgoraDB`.`Users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Users` (
+CREATE TABLE IF NOT EXISTS `AgoraDB`.`Users` (
   `User_id` INT NOT NULL AUTO_INCREMENT,
   `Email` VARCHAR(45) NULL,
   `First_name` VARCHAR(45) NOT NULL,
@@ -25,14 +25,14 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Users` (
   `Passhash` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`User_id`),
   UNIQUE INDEX `User_id_UNIQUE` (`User_id` ASC) VISIBLE,
-  INDEX `email` (`Email` ASC) VISIBLE)
+  INDEX `Email` (`Email` ASC) VISIBLE)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Groops`
+-- Table `AgoraDB`.`Groops`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Groops` (
+CREATE TABLE IF NOT EXISTS `AgoraDB`.`Groops` (
   `Groop_id` INT NOT NULL AUTO_INCREMENT,
   `Description` VARCHAR(45) NOT NULL,
   `Name` VARCHAR(45) NOT NULL,
@@ -42,31 +42,31 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Events`
+-- Table `AgoraDB`.`Events`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Events` (
+CREATE TABLE IF NOT EXISTS `AgoraDB`.`Events` (
   `Event_id` INT NOT NULL AUTO_INCREMENT,
   `Event_name` VARCHAR(45) NULL,
-  `Descrip` VARCHAR(45) NULL,
-  `Group_gid` INT NULL,
+  `Description` VARCHAR(45) NULL,
+  `Groop_id` INT NULL,
   `Location` VARCHAR(45) NULL,
   `Date_time` DATETIME NULL,
   PRIMARY KEY (`Event_id`),
   UNIQUE INDEX `Event ID_UNIQUE` (`Event_id` ASC) VISIBLE,
-  FULLTEXT INDEX `Descripsearch` (`Descrip`) INVISIBLE,
-  INDEX `Fk_events_groups_idx` (`Group_gid` ASC) VISIBLE,
+  FULLTEXT INDEX `Descripsearch` (`Description`) INVISIBLE,
+  INDEX `Fk_events_groups_idx` (`Groop_id` ASC) VISIBLE,
   CONSTRAINT `fk_events_groups`
-    FOREIGN KEY (`Group_gid`)
-    REFERENCES `mydb`.`Groops` (`Groop_id`)
+    FOREIGN KEY (`Groop_id`)
+    REFERENCES `AgoraDB`.`Groops` (`Groop_id`)
     ON DELETE SET NULL
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Event_attendance`
+-- Table `AgoraDB`.`Event_attendance`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Event_attendance` (
+CREATE TABLE IF NOT EXISTS `AgoraDB`.`Event_attendance` (
   `User_id` INT NOT NULL,
   `Event_id` INT NOT NULL,
   `Is_attending` ENUM("YES", "MAYBE", "NO") NULL,
@@ -75,35 +75,35 @@ CREATE TABLE IF NOT EXISTS `mydb`.`Event_attendance` (
   INDEX `fk_users_has_events_users1_idx` (`User_id` ASC) VISIBLE,
   CONSTRAINT `fk_users_has_events_users1`
     FOREIGN KEY (`User_id`)
-    REFERENCES `mydb`.`Users` (`User_id`)
+    REFERENCES `AgoraDB`.`Users` (`User_id`)
     ON DELETE CASCADE
     ON UPDATE RESTRICT,
   CONSTRAINT `fk_users_has_events_events1`
     FOREIGN KEY (`Event_id`)
-    REFERENCES `mydb`.`Events` (`Event_id`)
+    REFERENCES `AgoraDB`.`Events` (`Event_id`)
     ON DELETE CASCADE
     ON UPDATE RESTRICT)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`Groop_memberships`
+-- Table `AgoraDB`.`Groop_memberships`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`Groop_memberships` (
+CREATE TABLE IF NOT EXISTS `AgoraDB`.`Groop_memberships` (
   `User_id` INT NOT NULL,
-  `Groops_id` INT NOT NULL,
+  `Groop_id` INT NOT NULL,
   `Is_admin` TINYINT(1) NULL,
-  PRIMARY KEY (`User_id`, `Groops_id`),
-  INDEX `fk_Users_has_Groops_Groops1_idx` (`Groops_id` ASC) VISIBLE,
+  PRIMARY KEY (`User_id`, `Groop_id`),
+  INDEX `fk_Users_has_Groops_Groops1_idx` (`Groop_id` ASC) VISIBLE,
   INDEX `fk_Users_has_Groops_Users1_idx` (`User_id` ASC) VISIBLE,
   CONSTRAINT `fk_Users_has_Groops_Users1`
     FOREIGN KEY (`User_id`)
-    REFERENCES `mydb`.`Users` (`User_id`)
+    REFERENCES `AgoraDB`.`Users` (`User_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Users_has_Groops_Groops1`
-    FOREIGN KEY (`Groops_id`)
-    REFERENCES `mydb`.`Groops` (`Groop_id`)
+    FOREIGN KEY (`Groop_id`)
+    REFERENCES `AgoraDB`.`Groops` (`Groop_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
