@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import axios from "axios";
 import { Form, Button, Card } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
-import Navigation from '../components/Navigation.js';
 
 class SignUp extends Component {
     constructor(props) {
@@ -74,16 +73,15 @@ class SignUp extends Component {
             .catch(error => {
                 this.setState({
                     error: true,
-                    error_msg:  "Error requesting the details of an event: " + error.message
+                    error_msg:  "Error creating the user: " + error.message
                 });
-                console.log("Error requesting event: " + error.message);
+                console.log("Error posting user: " + error.message);
             });
     };
 
     render() {
         return (
             <div className='mt-5'>
-                <Navigation/>
                 <CenterView>
                     <Card border="primary" style={{ width: '40rem'}}>
                         <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>
