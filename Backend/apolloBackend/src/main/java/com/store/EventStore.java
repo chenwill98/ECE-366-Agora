@@ -204,6 +204,46 @@ public class EventStore {
         }
         return users;
     }
+
+    /* todo: add description */
+    public List<Event> getEvents() {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select * from Events");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        List<Event> events= new ArrayList<>();
+
+        try {
+            while (result_set.next()) {
+                events.add(new EventBuilder()
+                        .id(Integer.valueOf(result_set.getString("Event_name")))
+                        .name(result_set.getString("Event_name"))
+                        .description(result_set.getString("Description"))
+                        .gid(result_set.getInt("Groop_id"))
+                        .location(result_set.getString("Location"))
+                        .date(result_set.getString("Date_time"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return events;
+    }
 }
 
 

@@ -56,7 +56,7 @@ public class UserResourceTest {
                 .build();
 
         test_group = new GroupBuilder()
-                .gid(1)
+                .id(1)
                 .name("Test Group")
                 .description("This is a test group")
                 .build();
