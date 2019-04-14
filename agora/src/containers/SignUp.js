@@ -9,12 +9,20 @@ class SignUp extends Component {
         super(props);
 
         this.state = {
-            data: [],
-            email: "",
-            password: "",
-            id: 0,
+            // backend related states
+            ip: "http://localhost",
+            port: "8080",
+
+            // user related states
+            user_id: "",
+            user_cookie: "",
+            user_email: "",
+            user_password: "",
+
+            // error related states
             intervalSet: false,
-            error: false
+            error: false,
+            error_msg: ""
         };
     }
 
@@ -56,13 +64,20 @@ class SignUp extends Component {
     };
 
     SignUp = () => {
-        if (this.state.email === "error") {
-            this.setState({error: true})
-        }
-        axios.post("http://199.98.27.114:8080/user/create", {
-            email: this.state.email,
-            pass: this.state.password
-        });
+        axios.post("http://199.98.27.114:8080/create", {
+            email: this.state.user_email,
+            pass: this.state.user_password
+        })
+            .then(res => {
+                localStorage.setItem('cookie', res.data);
+            })
+            .catch(error => {
+                this.setState({
+                    error: true,
+                    error_msg:  "Error requesting the details of an event: " + error.message
+                });
+                console.log("Error requesting event: " + error.message);
+            });
     };
 
     render() {

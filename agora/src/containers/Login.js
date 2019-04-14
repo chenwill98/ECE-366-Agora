@@ -9,13 +9,20 @@ class Login extends Component {
         super(props);
 
         this.state = {
-            data: [],
-            email: "",
-            password: "",
-            id: 0,
-            cookie: "",
+            // backend related states
+            ip: "http://localhost",
+            port: "8080",
+
+            // user related states
+            user_id: "",
+            user_cookie: "",
+            user_email: "",
+            user_password: "",
+
+            // error related states
             intervalSet: false,
-            error: false
+            error: false,
+            error_msg: ""
         };
     }
 
@@ -57,20 +64,21 @@ class Login extends Component {
 
     //posts posts the input email, password, and then returns the response
     Login = () => {
-        return axios.post("http://199.98.27.114:8080/login",
-            JSON.stringify({email: this.state.email, pass: this.state.password})
-        ).then(response => {
-            return response.data;
+        axios.post("http://199.98.27.114:8080/login", {
+            email: this.state.user_email,
+            pass: this.state.user_password
         })
+            .then(res => {
+                localStorage.setItem('cookie', res.data);
+            })
+            .catch(error => {
+                this.setState({
+                    error: true,
+                    error_msg:  "Error requesting the details of an event: " + error.message
+                });
+                console.log("Error requesting event: " + error.message);
+            });
     };
-
-    // checkResponse = (response) => {
-    //     if (response.status == 403) {
-    //
-    //     } else {
-    //
-    //     }
-    // }
 
     render() {
         return (
@@ -95,11 +103,7 @@ class Login extends Component {
                                                       placeholder="Password"
                                                       onChange={this.handleChange}/>
                                     </Form.Group>
-                                    <Button variant="primary" type="submit" onClick={() =>
-                                        this.Login().then(data => {
-                                            localStorage.setItem('cookie', data);
-                                        })
-                                    }>
+                                    <Button variant="primary" type="submit" onClick={() => this.Login()}>
                                         Login
                                     </Button>
                                 </Form>

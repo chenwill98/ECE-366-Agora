@@ -62,13 +62,7 @@ class EventPage extends Component {
                     event_users: res.data
                 })
             })
-            .catch( error => {
-                this.setState({
-                    error: true,
-                    error_msg: "Error requesting the users belonging to an event: " + error.message
-                });
-                console.log("Error requesting event-users: " + error.message);
-            })
+
 
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);

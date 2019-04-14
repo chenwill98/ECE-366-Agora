@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card } from "react-bootstrap";
+import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
 
@@ -23,8 +24,28 @@ export default class Events extends Component {
         };
     }
 
+    //fetches all data when the component mounts
+    componentDidMount() {
+        this.setState({user_cookie: localStorage.getItem('cookie')});
+        this.getData(this.state.user_cookie);
+        if (!this.state.intervalSet) {
+            let interval = setInterval(this.getData, 1000);
+            this.setState({intervalSet: interval});
+        }
+    }
+
+    // kills the process
+    componentWillUnmount() {
+        if (this.state.intervalSet) {
+            clearInterval(this.state.intervalSet);
+            this.setState({ intervalSet: null });
+        }
+    }
+
+    getData = (user_cookie) => {
 
 
+    }
 
     render() {
         if (this.state.error)
