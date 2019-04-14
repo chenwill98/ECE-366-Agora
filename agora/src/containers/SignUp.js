@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card } from "react-bootstrap";
+import { Form, Button, Card, Col } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 
 class SignUp extends Component {
@@ -15,6 +15,8 @@ class SignUp extends Component {
             // user related states
             user_id: "",
             user_cookie: "",
+            user_name: "",
+            user_surname: "",
             user_email: "",
             user_password: "",
 
@@ -25,16 +27,6 @@ class SignUp extends Component {
         };
     }
 
-    //fetches all data when the component mounts
-    componentDidMount() {
-        // this.getData();
-        console.log(localStorage.getItem('cookie'));
-        if (!this.state.intervalSet) {
-            let interval = setInterval(this.getData, 1000);
-            this.setState({intervalSet: interval});
-        }
-    }
-
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalSet) {
@@ -42,13 +34,6 @@ class SignUp extends Component {
             this.setState({ intervalSet: null });
         }
     }
-
-    //fetches data
-    // getData = () => {
-    //     fetch("http://199.98.27.114:8080/somestuff")
-    //         .then(data => data.json())
-    //         .then(res => this.setState({ data: res.data }));
-    // };
 
     //sets the values of the inputs as values in this.state
     handleChange = event => {
@@ -62,21 +47,24 @@ class SignUp extends Component {
         event.preventDefault();
     };
 
+    //sends a request to create a user if it matches criteria and doesn't already exist
     SignUp = () => {
-        axios.post("http://199.98.27.114:8080/create", {
-            email: this.state.user_email,
-            pass: this.state.user_password
-        })
-            .then(res => {
-                localStorage.setItem('cookie', res.data);
+        //only attempts to sign up if the email matches certain criteria
+        if (this.state.user_email.includes('@')) {
+            axios.post(`${this.state.ip}:${this.state.port}/user/create`, {
+                email: this.state.user_email,
+                first_name: this.state.user_name,
+                last_name: this.state.user_surname,
+                pass: this.state.user_password
             })
-            .catch(error => {
-                this.setState({
-                    error: true,
-                    error_msg:  "Error creating the user: " + error.message
+                .catch(error => {
+                    this.setState({
+                        error: true,
+                        error_msg: "Error creating the user: " + error.message
+                    });
+                    console.log("Error posting user: " + error.message);
                 });
-                console.log("Error posting user: " + error.message);
-            });
+        }
     };
 
     render() {
@@ -89,15 +77,27 @@ class SignUp extends Component {
                             <Card.Title>Sign Up</Card.Title>
                             <Card.Text>
                                 <Form onSubmit={this.handleSubmit}>
-
-                                    <Form.Group controlId="email">
+                                    <Form.Group controlId="user_email">
                                         <Form.Label>Email address</Form.Label>
                                         <Form.Control type="email"
                                                       placeholder="Enter email"
                                                       onChange={this.handleChange}/>
-                                        {this.state.error ? console.log("hello") : '' }
                                     </Form.Group>
-                                    <Form.Group controlId="password">
+                                    <Form.Row>
+                                        <Form.Group as={Col} controlId="user_name">
+                                            <Form.Label>First Name</Form.Label>
+                                            <Form.Control type="first_name"
+                                                          placeholder="First Name"
+                                                          onChange={this.handleChange}/>
+                                        </Form.Group>
+                                        <Form.Group as={Col} controlId="user_surname">
+                                            <Form.Label>Last Name</Form.Label>
+                                            <Form.Control type="last_name"
+                                                          placeholder="Last Name"
+                                                          onChange={this.handleChange}/>
+                                        </Form.Group>
+                                    </Form.Row>
+                                    <Form.Group controlId="user_password">
                                         <Form.Label>Password</Form.Label>
                                         <Form.Control type="password"
                                                       placeholder="Password"
@@ -118,7 +118,8 @@ class SignUp extends Component {
                         </Card.Body>
                     </Card>
                 </CenterView>
-            </div>);
+            </div>
+        );
     }
 }
 export default SignUp;
