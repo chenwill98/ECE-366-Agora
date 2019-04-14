@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card, Col } from "react-bootstrap";
+import { Form, Button, Card, Col, Alert } from "react-bootstrap";
+import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
 
 class SignUp extends Component {
@@ -19,6 +20,8 @@ class SignUp extends Component {
             user_surname: "",
             user_email: "",
             user_password: "",
+            user_session: false,
+            user_success: false,
 
             // error related states
             intervalSet: false,
@@ -64,62 +67,79 @@ class SignUp extends Component {
                     });
                     console.log("Error posting user: " + error.message);
                 });
+            //if everything is fine, then redirect to login page
+            if (!this.state.error) { //why does this show up as false???
+                this.setState({user_success: true});
+            }
         }
     };
 
     render() {
-        return (
-            <div className='mt-5'>
-                <CenterView>
-                    <Card border="primary" style={{ width: '40rem'}}>
-                        <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>
-                        <Card.Body>
-                            <Card.Title>Sign Up</Card.Title>
-                            <Card.Text>
-                                <Form onSubmit={this.handleSubmit}>
-                                    <Form.Group controlId="user_email">
-                                        <Form.Label>Email address</Form.Label>
-                                        <Form.Control type="email"
-                                                      placeholder="Enter email"
-                                                      onChange={this.handleChange}/>
-                                    </Form.Group>
-                                    <Form.Row>
-                                        <Form.Group as={Col} controlId="user_name">
-                                            <Form.Label>First Name</Form.Label>
-                                            <Form.Control type="first_name"
-                                                          placeholder="First Name"
+        if (this.state.user_success) {
+            return (
+                <Redirect to="/login"/>
+            );
+        } else if (this.state.user_session) {
+            return(
+                <Redirect to="/home"/>
+            );
+        } else {
+            return (
+                <div className='mt-5'>
+                    <CenterView>
+                        <Card border="primary" style={{ width: '40rem'}}>
+                            <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>
+                            <Card.Body>
+                                <Card.Title>Sign Up</Card.Title>
+                                <Card.Text>
+                                    {this.state.error ?
+                                        <Alert dismissible variant="danger"
+                                               onClick={() => this.setState({error:false})}>
+                                            {this.state.error_msg}
+                                        </Alert>
+                                        : ''}
+                                    <Form onSubmit={this.handleSubmit}>
+                                        <Form.Group controlId="user_email">
+                                            <Form.Label>Email address</Form.Label>
+                                            <Form.Control type="email"
+                                                          placeholder="Enter email"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
-                                        <Form.Group as={Col} controlId="user_surname">
-                                            <Form.Label>Last Name</Form.Label>
-                                            <Form.Control type="last_name"
-                                                          placeholder="Last Name"
+                                        <Form.Row>
+                                            <Form.Group as={Col} controlId="user_name">
+                                                <Form.Label>First Name</Form.Label>
+                                                <Form.Control type="first_name"
+                                                              placeholder="First Name"
+                                                              onChange={this.handleChange}/>
+                                            </Form.Group>
+                                            <Form.Group as={Col} controlId="user_surname">
+                                                <Form.Label>Last Name</Form.Label>
+                                                <Form.Control type="last_name"
+                                                              placeholder="Last Name"
+                                                              onChange={this.handleChange}/>
+                                            </Form.Group>
+                                        </Form.Row>
+                                        <Form.Group controlId="user_password">
+                                            <Form.Label>Password</Form.Label>
+                                            <Form.Control type="password"
+                                                          placeholder="Password"
                                                           onChange={this.handleChange}/>
+                                            <Form.Text className="text-muted">
+                                                We'll never share your password with anyone else besides Zuckerberg
+                                            </Form.Text>
                                         </Form.Group>
-                                    </Form.Row>
-                                    <Form.Group controlId="user_password">
-                                        <Form.Label>Password</Form.Label>
-                                        <Form.Control type="password"
-                                                      placeholder="Password"
-                                                      onChange={this.handleChange}/>
-                                        <Form.Text className="text-muted">
-                                            We'll never share your password with anyone else besides Zuckerberg
-                                        </Form.Text>
-                                    </Form.Group>
-                                    <Form.Group controlId="formBasicCheckbox">
-                                        <Form.Check type="checkbox" label="I agree to the terms and conditions" />
-                                    </Form.Group>
-                                    <Button variant="primary" type="submit" onClick={() => this.SignUp()}>
-                                        Sign Up
-                                    </Button>
-                                </Form>
-                            </Card.Text>
-                            <Card.Link href="/login">Already have an account?</Card.Link>
-                        </Card.Body>
-                    </Card>
-                </CenterView>
-            </div>
-        );
+                                        <Button variant="primary" type="submit" onClick={() => this.SignUp()}>
+                                            Sign Up
+                                        </Button>
+                                    </Form>
+                                </Card.Text>
+                                <Card.Link href="/login">Already have an account?</Card.Link>
+                            </Card.Body>
+                        </Card>
+                    </CenterView>
+                </div>
+            );
+        }
     }
 }
 export default SignUp;
