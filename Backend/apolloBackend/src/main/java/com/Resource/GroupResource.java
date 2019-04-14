@@ -47,11 +47,13 @@ public class GroupResource implements RouteProvider {
         return Stream.of(
                 Route.sync("GET", "/group/<id>", this::getGroup)
                         .withMiddleware(jsonMiddleware()),
+                Route.sync("GET", "/group/get-groups", this::getGroups)
+                        .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-events", this::getEvents)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<gid>/is-admin/<uid>", this::isAdmin)
+                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<id>/is-admin/<uid>", this::isAdmin)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -78,17 +80,29 @@ public class GroupResource implements RouteProvider {
         );
     }
 
+
+    /* todo: comments and unit tests */
+    private Response<List<Group>> getGroups(RequestContext ctx) {
+        List<Group> groups = store.getGroups();
+
+        if (groups == null)
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+        else
+            return Response.ok().withPayload(groups);
+    }
+
+
     /* todo: comments and unit tests */
     private Response<Boolean> isAdmin(RequestContext ctx) {
         // some basic error checking
-        if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
+        if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty() ||
             ctx.pathArgs().get("uid") == null || ctx.pathArgs().get("uid").isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
         }
 
 
         return Response.ok().withPayload(
-                store.isAdmin(ctx.pathArgs().get("uid"), ctx.pathArgs().get("gid"))
+                store.isAdmin(ctx.pathArgs().get("uid"), ctx.pathArgs().get("id"))
         );
     }
 
@@ -248,7 +262,7 @@ public class GroupResource implements RouteProvider {
                         .build();
             }
 
-            if (store.createEvent(ctx.pathArgs().get("id"), new_event))
+            if (store.createEvent(new_event))
                 return Response.ok();
         }
         return Response.forStatus(Status.INTERNAL_SERVER_ERROR);

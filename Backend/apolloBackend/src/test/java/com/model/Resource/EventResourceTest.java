@@ -49,7 +49,7 @@ public class EventResourceTest {
                 .build();
 
         test_group = new GroupBuilder()
-                .gid(1)
+                .id(1)
                 .name("Test Group")
                 .description("This is a test group")
                 .build();
@@ -57,7 +57,7 @@ public class EventResourceTest {
         test_event = new EventBuilder()
                 .id(1)
                 .name("Test Event")
-                .gid(test_group.gid())
+                .gid(test_group.id())
                 .date("someDate")
                 .description("this is a test event")
                 .location("test place")

@@ -84,7 +84,7 @@ public class GroupStore {
     /**
      * getGroup - Tries to fetch the group with the given name.
      *
-     * @param name The name of the group being searched for. This name is a unique identifier for the group.
+     * @param id The name of the group being searched for. This name is a unique identifier for the group.
      *
      * @return The group if it exists, otherwise null.
      */
@@ -176,12 +176,11 @@ public class GroupStore {
     /**
      * createEvent - Adds an event to the database.
      *
-     * @param gid The group id of the group that created the event.
      * @param new_event The new event that is being added to the db.
      *
      * @return boolean - true on success, else false.
      */
-    public boolean createEvent(String gid, Event new_event) {
+    public boolean createEvent(Event new_event) {
 
         PreparedStatement stmt = null;
 
@@ -191,7 +190,7 @@ public class GroupStore {
                                                 "values (?, ?, ?, ?, ?)");
             stmt.setString(1, new_event.name());
             stmt.setString(2, new_event.description());
-            stmt.setInt(3, new_event.gid());
+            stmt.setInt(3, new_event.id());
             stmt.setString(4, new_event.location());
             stmt.setString(5, new_event.date());
         } catch (SQLException e) {
@@ -484,5 +483,42 @@ public class GroupStore {
         }
 
         return events;
+    }
+
+
+    public List<Group> getGroups() {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement("select * from Groops");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        //check the ResultSet
+        List<Group> groups= new ArrayList<>();
+
+        try {
+            while (result_set.next()) {
+                groups.add(new GroupBuilder()
+                        .id(Integer.valueOf(result_set.getString("Groop_id")))
+                        .name(result_set.getString("Name"))
+                        .description(result_set.getString("Description"))
+                        .build());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return groups;
     }
 }

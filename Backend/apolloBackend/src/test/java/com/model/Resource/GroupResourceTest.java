@@ -57,7 +57,7 @@ public class GroupResourceTest {
                 .build();
 
         test_group = new GroupBuilder()
-                .gid(1)
+                .id(1)
                 .name("Test Group")
                 .description("This is a test group")
                 .build();
@@ -65,13 +65,13 @@ public class GroupResourceTest {
         test_event = new EventBuilder()
                 .id(1)
                 .name("Test Event")
-                .gid(test_group.gid())
+                .gid(test_group.id())
                 .date("someDate")
                 .description("this is a test event")
                 .location("test place")
                 .build();
 
-        when(ctx_test.pathArgs()).thenReturn(Collections.singletonMap("id", String.valueOf(test_group.gid())));
+        when(ctx_test.pathArgs()).thenReturn(Collections.singletonMap("id", String.valueOf(test_group.id())));
     }
 
 
@@ -80,7 +80,7 @@ public class GroupResourceTest {
      */
     @Test
     public void getUsers() {
-        when(store.getUsers(String.valueOf(test_group.gid()))).thenReturn(Collections.singletonList(test_user));
+        when(store.getUsers(String.valueOf(test_group.id()))).thenReturn(Collections.singletonList(test_user));
 
         Response<List<User>> actual_response = test_group_resource.getUsers(ctx_test);
 
@@ -98,7 +98,7 @@ public class GroupResourceTest {
 
         when(event_store.getEvent(test_event.name())).thenReturn(test_event);
 
-        when(store.createEvent(String.valueOf(test_group.gid()), test_event)).thenReturn(true);
+        when(store.createEvent(test_event)).thenReturn(true);
 
         Response<ByteString> actual_response = test_group_resource.createEvent(ctx_test);
 
@@ -146,7 +146,7 @@ public class GroupResourceTest {
 
     @Test
     public void updateAdmins() throws Exception {
-        when(store.getGroup(String.valueOf(test_group.gid()))).thenReturn(test_group);
+        when(store.getGroup(String.valueOf(test_group.id()))).thenReturn(test_group);
 
         when(object_mapper.readTree(Optional
                 .of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap
@@ -158,7 +158,7 @@ public class GroupResourceTest {
         when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap
                 .of("user_id", test_user.uid(), "make_admin", 1)))));
 
-        when(store.updateAdmins(String.valueOf(test_group.gid()), String.valueOf(test_user.uid()), 1))
+        when(store.updateAdmins(String.valueOf(test_group.id()), String.valueOf(test_user.uid()), 1))
                 .thenReturn(true);
 
         Response<ByteString> actual_response = test_group_resource.updateAdmins (ctx_test);
@@ -168,7 +168,7 @@ public class GroupResourceTest {
 
     @Test
     public void viewContacts() {
-        when(store.getUsers(String.valueOf(test_group.gid()))).thenReturn(Collections.singletonList(test_user));
+        when(store.getUsers(String.valueOf(test_group.id()))).thenReturn(Collections.singletonList(test_user));
 
         Response<List<User>> actual_response = test_group_resource.viewContacts(ctx_test);
 

@@ -8,7 +8,7 @@ import io.norberg.automatter.AutoMatter;
  */
 @AutoMatter
 public interface Group {
-    int gid();
+    int id();
     String name();
     String description();
 }
