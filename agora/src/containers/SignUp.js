@@ -30,6 +30,13 @@ class SignUp extends Component {
         };
     }
 
+    //determines if there is currently a user session by whether a cookie exists or not
+    componentDidMount () {
+        if (localStorage.getItem('cookie')) {
+            this.setState({user_session: true});
+        }
+    }
+
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalSet) {
