@@ -13,6 +13,7 @@ class Login extends Component {
             email: "",
             password: "",
             id: 0,
+            cookie: "",
             intervalSet: false,
             error: false
         };
@@ -62,6 +63,14 @@ class Login extends Component {
             return response.data;
         })
     };
+
+    // checkResponse = (response) => {
+    //     if (response.status == 403) {
+    //
+    //     } else {
+    //
+    //     }
+    // }
 
     render() {
         return (
