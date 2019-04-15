@@ -88,7 +88,7 @@ export default class Groups extends Component {
                             <Card.Body>
                                 <Card.Title>Error</Card.Title>
                                 <Card.Text>
-                                    Oops, error {this.state.error_msg} occurred :/
+                                    Oops, {this.state.error_msg} :/
                                 </Card.Text>
                             </Card.Body>
                         </Card>
