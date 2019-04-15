@@ -222,11 +222,11 @@ public class UserResource implements RouteProvider {
 
             Group new_group;
             /* this logic is only needed for the unit testing */
-            if (node.get("gid") != null && !node.get("gid").asText().isEmpty()) {
+            if (node.get("id") != null && !node.get("id").asText().isEmpty()) {
                 new_group = new GroupBuilder()
                         .name(node.get("name").asText())
                         .description(node.get("description").asText())
-                        .gid(Integer.valueOf(node.get("gid").asText()))
+                        .id(Integer.valueOf(node.get("id").asText()))
                         .build();
             }
             else {
@@ -538,7 +538,7 @@ public class UserResource implements RouteProvider {
         User auth_user = store.getUserWithEmail(user_json.get("email").asText());
 
         // if it is the same, we return the user with all the info, otherwise we return a null object.
-        if (auth_user.pass_hash().equals(user_json.get("pass_hash").asText())) {
+        if (auth_user != null && auth_user.pass_hash().equals(user_json.get("pass_hash").asText())) {
             return Response.ok().withPayload(getCookieID(auth_user.uid()));
         }
         else

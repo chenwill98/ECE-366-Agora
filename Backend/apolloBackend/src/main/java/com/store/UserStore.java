@@ -541,7 +541,7 @@ public class UserStore {
         try {
             while (result_set.next()) {
                 groups.add( new GroupBuilder()
-                        .gid(result_set.getInt("Groop_id"))
+                        .id(result_set.getInt("Groop_id"))
                         .name(result_set.getString("Name"))
                         .description(result_set.getString("Description"))
                         .build());

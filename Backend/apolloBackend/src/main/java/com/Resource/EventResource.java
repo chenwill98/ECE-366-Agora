@@ -41,11 +41,22 @@ public class EventResource implements RouteProvider {
     @Override
     public Stream<Route<AsyncHandler<Response<ByteString>>>> routes() {
         return Stream.of(
+                Route.sync("GET", "/event/get-events", this::getEvents)
+                        .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/event/<id>", this::getEventByID)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/event/<id>/get-users", this::getUsers)
                         .withMiddleware(jsonMiddleware())
         );
+    }
+
+    private Response<List<Event>> getEvents(RequestContext ctx) {
+        List<Event> events= store.getEvents();
+
+        if (events == null)
+            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+        else
+            return Response.ok().withPayload(events);
     }
 
     /* todo: add comments and unit tests */
