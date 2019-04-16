@@ -11,4 +11,5 @@ insert into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?);
 
 insert into Events (Event_name, Description, Groop_id, Location, Date_time) values ( "Quidditch Part", "After the house cup!", 1, "Griffindor Common Room", "2019-05-05");
 
+
 insert into Event_attendance (User_id, Event_id, Is_attending) values (1, 1, 1);

@@ -108,11 +108,11 @@ public class UserResourceTest {
                         .of(ByteString.of(real_object_mapper.writeValueAsBytes(test_user))).get().utf8()));
 
 
-        Response<Integer> actual_response = test_user_resource.attemptLogin(ctx_test);
-        Integer actual_user_id = actual_response.payload().get();
+        Response<List<Integer>> actual_response = test_user_resource.attemptLogin(ctx_test);
+        List<Integer> actual_user_id = actual_response.payload().get();
 
         Integer expected_user_id = new Random(1234).nextInt(1000000);
-        assertEquals(expected_user_id , actual_user_id);
+        assertEquals(expected_user_id , actual_user_id.get(0));
     }
 
     @Test
