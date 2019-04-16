@@ -12,10 +12,7 @@ import com.spotify.apollo.Response;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 import java.util.stream.Stream;
 
@@ -92,11 +89,11 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
                 .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<User>>>create("POST", "/user/<id>", this::getUser)
+                Route.<SyncHandler<Response<User>>>create("GET", "/user/<id>/get-user", this::getUser)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<Group>>>>create("POST", "/user/<id>/groups", this::getGroups)
+                Route.<SyncHandler<Response<List<Group>>>>create("GET", "/user/<id>/groups", this::getGroups)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -513,11 +510,11 @@ public class UserResource implements RouteProvider {
      * @param ctx A request context that contains an email and hashed password of the user who wants to login. These
      *            will have the keys "email" and "pass_hash", respectively.
      *
-     * @return Response which on success contains a payload with the cookie ID corresponding with the user who logged
-     * in, else some error status code.
+     * @return Response which on success contains a payload with a list of integers corresponding with the user who
+     * logged in, else some error status code. The list is of 2 elements: A cookie id and a user id.
      */
     @VisibleForTesting
-    public Response<Integer> attemptLogin(RequestContext ctx) {
+    public Response<List<Integer>> attemptLogin(RequestContext ctx) {
 
         // convert request payload into JSON
         JsonNode user_json = null;
@@ -537,9 +534,15 @@ public class UserResource implements RouteProvider {
         // get the password of the user with that username from db and confirm it is the same.
         User auth_user = store.getUserWithEmail(user_json.get("email").asText());
 
+
+        List<Integer> values = new ArrayList<>();
+
+        values.add(getCookieID(auth_user.uid()));
+        values.add(auth_user.uid());
+
         // if it is the same, we return the user with all the info, otherwise we return a null object.
         if (auth_user != null && auth_user.pass_hash().equals(user_json.get("pass_hash").asText())) {
-            return Response.ok().withPayload(getCookieID(auth_user.uid()));
+            return Response.ok().withPayload(values);
         }
         else
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Incorrect email or password"));
