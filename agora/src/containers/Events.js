@@ -64,7 +64,7 @@ export default class Events extends Component {
             });
 
         //fetches all of the groups available for browsing
-        axios.get( `${this.state.ip}:${this.state.port}/group/get-events`)
+        axios.get( `${this.state.ip}:${this.state.port}/event/get-events`)
             .then(res => {
                 this.setState( {
                     total_events: res.data.events,
