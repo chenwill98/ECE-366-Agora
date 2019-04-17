@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import { Form, Button, Card, Col, Alert } from "react-bootstrap";
+import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
+import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Navigation from '../components/Navigation.js';
@@ -100,6 +102,7 @@ class SignUp extends Component {
         } else if (this.state.error === false) {
             return (
                 <div className='mt-5'>
+                    <WelcomeNav/>
                     <CenterView>
                         <Card border="primary" style={{ width: '40rem'}}>
                             <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>

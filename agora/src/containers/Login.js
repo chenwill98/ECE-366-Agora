@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Form, Button, Card, Alert } from "react-bootstrap";
+import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
+import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 
@@ -60,12 +62,10 @@ class Login extends Component {
     Login = () => {
         //only tries to log in if the email matches certain criteria
         if (this.state.user_email.includes('@')) {
-
             let data = JSON.stringify({
                 'email': this.state.user_email,
                 'pass_hash': this.state.user_password
             });
-
             axios.post(`${this.state.ip}:${this.state.port}/login`, data)
                 .then(res => {
                     if (res.status === 200) {
@@ -102,10 +102,11 @@ class Login extends Component {
         } else {
             return (
                 <div className='mt-5'>
+                    <WelcomeNav/>
                     <CenterView>
                         <Card border="primary" style={{width: '40rem'}}>
+                            <Card.Header as="h5">Login</Card.Header>
                             <Card.Body>
-                                <Card.Title>Login</Card.Title>
                                 <Card.Text>
                                     <Form onSubmit={this.handleSubmit}>
                                         {this.state.error ?
@@ -137,7 +138,6 @@ class Login extends Component {
                         </Card>
                     </CenterView>
                 </div>
-
             );
         }
     }
