@@ -188,14 +188,15 @@ public class UserStore {
         // execute the sql to confirm no such user already exists
         try {
             result_set = stmt.executeQuery();
-            if (!result_set.next())
+
+            if (result_set.next()) {
                 return false;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
         }
-
 
         // prepare the sql statement
         try {

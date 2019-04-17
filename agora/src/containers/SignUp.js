@@ -3,6 +3,8 @@ import axios from "axios";
 import { Form, Button, Card, Col, Alert } from "react-bootstrap";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
+import {Backend_Route} from "../BackendRoute.js";
+import Navigation from '../components/Navigation.js';
 
 class SignUp extends Component {
     constructor(props) {
@@ -10,8 +12,8 @@ class SignUp extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // user related states
             user_id: "",
@@ -59,25 +61,30 @@ class SignUp extends Component {
 
     //sends a request to create a user if it matches criteria and doesn't already exist
     SignUp = () => {
+
         //only attempts to sign up if the email matches certain criteria
         if (this.state.user_email.includes('@')) {
-            axios.post(`${this.state.ip}:${this.state.port}/user/create`, {
-                email: this.state.user_email,
-                first_name: this.state.user_name,
-                last_name: this.state.user_surname,
-                pass: this.state.user_password
+
+            let data = JSON.stringify({
+                'email': this.state.user_email,
+                'first_name': this.state.user_name,
+                'last_name': this.state.user_surname,
+                'pass_hash': this.state.user_password
+            });
+
+            axios.post(`${this.state.ip}:${this.state.port}/user/create`, data)
+            .then(res => { //if everything is fine, then redirect to login page
+                this.setState({
+                        user_success: true
+                    });
             })
-                .catch(error => {
-                    this.setState({
+            .catch(error => {
+                this.setState({
                         error: true,
                         error_msg: "Error creating the user: " + error.message
                     });
                     console.log("Error posting user: " + error.message);
-                });
-            //if everything is fine, then redirect to login page
-            if (!this.state.error) { //why does this show up as false???
-                this.setState({user_success: true});
-            }
+            })
         }
     };
 
@@ -90,7 +97,7 @@ class SignUp extends Component {
             return(
                 <Redirect to="/home"/>
             );
-        } else {
+        } else if (this.state.error === false) {
             return (
                 <div className='mt-5'>
                     <CenterView>
@@ -144,6 +151,18 @@ class SignUp extends Component {
                             </Card.Body>
                         </Card>
                     </CenterView>
+                </div>
+            );
+        }
+        else { // error!
+            return (
+                <div className='mt-5'>
+                    <Navigation/>
+                    <div className='mt-5'>
+                        <CenterView>
+                        <p>Error: {this.state.error_msg}</p>
+                        </CenterView>
+                    </div>
                 </div>
             );
         }

@@ -396,6 +396,7 @@ public class GroupResource implements RouteProvider {
         Map<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
         headers.put("Access-Control-Allow-Methods", "GET, POST");
+        headers.put("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 
         return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
                 .and(Middlewares::httpPayloadSemantics)

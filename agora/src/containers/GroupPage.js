@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import axios from "axios";
 import Navigation from '../components/Navigation.js';
-import SinglebObjectView from '../components/SingleObjectView.js';
+import SingleObjectView from '../components/SingleObjectView.js';
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
+import {Backend_Route} from "../BackendRoute.js";
 
 class GroupPage extends Component {
     constructor(props) {
@@ -11,8 +12,8 @@ class GroupPage extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://199.98.27.114",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // group related states
             group_id: this.props.match.params.group_id,
@@ -49,7 +50,7 @@ class GroupPage extends Component {
                     error: true,
                     error_msg: error.message
                 });
-                console.log("Error on request: " + error.message);
+                console.log("Error requesting group info: " + error.message);
             });
 
         // get the group's users
@@ -112,7 +113,7 @@ class GroupPage extends Component {
         // get the group's events
         axios.post(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/view-contacts`,
                 {},
-            { headers: { 'Cookie': 'USER_TOKEN=' + localStorage.getItem('cookie')} })
+            { headers: { 'Authorization': 'USER_TOKEN=' + localStorage.getItem('cookie')} })
             .then ( res => {
                 console.log(res.data);
                 this.setState( {
@@ -142,9 +143,9 @@ class GroupPage extends Component {
             return (
                 <div className='mt-5'>
                     <Navigation/>
-                    <SinglebObjectView>
+                    <SingleObjectView>
                         <p>Error: {this.state.error_msg}</p>
-                    </SinglebObjectView>
+                    </SingleObjectView>
                 </div>
             );
         }
@@ -153,7 +154,7 @@ class GroupPage extends Component {
                 <div className='mt-5'>
                     <Navigation/>
 
-                    <SinglebObjectView>
+                    <SingleObjectView>
                         <h1>Name: {this.state.group_name}</h1>
                         <p>Description: {this.state.group_description}</p>
 
@@ -177,7 +178,7 @@ class GroupPage extends Component {
                                 </Card>
                             )}
                         </Card>
-                    </SinglebObjectView>
+                    </SingleObjectView>
                 </div>
             );
         }

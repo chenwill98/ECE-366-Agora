@@ -3,6 +3,7 @@ import { Card } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
+import {Backend_Route} from "../BackendRoute.js";
 
 export default class Groups extends Component {
     constructor(props) {
@@ -10,8 +11,8 @@ export default class Groups extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // user related states
             user_id: "",
@@ -47,7 +48,7 @@ export default class Groups extends Component {
     getData = (user_cookie) => {
         //fetches all of the user's groups
         axios.get( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/groups`, { headers:{
-                Cookie: `USER_TOKEN=${user_cookie}`
+                'Authorization': `USER_TOKEN=${user_cookie}`
         }})
             .then(res => {
                 this.setState( {

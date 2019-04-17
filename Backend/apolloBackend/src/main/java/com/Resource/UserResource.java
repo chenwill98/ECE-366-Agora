@@ -82,22 +82,21 @@ public class UserResource implements RouteProvider {
                 Route.sync("GET", "/", ctx -> Response.ok().withPayload("you have reached Agora!\n"))
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login", this::attemptLogin)
-                .withMiddleware(jsonMiddleware()),
+                        .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/logout", this::attemptLogout)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
-                .withMiddleware(jsonMiddleware()),
+                    .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<User>>>create("GET", "/user/<id>/get-user", this::getUser)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
-                        .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<Group>>>>create("GET", "/user/<id>/groups", this::getGroups)
+                        .withMiddleware(jsonMiddleware()),                Route.<SyncHandler<Response<List<Group>>>>create("GET", "/user/<id>/groups", this::getGroups)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<Event>>>>create("POST", "/user/<id>/events", this::getEvents)
+                Route.<SyncHandler<Response<List<Event>>>>create("GET", "/user/<id>/events", this::getEvents)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -463,7 +462,7 @@ public class UserResource implements RouteProvider {
 
         /* this if statement is useful for conducting the unit tests. Not optimal (ie not needed) during production */
         User new_user;
-        if (user_json.get("uid").asText() != null )
+        if (user_json.get("uid") != null )
             new_user = new UserBuilder()
                     .uid(Integer.valueOf(user_json.get("uid").asText()))
                     .email(user_json.get("email").asText())
@@ -580,13 +579,14 @@ public class UserResource implements RouteProvider {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST");
+        headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
         return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
                 .and(Middlewares::httpPayloadSemantics)
                 .and(responseAsyncHandler -> ctx ->
                     responseAsyncHandler.invoke(ctx)
-                            .thenApply(response -> response.withHeaders(headers)));
+                        .thenApply(response -> response.withHeaders(headers)));
     }
 
 
@@ -613,11 +613,12 @@ public class UserResource implements RouteProvider {
     public static <T> SyncHandler<Response<T>> userSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
 
         return ctx -> {
+            System.out.println("INCOMING HEADERS: " + ctx.request().headers());
             // check matching cookie id.
-            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+            if (ctx.request().headers().get("Authorization") == null || ctx.request().headers().get("Authorization").isEmpty())
                 return Response.forStatus(Status.UNAUTHORIZED);
 
-            String[] tokens = ctx.request().headers().get("Cookie").split("=");
+            String[] tokens = ctx.request().headers().get("Authorization").split("=");
             String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
 
             if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))

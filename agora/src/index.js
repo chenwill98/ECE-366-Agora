@@ -5,7 +5,7 @@ import { Route, BrowserRouter as Router } from 'react-router-dom'
 import SignUp from './containers/SignUp.js';
 import Login from './containers/Login.js';
 import Welcome from './components/Welcome.js';
-import Home from './containers/Home.js';
+import Dashboard from './containers/Dashboard.js';
 import Groups from './containers/Groups.js';
 import Events from './containers/Events.js';
 import EventPage from './containers/EventPage.js';
@@ -15,7 +15,7 @@ const routing = (
     <Router>
         <div>
             <Route exact path="/" component={Welcome} />
-            <Route path="/home" component={Home} />
+            <Route path="/home" component={Dashboard} />
             <Route path="/events" component={Events} />
             <Route path="/groups" component={Groups} />
             <Route path="/signup" component={SignUp} />

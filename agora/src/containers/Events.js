@@ -3,6 +3,7 @@ import { Card } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
+import {Backend_Route} from "../BackendRoute.js";
 
 export default class Events extends Component {
     constructor(props) {
@@ -10,8 +11,8 @@ export default class Events extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // user related states
             user_id: "",

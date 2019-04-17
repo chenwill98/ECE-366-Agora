@@ -3,6 +3,7 @@ import axios from "axios";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
+import {Backend_Route} from "../BackendRoute.js";
 
 class Login extends Component {
     constructor(props) {
@@ -10,8 +11,8 @@ class Login extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // user related states
             user_id: "",
@@ -59,12 +60,29 @@ class Login extends Component {
     Login = () => {
         //only tries to log in if the email matches certain criteria
         if (this.state.user_email.includes('@')) {
-            axios.post(`${this.state.ip}:${this.state.port}/login`, {
-                email: this.state.user_email,
-                pass: this.state.user_password
-            })
+
+            let data = JSON.stringify({
+                'email': this.state.user_email,
+                'pass_hash': this.state.user_password
+            });
+
+            axios.post(`${this.state.ip}:${this.state.port}/login`, data)
                 .then(res => {
-                    localStorage.setItem('cookie', res.data);
+                    if (res.status === 200) {
+                        localStorage.setItem('cookie', res.data[0]);
+                        localStorage.setItem('userID', res.data[1]);
+
+                        this.setState({
+                            user_session: true
+                        });
+                    }
+                    else {
+                        this.setState({
+                            error: true,
+                            error_msg:  "Error logging in user. Status code: " + res.status
+                        });
+                        console.log("Error requesting cookie: " + res.status);
+                    }
                 })
                 .catch(error => { //not catching error with connecting? only catches errors returned by backend?
                     this.setState({
@@ -73,10 +91,6 @@ class Login extends Component {
                     });
                     console.log("Error requesting cookie: " + error.message);
                 });
-            //if everything is fine, then redirect to user home
-            if (!this.state.error) {
-                this.setState({user_session: true});
-            }
         }
     };
 
