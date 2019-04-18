@@ -3,6 +3,7 @@ import axios from "axios";
 import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
+import {Backend_Route} from "../BackendRoute.js";
 
 class EventPage extends Component {
     constructor(props) {
@@ -10,14 +11,15 @@ class EventPage extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://199.98.27.114",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // events related states
             event_id: this.props.match.params.event_id,
             event_description: "description",
             event_name: "Name",
             event_gid: "456",
+            event_g_name: "",
             event_location: "Here",
             event_date: "03/18/1994",
             event_users: [],
@@ -46,6 +48,22 @@ class EventPage extends Component {
                     event_location: res.data.location,
                     event_date: res.data.date
                 });
+
+                // get the Group name of the event's parent group.
+                console.log(this.state.event_gid);
+                axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}`)
+                    .then(res => {
+                        this.setState( {
+                            event_g_name: res.data.name
+                        });
+                    })
+                    .catch(error => {
+                        this.setState({
+                            error: true,
+                            error_msg: error.message
+                        });
+                        console.log("Error requesting event's parent group info: " + error.message);
+                    });
             })
             .catch(error => {
                 this.setState({
@@ -62,6 +80,8 @@ class EventPage extends Component {
                     event_users: res.data
                 })
             })
+
+
 
 
         if (!this.state.intervalSet) {
@@ -99,6 +119,13 @@ class EventPage extends Component {
                     <SinglebObjectView>
                         <h1>Name: {this.state.event_name}</h1>
                         <p>Description: {this.state.event_description}</p>
+
+                        <Card>
+                            <Card.Body>
+                                <Card.Link href={"/group/" + this.state.event_gid}>{this.state.event_g_name}</Card.Link>
+                            </Card.Body>
+                        </Card>
+
                         <p>Location: {this.state.event_location}</p>
                         <p>Date: {this.state.event_date}</p>
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card } from "react-bootstrap";
+import "../styles/Welcome.css";
 import CenterView from '../components/CenterView.js';
 import WelcomeNav from './WelcomeNav.js';
 
@@ -13,10 +14,8 @@ export default class Welcome extends Component {
                         <Card.Body>
                             <Card.Title>Welcome to Agora!</Card.Title>
                             <Card.Text>
-                                Experience the latest in bleeding-edge event organizing technology with our
-                                never-before-seen tech stack (no really, literally no one in their right mind
-                                would use the unholy combination of react, Nginx, Apollo, and mySQL over straight up
-                                LAMP or MERN).
+                                Experience the latest in bleeding-edge event organization technology and meet up with your
+                                friends today!
                             </Card.Text>
 
                         </Card.Body>

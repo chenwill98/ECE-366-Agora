@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Form, Button, Card, Alert } from "react-bootstrap";
+import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
+import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
+import {Backend_Route} from "../BackendRoute.js";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
 
 class Login extends Component {
     constructor(props) {
@@ -10,8 +17,8 @@ class Login extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // user related states
             user_id: "",
@@ -37,10 +44,10 @@ class Login extends Component {
 
     //kills the process
     componentWillUnmount() {
-        if (this.state.intervalIsSet) {
-            clearInterval(this.state.intervalIsSet);
-            this.setState({ intervalIsSet: null });
-        }
+        // if (this.state.intervalIsSet) {
+        //     clearInterval(this.state.intervalIsSet);
+        //     this.setState({ intervalIsSet: null });
+        // }
     }
 
     //sets the values of the inputs as values in this.state
@@ -59,12 +66,28 @@ class Login extends Component {
     Login = () => {
         //only tries to log in if the email matches certain criteria
         if (this.state.user_email.includes('@')) {
-            axios.post(`${this.state.ip}:${this.state.port}/login`, {
-                email: this.state.user_email,
-                pass: this.state.user_password
-            })
+            let data = JSON.stringify({
+                'email': this.state.user_email,
+                'pass_hash': this.state.user_password
+            });
+            axios.post(`${this.state.ip}:${this.state.port}/login`, data)
                 .then(res => {
-                    localStorage.setItem('cookie', res.data);
+                    if (res.status === 200) {
+
+                        cookies.set('USER_TOKEN', res.data[0], { path: '/' });
+                        localStorage.setItem('userID', res.data[1]);
+
+                        this.setState({
+                            user_session: true
+                        });
+                    }
+                    else {
+                        this.setState({
+                            error: true,
+                            error_msg:  "Error logging in user. Status code: " + res.status
+                        });
+                        console.log("Error requesting cookie: " + res.status);
+                    }
                 })
                 .catch(error => { //not catching error with connecting? only catches errors returned by backend?
                     this.setState({
@@ -73,10 +96,6 @@ class Login extends Component {
                     });
                     console.log("Error requesting cookie: " + error.message);
                 });
-            //if everything is fine, then redirect to user home
-            if (!this.state.error) {
-                this.setState({user_session: true});
-            }
         }
     };
 
@@ -88,10 +107,11 @@ class Login extends Component {
         } else {
             return (
                 <div className='mt-5'>
+                    <WelcomeNav/>
                     <CenterView>
                         <Card border="primary" style={{width: '40rem'}}>
+                            <Card.Header as="h5">Login</Card.Header>
                             <Card.Body>
-                                <Card.Title>Login</Card.Title>
                                 <Card.Text>
                                     <Form onSubmit={this.handleSubmit}>
                                         {this.state.error ?
@@ -123,9 +143,9 @@ class Login extends Component {
                         </Card>
                     </CenterView>
                 </div>
-
             );
         }
     }
 }
+
 export default Login;

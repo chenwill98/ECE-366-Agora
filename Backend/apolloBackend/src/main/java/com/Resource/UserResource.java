@@ -82,13 +82,13 @@ public class UserResource implements RouteProvider {
                 Route.sync("GET", "/", ctx -> Response.ok().withPayload("you have reached Agora!\n"))
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/login", this::attemptLogin)
-                .withMiddleware(jsonMiddleware()),
+                        .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/logout", this::attemptLogout)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("POST", "/user/create", this::createUser)
-                .withMiddleware(jsonMiddleware()),
+                    .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<User>>>create("GET", "/user/<id>/get-user", this::getUser)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
@@ -97,7 +97,7 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<Event>>>>create("POST", "/user/<id>/events", this::getEvents)
+                Route.<SyncHandler<Response<List<Event>>>>create("GET", "/user/<id>/events", this::getEvents)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -463,7 +463,7 @@ public class UserResource implements RouteProvider {
 
         /* this if statement is useful for conducting the unit tests. Not optimal (ie not needed) during production */
         User new_user;
-        if (user_json.get("uid").asText() != null )
+        if (user_json.get("uid") != null )
             new_user = new UserBuilder()
                     .uid(Integer.valueOf(user_json.get("uid").asText()))
                     .email(user_json.get("email").asText())
@@ -483,7 +483,7 @@ public class UserResource implements RouteProvider {
         if (store.createUser(new_user))
             return Response.ok();
         else
-            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("User already exists!"));
 
     }
 
@@ -579,14 +579,16 @@ public class UserResource implements RouteProvider {
     private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST");
+        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
+        headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
+        headers.put("Access-Control-Allow-Credentials", "true");
 
         return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
                 .and(Middlewares::httpPayloadSemantics)
                 .and(responseAsyncHandler -> ctx ->
                     responseAsyncHandler.invoke(ctx)
-                            .thenApply(response -> response.withHeaders(headers)));
+                        .thenApply(response -> response.withHeaders(headers)));
     }
 
 
@@ -614,12 +616,14 @@ public class UserResource implements RouteProvider {
 
         return ctx -> {
             // check matching cookie id.
-            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty()) {
                 return Response.forStatus(Status.UNAUTHORIZED);
+            }
 
             String[] tokens = ctx.request().headers().get("Cookie").split("=");
             String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
 
+            System.out.println(cookie_id);
             if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))
                 return Response.forStatus(Status.FORBIDDEN);
 
