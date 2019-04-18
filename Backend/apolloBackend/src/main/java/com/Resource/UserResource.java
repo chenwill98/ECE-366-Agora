@@ -92,7 +92,8 @@ public class UserResource implements RouteProvider {
                 Route.<SyncHandler<Response<User>>>create("GET", "/user/<id>/get-user", this::getUser)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
-                        .withMiddleware(jsonMiddleware()),                Route.<SyncHandler<Response<List<Group>>>>create("GET", "/user/<id>/groups", this::getGroups)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<List<Group>>>>create("GET", "/user/<id>/groups", this::getGroups)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -482,7 +483,7 @@ public class UserResource implements RouteProvider {
         if (store.createUser(new_user))
             return Response.ok();
         else
-            return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("User already exists!"));
 
     }
 
@@ -578,9 +579,10 @@ public class UserResource implements RouteProvider {
     private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
         headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
-        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
+        headers.put("Access-Control-Allow-Credentials", "true");
 
         return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
                 .and(Middlewares::httpPayloadSemantics)
@@ -613,14 +615,15 @@ public class UserResource implements RouteProvider {
     public static <T> SyncHandler<Response<T>> userSessionMiddleware(SyncHandler<Response<T>> innerHandler) {
 
         return ctx -> {
-            System.out.println("INCOMING HEADERS: " + ctx.request().headers());
             // check matching cookie id.
-            if (ctx.request().headers().get("Authorization") == null || ctx.request().headers().get("Authorization").isEmpty())
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty()) {
                 return Response.forStatus(Status.UNAUTHORIZED);
+            }
 
-            String[] tokens = ctx.request().headers().get("Authorization").split("=");
+            String[] tokens = ctx.request().headers().get("Cookie").split("=");
             String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
 
+            System.out.println(cookie_id);
             if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))
                 return Response.forStatus(Status.FORBIDDEN);
 

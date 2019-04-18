@@ -6,6 +6,10 @@ import { Redirect } from 'react-router-dom'
 import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
 
 class Login extends Component {
     constructor(props) {
@@ -40,10 +44,10 @@ class Login extends Component {
 
     //kills the process
     componentWillUnmount() {
-        if (this.state.intervalIsSet) {
-            clearInterval(this.state.intervalIsSet);
-            this.setState({ intervalIsSet: null });
-        }
+        // if (this.state.intervalIsSet) {
+        //     clearInterval(this.state.intervalIsSet);
+        //     this.setState({ intervalIsSet: null });
+        // }
     }
 
     //sets the values of the inputs as values in this.state
@@ -69,7 +73,8 @@ class Login extends Component {
             axios.post(`${this.state.ip}:${this.state.port}/login`, data)
                 .then(res => {
                     if (res.status === 200) {
-                        localStorage.setItem('cookie', res.data[0]);
+
+                        cookies.set('USER_TOKEN', res.data[0], { path: '/' });
                         localStorage.setItem('userID', res.data[1]);
 
                         this.setState({
@@ -142,4 +147,5 @@ class Login extends Component {
         }
     }
 }
+
 export default Login;

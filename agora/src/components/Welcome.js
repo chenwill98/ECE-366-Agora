@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Jumbotron } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 import "../styles/Welcome.css";
 import CenterView from '../components/CenterView.js';
 import WelcomeNav from './WelcomeNav.js';

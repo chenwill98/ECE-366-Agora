@@ -566,11 +566,11 @@ public class UserStore {
         ResultSet  result_set;
 
         try {
-            stmt = connection.prepareStatement( "select E.Event_id, E.Event_name, E.Description, E.Location, E.Date_time" +
-                                                "from Event_attendance EA" +
-                                                "inner join Users U on U.User_id = EA.User_id" +
-                                                "inner join Events E on E.Event_id= EA.Event_id" +
-                                                " where U.User_id = ?");
+            stmt = connection.prepareStatement( "select E.Event_id, E.Event_name, E.Description, E.Location, " +
+                    "E.DAte_time from Event_attendance EA " +
+                    "inner join Users U on U.User_id = EA.User_id " +
+                    "inner join Events E on E.Event_id = EA.Event_id " +
+                    "where U.User_id = ?");
             stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();

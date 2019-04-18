@@ -30,6 +30,7 @@ class SignUp extends Component {
             // error related states
             intervalSet: false,
             error: false,
+            already_user: false,
             error_msg: ""
         };
     }
@@ -76,16 +77,31 @@ class SignUp extends Component {
 
             axios.post(`${this.state.ip}:${this.state.port}/user/create`, data)
             .then(res => { //if everything is fine, then redirect to login page
-                this.setState({
+                if (res.status === 200) {
+                    this.setState({
                         user_success: true
                     });
+                }
+                else {
+                    this.setState( {
+                        already_user: true
+                    });
+                }
             })
             .catch(error => {
-                this.setState({
+                console.log("Status: " + error.status);
+                if (error.response.status === 400) {
+                    this.setState( {
+                        already_user: true
+                    });
+                }
+                else {
+                    this.setState({
                         error: true,
                         error_msg: "Error creating the user: " + error.message
                     });
                     console.log("Error posting user: " + error.message);
+                }
             })
         }
     };
@@ -100,62 +116,71 @@ class SignUp extends Component {
                 <Redirect to="/home"/>
             );
         } else if (this.state.error === false) {
-            return (
-                <div className='mt-5'>
-                    <WelcomeNav/>
-                    <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
-                            <Card.Header as="h5">Organize events and connect with others on Agora today!</Card.Header>
-                            <Card.Body>
-                                <Card.Title>Sign Up</Card.Title>
-                                <Card.Text>
-                                    {this.state.error ?
-                                        <Alert dismissible variant="danger"
-                                               onClick={() => this.setState({error:false})}>
-                                            {this.state.error_msg}
-                                        </Alert>
+                return (
+                    <div className='mt-5'>
+                        <WelcomeNav/>
+                        <CenterView>
+                            <Card border="primary" style={{width: '40rem'}}>
+                                <Card.Header as="h5">Organize events and connect with others on Agora
+                                    today!</Card.Header>
+                                <Card.Body>
+                                    <Card.Title>Sign Up</Card.Title>
+                                    <Card.Text>
+                                        {this.state.error ?
+                                            <Alert dismissible variant="danger"
+                                                   onClick={() => this.setState({error: false})}>
+                                                {this.state.error_msg}
+                                            </Alert>
+                                            : ''}
+                                        <Form onSubmit={this.handleSubmit}>
+                                            <Form.Group controlId="user_email">
+                                                <Form.Label>Email address</Form.Label>
+                                                <Form.Control type="email"
+                                                              placeholder="Enter email"
+                                                              onChange={this.handleChange}/>
+                                            </Form.Group>
+                                            <Form.Row>
+                                                <Form.Group as={Col} controlId="user_name">
+                                                    <Form.Label>First Name</Form.Label>
+                                                    <Form.Control type="first_name"
+                                                                  placeholder="First Name"
+                                                                  onChange={this.handleChange}/>
+                                                </Form.Group>
+                                                <Form.Group as={Col} controlId="user_surname">
+                                                    <Form.Label>Last Name</Form.Label>
+                                                    <Form.Control type="last_name"
+                                                                  placeholder="Last Name"
+                                                                  onChange={this.handleChange}/>
+                                                </Form.Group>
+                                            </Form.Row>
+                                            <Form.Group controlId="user_password">
+                                                <Form.Label>Password</Form.Label>
+                                                <Form.Control type="password"
+                                                              placeholder="Password"
+                                                              onChange={this.handleChange}/>
+                                                <Form.Text className="text-muted">
+                                                    We'll never share your password with anyone else besides Zuckerberg
+                                                </Form.Text>
+                                            </Form.Group>
+                                            <Button variant="primary" type="submit" onClick={() => this.SignUp()}>
+                                                Sign Up
+                                            </Button>
+                                        </Form>
+                                    </Card.Text>
+                                    <Card.Link href="/login">Already have an account?</Card.Link>
+                                    <Card.Text>
+                                        {this.state.already_user ?
+                                            <Alert variant="danger">
+                                                A user with this email was already created!
+                                            </Alert>
                                         : ''}
-                                    <Form onSubmit={this.handleSubmit}>
-                                        <Form.Group controlId="user_email">
-                                            <Form.Label>Email address</Form.Label>
-                                            <Form.Control type="email"
-                                                          placeholder="Enter email"
-                                                          onChange={this.handleChange}/>
-                                        </Form.Group>
-                                        <Form.Row>
-                                            <Form.Group as={Col} controlId="user_name">
-                                                <Form.Label>First Name</Form.Label>
-                                                <Form.Control type="first_name"
-                                                              placeholder="First Name"
-                                                              onChange={this.handleChange}/>
-                                            </Form.Group>
-                                            <Form.Group as={Col} controlId="user_surname">
-                                                <Form.Label>Last Name</Form.Label>
-                                                <Form.Control type="last_name"
-                                                              placeholder="Last Name"
-                                                              onChange={this.handleChange}/>
-                                            </Form.Group>
-                                        </Form.Row>
-                                        <Form.Group controlId="user_password">
-                                            <Form.Label>Password</Form.Label>
-                                            <Form.Control type="password"
-                                                          placeholder="Password"
-                                                          onChange={this.handleChange}/>
-                                            <Form.Text className="text-muted">
-                                                We'll never share your password with anyone else besides Zuckerberg
-                                            </Form.Text>
-                                        </Form.Group>
-                                        <Button variant="primary" type="submit" onClick={() => this.SignUp()}>
-                                            Sign Up
-                                        </Button>
-                                    </Form>
-                                </Card.Text>
-                                <Card.Link href="/login">Already have an account?</Card.Link>
-                            </Card.Body>
-                        </Card>
-                    </CenterView>
-                </div>
-            );
+                                    </Card.Text>
+                                </Card.Body>
+
+                            </Card>
+                        </CenterView>
+                    </div>
+                );
         }
         else { // error!
             return (
