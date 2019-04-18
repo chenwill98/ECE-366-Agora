@@ -74,6 +74,7 @@ class Login extends Component {
                 .then(res => {
                     if (res.status === 200) {
 
+                        // set cookie and local storage from response
                         cookies.set('USER_TOKEN', res.data[0], { path: '/' });
                         localStorage.setItem('userID', res.data[1]);
 

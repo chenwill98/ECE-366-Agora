@@ -126,6 +126,7 @@ class Dashboard extends Component{
 
     ////////////////////////////
     render() {
+        // confirm that the user session exists, otherwise redirect to login.
         if (cookies.get("USER_TOKEN") == null)
             return <Redirect to="/login"/>;
         else {
