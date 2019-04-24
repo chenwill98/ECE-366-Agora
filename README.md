@@ -14,10 +14,23 @@ This is an event sharing platform built for Cooper Union's ECE-366: Software Eng
 ### Block Diagram
 ![Block Diagram Picture](./diagrams/AgoraBlockDiagram.png)
 
+### Front end Setup
 
-### BackEnd Setup
+Our front end uses React to build the UI, and we use Yarn to manage our dependencies.
 
-Our BackEnd consists of restful API services along with a database.
+To start the app in development mode, we first need to install all the dependencies using the command:
+```
+yarn install
+```
+After installing the dependencies, we can start the app in development mode using the command:
+```
+yarn start
+```
+The app should start, and to access it simply go to `http://localhost:3000` if it doesn't automatically direct you there.
+
+### Back end Setup
+
+Our back end consists of restful API services along with a database.
 
 #### Services
 
