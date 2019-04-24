@@ -10,6 +10,10 @@ import Groups from './containers/Groups.js';
 import Events from './containers/Events.js';
 import EventPage from './containers/EventPage.js';
 import GroupPage from './containers/GroupPage.js';
+import CreateGroup from './containers/CreateGroup.js';
+import CreateEvent from './containers/CreateEvent.js';
+
+
 
 const routing = (
     <Router>
@@ -22,6 +26,8 @@ const routing = (
             <Route path="/login" component={Login} />
             <Route path="/group/:group_id" component={GroupPage} />
             <Route path="/event/:event_id" component={EventPage} />
+            <Route path="/groupCreate" component={GroupCreate} />
+            <Route path="/eventCreate" component={EventCreate} />
         </div>
     </Router>
 )

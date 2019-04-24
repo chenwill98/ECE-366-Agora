@@ -173,6 +173,7 @@ public class GroupStore {
     }
 
 
+
     /**
      * createEvent - Adds an event to the database.
      *
@@ -521,4 +522,5 @@ public class GroupStore {
 
         return groups;
     }
+
 }

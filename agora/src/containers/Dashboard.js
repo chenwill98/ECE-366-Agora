@@ -5,8 +5,8 @@ import "../styles/App.css";
 import Button from "react-bootstrap/Button";
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute.js";
-import Cookies from "universal-cookie";
 import Navigation from "../components/Navigation.js";
+import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
@@ -106,7 +106,6 @@ class Dashboard extends Component{
                         status: res.status
                     })
                 ).then(res => {
-                    console.log('eventsssss:' + res.data);
                     if (res.data !== '') {
                         this.setState( {
                             user_events: res.data,

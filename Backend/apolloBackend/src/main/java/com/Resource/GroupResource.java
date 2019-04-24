@@ -73,7 +73,7 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<User>>>>create("POST", "/group/<id>/view-contacts", this::viewContacts)
+                Route.<SyncHandler<Response<List<User>>>>create("GET", "/group/<id>/view-contacts", this::viewContacts)
                         .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
@@ -154,15 +154,15 @@ public class GroupResource implements RouteProvider {
      */
     @VisibleForTesting
     public Response<List<User>> viewContacts(RequestContext ctx) {
-        String id = ctx.pathArgs().get("id");
+        String gid = ctx.pathArgs().get("id");
 
         // some basic error checking
-        if (id == null || id.isEmpty()) {
+        if (gid == null || gid.isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // get the list of users from the database and return it
-        List<User> users = store.getUsers(id);
+        List<User> users = store.getUsers(gid);
 
         if (!users.isEmpty())
             return Response.ok().withPayload(users);
