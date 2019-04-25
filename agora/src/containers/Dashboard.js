@@ -5,8 +5,8 @@ import "../styles/App.css";
 import Button from "react-bootstrap/Button";
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute.js";
-import Cookies from "universal-cookie";
 import Navigation from "../components/Navigation.js";
+import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
@@ -31,7 +31,7 @@ class Dashboard extends Component{
             port: Backend_Route.port,
 
             // user related states
-            user_id: localStorage.getItem('userID'), //
+            user_id: localStorage.getItem('userID'),
             user_last_name: "",
             user_first_name: "",
             user_email: "",
@@ -45,7 +45,6 @@ class Dashboard extends Component{
         };
     }
     componentDidMount () {
-
         fetch( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/get-user`, init)
         .catch(error => {
             this.setState({
@@ -106,7 +105,6 @@ class Dashboard extends Component{
                         status: res.status
                     })
                 ).then(res => {
-                    console.log('eventsssss:' + res.data);
                     if (res.data !== '') {
                         this.setState( {
                             user_events: res.data,
@@ -126,8 +124,10 @@ class Dashboard extends Component{
 
     ////////////////////////////
     render() {
-        if (cookies.get("USER_TOKEN") == null)
+        // confirm that the user session exists, otherwise redirect to login.
+        if (!cookies.get("USER_TOKEN")) {
             return <Redirect to="/login"/>;
+        }
         else {
             return (
                 <div>

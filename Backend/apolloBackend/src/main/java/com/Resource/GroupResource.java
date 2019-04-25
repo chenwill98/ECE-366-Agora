@@ -53,7 +53,7 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-events", this::getEvents)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<id>/is-admin/<uid>", this::isAdmin)
+                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<gid>/is-admin/<id>", this::isAdmin)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -73,7 +73,7 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<List<User>>>>create("POST", "/group/<id>/view-contacts", this::viewContacts)
+                Route.<SyncHandler<Response<List<User>>>>create("GET", "/group/<id>/view-contacts", this::viewContacts)
                         .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
@@ -95,14 +95,14 @@ public class GroupResource implements RouteProvider {
     /* todo: comments and unit tests */
     private Response<Boolean> isAdmin(RequestContext ctx) {
         // some basic error checking
-        if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty() ||
-            ctx.pathArgs().get("uid") == null || ctx.pathArgs().get("uid").isEmpty()) {
+        if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
+            ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
         }
 
 
         return Response.ok().withPayload(
-                store.isAdmin(ctx.pathArgs().get("uid"), ctx.pathArgs().get("id"))
+                store.isAdmin(ctx.pathArgs().get("id"), ctx.pathArgs().get("gid"))
         );
     }
 
@@ -154,15 +154,15 @@ public class GroupResource implements RouteProvider {
      */
     @VisibleForTesting
     public Response<List<User>> viewContacts(RequestContext ctx) {
-        String id = ctx.pathArgs().get("id");
+        String gid = ctx.pathArgs().get("id");
 
         // some basic error checking
-        if (id == null || id.isEmpty()) {
+        if (gid == null || gid.isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
         }
 
         // get the list of users from the database and return it
-        List<User> users = store.getUsers(id);
+        List<User> users = store.getUsers(gid);
 
         if (!users.isEmpty())
             return Response.ok().withPayload(users);
@@ -394,9 +394,10 @@ public class GroupResource implements RouteProvider {
     private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Access-Control-Allow-Origin", "*");
-        headers.put("Access-Control-Allow-Methods", "GET, POST");
-        headers.put("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
+        headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+        headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
+        headers.put("Access-Control-Allow-Credentials", "true");
 
         return JsonSerializerMiddlewares.<T>jsonSerializeResponse(object_mapper.writer())
                 .and(Middlewares::httpPayloadSemantics)
@@ -427,8 +428,9 @@ public class GroupResource implements RouteProvider {
 
         return ctx -> {
             // check matching cookie id.
-            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty()) {
                 return Response.forStatus(Status.UNAUTHORIZED);
+            }
 
             String[] tokens = ctx.request().headers().get("Cookie").split("=");
 
@@ -437,6 +439,7 @@ public class GroupResource implements RouteProvider {
 
             // check that the user_id is an admin in the group
             String group_id = ctx.pathArgs().get("id");
+
             if (user_id == null || !store.isAdmin(user_id, group_id))
                 return Response.forStatus(Status.FORBIDDEN);
 

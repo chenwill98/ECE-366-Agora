@@ -1,19 +1,8 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
-import Cookies from "universal-cookie";
-import { withRouter } from 'react-router-dom';
-
-const cookies = new Cookies();
 
 
-
-
-class Navigation extends Component {
-    logOut = () => {
-        cookies.remove('USER_TOKEN', { path: '/' });
-        localStorage.setItem('userID', '');
-        this.props.history.push('/login');
-    }
+export default class Navigation extends Component {
 
     render() {
         return (
@@ -29,7 +18,7 @@ class Navigation extends Component {
                             <NavDropdown.Item href="/account">My Account</NavDropdown.Item>
                             <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item onClick={() => this.logOut()}>Sign Out</NavDropdown.Item>
+                            <NavDropdown.Item>Sign Out</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
                 </Navbar.Collapse>
@@ -37,4 +26,3 @@ class Navigation extends Component {
         )
     };
 }
-export default withRouter(Navigation) // at the end of component

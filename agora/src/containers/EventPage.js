@@ -83,9 +83,6 @@ class EventPage extends Component {
                 })
             })
 
-
-
-
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
             this.setState({intervalSet: interval})

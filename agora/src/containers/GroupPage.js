@@ -6,6 +6,12 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
 
+let init_get = {
+    method: "Get",
+    credentials: "include"
+};
+
+
 class GroupPage extends Component {
     constructor(props) {
         super(props);
@@ -23,7 +29,7 @@ class GroupPage extends Component {
             group_events: [],
 
             // if in a user session
-            user_id: "",
+            user_id: localStorage.getItem('userID'),
             user_isAdmin: false,
 
             // error related states
@@ -56,6 +62,7 @@ class GroupPage extends Component {
         // get the group's users
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
             .then ( res => {
+                console.log("Successfully got users.");
                 this.setState( {
                    group_users: res.data
                 });
@@ -71,7 +78,7 @@ class GroupPage extends Component {
         // get the group's events
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-events`)
             .then ( res => {
-                console.log(res.data);
+                console.log("Successfully got events.");
                 this.setState( {
                     group_events: res.data
                 });
@@ -86,13 +93,7 @@ class GroupPage extends Component {
 
         // find if user is an admin, if so give him certain buttons
         if (this.state.user_id !== '') {
-
-            axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.group_id}/is-admin/${this.state.user_id}`)
-                .then( res => {
-                    this.setState( {
-                        user_isAdmin: true
-                    });
-                })
+            fetch( `${this.state.ip}:${this.state.port}/group/${this.state.group_id}/is-admin/${this.state.user_id}`, init_get)
                 .catch( error => {
                     this.setState({
                         error: true,
@@ -100,6 +101,21 @@ class GroupPage extends Component {
                     });
                     console.log("Error requesting is-admin: " + error.message);
                 })
+                .then(res => {
+                    res.json().then(data => ({
+                            data: data,
+                            status: res.status
+                        })
+                    )
+                    .then(res => {
+                        if (res.data !== '') {
+                            console.log("Successfully know whether admin or not.");
+                            this.setState( {
+                                user_isAdmin: true
+                            });
+                        }
+                    })
+                });
         }
 
         if (!this.state.intervalSet) {
@@ -108,26 +124,37 @@ class GroupPage extends Component {
         }
     }
 
-    // updates the group_users array to also include the user's emails
+
+    /**
+     * getContactInfo - updates the group_users array to also include the user's emails.
+     */
     getContactInfo() {
         // get the group's events
-        axios.post(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/view-contacts`,
-                {},
-            { headers: { 'Authorization': 'USER_TOKEN=' + localStorage.getItem('cookie')} })
-            .then ( res => {
-                console.log(res.data);
-                this.setState( {
-                    group_events: res.data
-                });
-            })
-            .catch( error => {
-                this.setState({
-                    error: true,
-                    error_msg: error.message
-                });
-                console.log("Error requesting view-contacts: " + error.message);
+        fetch(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/view-contacts`, init_get)
+        .catch( error => {
+            this.setState({
+                error: true,
+                error_msg: error.message
             });
+            console.log("Error requesting view-contacts: " + error.message);
+        })
+        .then(res => {
+            console.log("status: " + res.status);
+
+            res.json().then(data => ({
+                    data: data,
+                    status: res.status
+                })
+            ).then(res => {
+                if (res.data !== '') {
+                    this.setState( {
+                        group_users: res.data
+                    });
+                }
+            })
+        });
     }
+
 
     //kills the process
     componentWillUnmount() {
@@ -138,6 +165,8 @@ class GroupPage extends Component {
     }
 
 
+
+    //// render function ////
     render() {
         if (this.state.error) {
             return (
@@ -158,7 +187,7 @@ class GroupPage extends Component {
                         <h1>Name: {this.state.group_name}</h1>
                         <p>Description: {this.state.group_description}</p>
 
-                        {this.state.user_isAdmin && <Button variant="raised" href="/createEvent">Create Event</Button>}
+                        {this.state.user_isAdmin && <Button variant="raised" href="/eventCreate">Create Event</Button>}
                         {this.state.user_isAdmin && <Button variant="raised" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
 
                         <Card>
@@ -178,6 +207,7 @@ class GroupPage extends Component {
                                 </Card>
                             )}
                         </Card>
+
                     </SingleObjectView>
                 </div>
             );

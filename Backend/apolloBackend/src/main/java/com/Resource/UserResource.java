@@ -623,7 +623,6 @@ public class UserResource implements RouteProvider {
             String[] tokens = ctx.request().headers().get("Cookie").split("=");
             String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
 
-            System.out.println(cookie_id);
             if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))
                 return Response.forStatus(Status.FORBIDDEN);
 
