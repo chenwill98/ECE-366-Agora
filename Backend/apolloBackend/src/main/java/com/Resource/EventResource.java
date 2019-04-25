@@ -50,6 +50,12 @@ public class EventResource implements RouteProvider {
         );
     }
 
+
+    /**
+     * getEvents - Get all events
+     * @param ctx - the request context
+     * @return a list of events
+     */
     private Response<List<Event>> getEvents(RequestContext ctx) {
         List<Event> events= store.getEvents();
 
@@ -59,7 +65,12 @@ public class EventResource implements RouteProvider {
             return Response.ok().withPayload(events);
     }
 
-    /* todo: add comments and unit tests */
+
+    /**
+     * getEventByID - gets an event from its ID
+     * @param ctx - the request context
+     * @return The event object.
+     */
     private Response<Event> getEventByID(RequestContext ctx) {
 
         String id = ctx.pathArgs().get("id");

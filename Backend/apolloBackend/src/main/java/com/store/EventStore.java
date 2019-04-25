@@ -230,7 +230,7 @@ public class EventStore {
         try {
             while (result_set.next()) {
                 events.add(new EventBuilder()
-                        .id(Integer.valueOf(result_set.getString("Event_name")))
+                        .id(Integer.valueOf(result_set.getString("Event_id")))
                         .name(result_set.getString("Event_name"))
                         .description(result_set.getString("Description"))
                         .gid(result_set.getInt("Groop_id"))

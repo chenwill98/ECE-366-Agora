@@ -39,20 +39,19 @@ export default class Groups extends Component {
 
     //fetches all data when the component mounts
     componentDidMount() {
-        this.setState({user_cookie: localStorage.getItem('cookie')});
-        this.getData(this.state.user_cookie);
-        if (!this.state.intervalSet) {
-            let interval = setInterval(this.getData, 1000);
-            this.setState({intervalSet: interval});
-        }
+        this.getData();
+        // if (!this.state.intervalSet) {
+        //     let interval = setInterval(this.getData, 1000);
+        //     this.setState({intervalSet: interval});
+        // }
     }
 
     // kills the process
     componentWillUnmount() {
-        if (this.state.intervalSet) {
-            clearInterval(this.state.intervalSet);
-            this.setState({ intervalSet: null });
-        }
+        // if (this.state.intervalSet) {
+        //     clearInterval(this.state.intervalSet);
+        //     // this.setState({ intervalSet: null });
+        // }
     }
 
     getData = () => {
@@ -87,10 +86,10 @@ export default class Groups extends Component {
         //fetches all of the groups available for browsing
         axios.get( `${this.state.ip}:${this.state.port}/group/get-groups`)
         .then(res => {
-            console.log("Successfully got all groups.");
             this.setState( {
-                total_groups: res.data.groups,
+                total_groups: res.data.groups
             });
+            console.log("Successfully got all groups.");
         })
         .catch(error => {
             this.setState({
@@ -102,12 +101,12 @@ export default class Groups extends Component {
     };
 
     render() {
-        if (this.state.error)
+        if (this.state.error) {
             return (
                 <div className='mt-5'>
                     <Navigation/>
                     <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
+                        <Card border="primary" style={{width: '40rem'}}>
                             <Card.Body>
                                 <Card.Title>Error</Card.Title>
                                 <Card.Text>
@@ -118,6 +117,7 @@ export default class Groups extends Component {
                     </CenterView>
                 </div>
             );
+        }
         else {
             return (
                 <div className='mt-5'>
@@ -126,15 +126,14 @@ export default class Groups extends Component {
                         <Card>
                             <Card.Header as="h5">Your groups</Card.Header>
                         </Card>
-                        {this.state.user_groups & this.state.user_groups.map((groups, i) =>
-                            <Card key={i} group={groups}>
 
-                            </Card>
-                        )}
+                        {this.state.user_groups && this.state.user_groups
+                            .map((groups, i) => <Card key={i} group={groups}></Card>)
+                        }
                         <Card>
                             <Card.Header as="h5">All groups</Card.Header>
                         </Card>
-                        {this.state.total_groups & this.state.total_groups.map((groups, i) =>
+                        {this.state.total_groups && this.state.total_groups.map((groups, i) =>
                             <Card key={i} group={groups}>
 
                             </Card>
