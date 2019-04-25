@@ -224,10 +224,10 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select Is_admin from Groop_memberships where" +
-                                                "User_id = ? and Groop_id =?");
-            stmt.setString(1, user_id);
-            stmt.setString(2, group_id);
+            stmt = connection.prepareStatement( "select Is_admin from Groop_memberships where " +
+                                                "User_id = ? and Groop_id = ?");
+            stmt.setInt(1, Integer.valueOf(user_id));
+            stmt.setInt(2, Integer.valueOf(group_id));
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -4,6 +4,17 @@ import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
+
+
+let init = {
+    method: "Get",
+    credentials: "include"
+};
+
 
 export default class Groups extends Component {
     constructor(props) {
@@ -15,8 +26,7 @@ export default class Groups extends Component {
             port: Backend_Route.port,
 
             // user related states
-            user_id: "",
-            user_cookie: "",
+            user_id: localStorage.getItem('userID'),
             user_groups: [],
             total_groups: [],
 
@@ -45,38 +55,50 @@ export default class Groups extends Component {
         }
     }
 
-    getData = (user_cookie) => {
-        //fetches all of the user's groups
-        axios.get( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/groups`, { headers:{
-                'Authorization': `USER_TOKEN=${user_cookie}`
-        }})
-            .then(res => {
-                this.setState( {
-                    user_groups: res.data.groups,
-                });
-            })
+    getData = () => {
+        if (this.state.user_id && cookies.get("USER_TOKEN")) {
+            //fetches all of the user's groups
+            fetch( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/groups`, init)
             .catch(error => {
                 this.setState({
                     error: true,
                     error_msg:  "Error requesting list of user groups: " + error.message
                 });
                 console.log("Error requesting user groups: " + error.message);
+            })
+            .then(res => {
+                res.json().then(data => ({
+                        data: data,
+                        status: res.status
+                    })
+                )
+                    .then(res => {
+                        if (res.data !== '') {
+                            console.log("Successfully got user groups.");
+                            this.setState( {
+                                user_groups: res.data.groups,
+                            });
+                        }
+                    })
             });
+        }
+
 
         //fetches all of the groups available for browsing
         axios.get( `${this.state.ip}:${this.state.port}/group/get-groups`)
-            .then(res => {
-                this.setState( {
-                    total_groups: res.data.groups,
-                });
-            })
-            .catch(error => {
-                this.setState({
-                    error: true,
-                    error_msg:  "Error requesting list of all groups: " + error.message
-                });
-                console.log("Error requesting all groups: " + error.message);
+        .then(res => {
+            console.log("Successfully got all groups.");
+            this.setState( {
+                total_groups: res.data.groups,
             });
+        })
+        .catch(error => {
+            this.setState({
+                error: true,
+                error_msg:  "Error requesting list of all groups: " + error.message
+            });
+            console.log("Error requesting all groups: " + error.message);
+        });
     };
 
     render() {
@@ -104,7 +126,7 @@ export default class Groups extends Component {
                         <Card>
                             <Card.Header as="h5">Your groups</Card.Header>
                         </Card>
-                        {this.state.user_groups.map((groups, i) =>
+                        {this.state.user_groups & this.state.user_groups.map((groups, i) =>
                             <Card key={i} group={groups}>
 
                             </Card>
@@ -112,7 +134,7 @@ export default class Groups extends Component {
                         <Card>
                             <Card.Header as="h5">All groups</Card.Header>
                         </Card>
-                        {this.state.total_groups.map((groups, i) =>
+                        {this.state.total_groups & this.state.total_groups.map((groups, i) =>
                             <Card key={i} group={groups}>
 
                             </Card>

@@ -31,7 +31,7 @@ class Dashboard extends Component{
             port: Backend_Route.port,
 
             // user related states
-            user_id: localStorage.getItem('userID'), //
+            user_id: localStorage.getItem('userID'),
             user_last_name: "",
             user_first_name: "",
             user_email: "",
@@ -45,7 +45,6 @@ class Dashboard extends Component{
         };
     }
     componentDidMount () {
-
         fetch( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/get-user`, init)
         .catch(error => {
             this.setState({
@@ -126,8 +125,9 @@ class Dashboard extends Component{
     ////////////////////////////
     render() {
         // confirm that the user session exists, otherwise redirect to login.
-        if (cookies.get("USER_TOKEN") == null)
+        if (!cookies.get("USER_TOKEN")) {
             return <Redirect to="/login"/>;
+        }
         else {
             return (
                 <div>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card, Alert, Col } from "react-bootstrap";
+import { Form, Button, Card, Alert } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'

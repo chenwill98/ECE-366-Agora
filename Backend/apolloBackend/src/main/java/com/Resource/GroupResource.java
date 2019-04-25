@@ -53,7 +53,7 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(jsonMiddleware()),
                 Route.sync("GET", "/group/<id>/get-events", this::getEvents)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<id>/is-admin/<uid>", this::isAdmin)
+                Route.<SyncHandler<Response<Boolean>>>create("GET", "/group/<gid>/is-admin/<id>", this::isAdmin)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -95,14 +95,14 @@ public class GroupResource implements RouteProvider {
     /* todo: comments and unit tests */
     private Response<Boolean> isAdmin(RequestContext ctx) {
         // some basic error checking
-        if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty() ||
-            ctx.pathArgs().get("uid") == null || ctx.pathArgs().get("uid").isEmpty()) {
+        if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
+            ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
         }
 
 
         return Response.ok().withPayload(
-                store.isAdmin(ctx.pathArgs().get("uid"), ctx.pathArgs().get("id"))
+                store.isAdmin(ctx.pathArgs().get("id"), ctx.pathArgs().get("gid"))
         );
     }
 
@@ -428,8 +428,9 @@ public class GroupResource implements RouteProvider {
 
         return ctx -> {
             // check matching cookie id.
-            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty())
+            if (ctx.request().headers().get("Cookie") == null || ctx.request().headers().get("Cookie").isEmpty()) {
                 return Response.forStatus(Status.UNAUTHORIZED);
+            }
 
             String[] tokens = ctx.request().headers().get("Cookie").split("=");
 
@@ -438,6 +439,7 @@ public class GroupResource implements RouteProvider {
 
             // check that the user_id is an admin in the group
             String group_id = ctx.pathArgs().get("id");
+
             if (user_id == null || !store.isAdmin(user_id, group_id))
                 return Response.forStatus(Status.FORBIDDEN);
 

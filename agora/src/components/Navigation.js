@@ -1,20 +1,23 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, NavDropdown } from "react-bootstrap";
+import Cookies from "universal-cookie";
+import { withRouter } from 'react-router-dom';
+
+const cookies = new Cookies();
 
 
-export default class Navigation extends Component {
+
+
+class Navigation extends Component {
+    logOut = () => {
+        cookies.remove('USER_TOKEN', { path: '/' });
+        localStorage.setItem('userID', '');
+        this.props.history.push('/login');
+    }
 
     render() {
         return (
             <Navbar fixed="bottom" bg="primary" variant="dark" expand="lg">
-                {/*<Navbar.Brand href="#home">*/}
-                    {/*<img*/}
-                        {/*src="../images/AgoraLogo.png"*/}
-                        {/*width="30"*/}
-                        {/*height="30"*/}
-                        {/*className="d-inline-block align-top"*/}
-                    {/*/>*/}
-                {/*</Navbar.Brand>*/}
                 <Navbar.Brand href="/home">Agora</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -26,7 +29,7 @@ export default class Navigation extends Component {
                             <NavDropdown.Item href="/account">My Account</NavDropdown.Item>
                             <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
                             <NavDropdown.Divider />
-                            <NavDropdown.Item>Sign Out</NavDropdown.Item>
+                            <NavDropdown.Item onClick={() => this.logOut()}>Sign Out</NavDropdown.Item>
                         </NavDropdown>
                     </Nav>
                 </Navbar.Collapse>
@@ -34,3 +37,4 @@ export default class Navigation extends Component {
         )
     };
 }
+export default withRouter(Navigation) // at the end of component

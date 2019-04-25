@@ -5,16 +5,9 @@ import SingleObjectView from '../components/SingleObjectView.js';
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
-import Cookies from "universal-cookie";
-
-const cookies = new Cookies();
 
 let init_get = {
     method: "Get",
-    credentials: "include"
-};
-let init_post = {
-    method: "Post",
     credentials: "include"
 };
 
@@ -36,7 +29,7 @@ class GroupPage extends Component {
             group_events: [],
 
             // if in a user session
-            user_id: "",
+            user_id: localStorage.getItem('userID'),
             user_isAdmin: false,
 
             // error related states
@@ -69,6 +62,7 @@ class GroupPage extends Component {
         // get the group's users
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
             .then ( res => {
+                console.log("Successfully got users.");
                 this.setState( {
                    group_users: res.data
                 });
@@ -84,7 +78,7 @@ class GroupPage extends Component {
         // get the group's events
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-events`)
             .then ( res => {
-                console.log(res.data);
+                console.log("Successfully got events.");
                 this.setState( {
                     group_events: res.data
                 });
@@ -99,7 +93,6 @@ class GroupPage extends Component {
 
         // find if user is an admin, if so give him certain buttons
         if (this.state.user_id !== '') {
-
             fetch( `${this.state.ip}:${this.state.port}/group/${this.state.group_id}/is-admin/${this.state.user_id}`, init_get)
                 .catch( error => {
                     this.setState({
@@ -113,8 +106,10 @@ class GroupPage extends Component {
                             data: data,
                             status: res.status
                         })
-                    ).then(res => {
+                    )
+                    .then(res => {
                         if (res.data !== '') {
+                            console.log("Successfully know whether admin or not.");
                             this.setState( {
                                 user_isAdmin: true
                             });
@@ -129,31 +124,35 @@ class GroupPage extends Component {
         }
     }
 
-    // updates the group_users array to also include the user's emails
+
+    /**
+     * getContactInfo - updates the group_users array to also include the user's emails.
+     */
     getContactInfo() {
         // get the group's events
         fetch(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/view-contacts`, init_get)
-
-            .catch( error => {
-                this.setState({
-                    error: true,
-                    error_msg: error.message
-                });
-                console.log("Error requesting view-contacts: " + error.message);
-            })
-            .then(res => {
-                res.json().then(data => ({
-                        data: data,
-                        status: res.status
-                    })
-                ).then(res => {
-                    if (res.data !== '') {
-                        this.setState( {
-                            group_users: res.data
-                        });
-                    }
-                })
+        .catch( error => {
+            this.setState({
+                error: true,
+                error_msg: error.message
             });
+            console.log("Error requesting view-contacts: " + error.message);
+        })
+        .then(res => {
+            console.log("status: " + res.status);
+
+            res.json().then(data => ({
+                    data: data,
+                    status: res.status
+                })
+            ).then(res => {
+                if (res.data !== '') {
+                    this.setState( {
+                        group_users: res.data
+                    });
+                }
+            })
+        });
     }
 
 
@@ -168,10 +167,6 @@ class GroupPage extends Component {
 
 
     //// render function ////
-/* todo :
-    if (cookies.get("USER_TOKEN") == null)
-    return <Redirect to="/login"/>;
-*/
     render() {
         if (this.state.error) {
             return (
@@ -212,8 +207,6 @@ class GroupPage extends Component {
                                 </Card>
                             )}
                         </Card>
-
-
 
                     </SingleObjectView>
                 </div>
