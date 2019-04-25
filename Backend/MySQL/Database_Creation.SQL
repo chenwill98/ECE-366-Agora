@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS `AgoraDB`.`Users` (
   `Last_name` VARCHAR(45) NOT NULL,
   `Passhash` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`User_id`),
-  UNIQUE INDEX `User_id_UNIQUE` (`User_id` ASC) VISIBLE,
-  INDEX `Email` (`Email` ASC) VISIBLE)
+  UNIQUE INDEX `User_id_UNIQUE` (`User_id` ASC) ,
+  INDEX `Email` (`Email` ASC) )
 ENGINE = InnoDB;
 
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `AgoraDB`.`Groops` (
   `Description` VARCHAR(45) NOT NULL,
   `Name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`Groop_id`),
-  UNIQUE INDEX `Group_id_UNIQUE` (`Groop_id` ASC) VISIBLE)
+  UNIQUE INDEX `Group_id_UNIQUE` (`Groop_id` ASC) )
 ENGINE = InnoDB;
 
 
@@ -48,13 +48,13 @@ CREATE TABLE IF NOT EXISTS `AgoraDB`.`Events` (
   `Event_id` INT NOT NULL AUTO_INCREMENT,
   `Event_name` VARCHAR(45) NULL,
   `Description` VARCHAR(45) NULL,
-  `Groop_id` INT NULL,
+  `Groop_id` INT NOT NULL,
   `Location` VARCHAR(45) NULL,
   `Date_time` DATETIME NULL,
   PRIMARY KEY (`Event_id`),
-  UNIQUE INDEX `Event ID_UNIQUE` (`Event_id` ASC) VISIBLE,
-  FULLTEXT INDEX `Descripsearch` (`Description`) INVISIBLE,
-  INDEX `Fk_events_groups_idx` (`Groop_id` ASC) VISIBLE,
+  UNIQUE INDEX `Event ID_UNIQUE` (`Event_id` ASC) ,
+  FULLTEXT INDEX `Descripsearch` (`Description`) IN,
+  INDEX `Fk_events_groups_idx` (`Groop_id` ASC) ,
   CONSTRAINT `fk_events_groups`
     FOREIGN KEY (`Groop_id`)
     REFERENCES `AgoraDB`.`Groops` (`Groop_id`)
@@ -71,8 +71,8 @@ CREATE TABLE IF NOT EXISTS `AgoraDB`.`Event_attendance` (
   `Event_id` INT NOT NULL,
   `Is_attending` ENUM("YES", "MAYBE", "NO") NULL,
   PRIMARY KEY (`User_id`, `Event_id`),
-  INDEX `fk_users_has_events_events1_idx` (`Event_id` ASC) VISIBLE,
-  INDEX `fk_users_has_events_users1_idx` (`User_id` ASC) VISIBLE,
+  INDEX `fk_users_has_events_events1_idx` (`Event_id` ASC) ,
+  INDEX `fk_users_has_events_users1_idx` (`User_id` ASC) ,
   CONSTRAINT `fk_users_has_events_users1`
     FOREIGN KEY (`User_id`)
     REFERENCES `AgoraDB`.`Users` (`User_id`)
@@ -94,8 +94,8 @@ CREATE TABLE IF NOT EXISTS `AgoraDB`.`Groop_memberships` (
   `Groop_id` INT NOT NULL,
   `Is_admin` TINYINT(1) NULL,
   PRIMARY KEY (`User_id`, `Groop_id`),
-  INDEX `fk_Users_has_Groops_Groops1_idx` (`Groop_id` ASC) VISIBLE,
-  INDEX `fk_Users_has_Groops_Users1_idx` (`User_id` ASC) VISIBLE,
+  INDEX `fk_Users_has_Groops_Groops1_idx` (`Groop_id` ASC) ,
+  INDEX `fk_Users_has_Groops_Users1_idx` (`User_id` ASC) ,
   CONSTRAINT `fk_Users_has_Groops_Users1`
     FOREIGN KEY (`User_id`)
     REFERENCES `AgoraDB`.`Users` (`User_id`)
