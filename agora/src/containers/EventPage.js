@@ -139,22 +139,14 @@ class EventPage extends Component {
 
 			  </ListGroup>
                         <Card>
-                            <h3>Users attending:</h3>
-			    <ListGroup> 
-			      {this.state.event_users.map((user, i) =>
-                                  <ListGroup.Item key={i} user={user}>
-                                      {user.first_name} {user.last_name} {user.email}
-                                  </ListGroup.Item>
-                              )}    
-
-			    </ListGroup>	
+                            <h3>Users attending:</h3>	
                             {this.state.event_users.map((user, i) =>
                                 <Card key={i} user={user}>
                                     <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body>
                                 </Card>
                             )}
                         </Card>
-                    </SinglebObjectView>
+                    </SinglebObjectView> 
 
                 </div>
             );
