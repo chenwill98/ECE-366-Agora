@@ -4,6 +4,8 @@ import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
+import ListGroup from 'react-bootstrap/ListGroup'
+
 
 class EventPage extends Component {
     constructor(props) {
@@ -129,8 +131,26 @@ class EventPage extends Component {
                         <p>Location: {this.state.event_location}</p>
                         <p>Date: {this.state.event_date}</p>
 
+
+
+			  <ListGroup> 
+			    {this.state.event_users.map((user, i) =>
+                                <ListGroup.Item key={i} user={user}>
+                                    {user.first_name} {user.last_name} {user.email}
+                                </ListGroup.Item>
+                            )}    
+
+			  </ListGroup>
                         <Card>
                             <h3>Users attending:</h3>
+			    <ListGroup> 
+			      {this.state.event_users.map((user, i) =>
+                                  <ListGroup.Item key={i} user={user}>
+                                      {user.first_name} {user.last_name} {user.email}
+                                  </ListGroup.Item>
+                              )}    
+
+			    </ListGroup>	
                             {this.state.event_users.map((user, i) =>
                                 <Card key={i} user={user}>
                                     <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body>
