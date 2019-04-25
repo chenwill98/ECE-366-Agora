@@ -5,7 +5,9 @@ import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
 import ListGroup from 'react-bootstrap/ListGroup'
-
+import Jumbotron from 'react-bootstrap/Jumbotron'
+import Button from 'react-bootstrap/Button'
+import Alert from 'react-bootstrap/Alert'
 
 class EventPage extends Component {
     constructor(props) {
@@ -115,39 +117,58 @@ class EventPage extends Component {
                 <div className='mt-5'>
                     <Navigation/>
 
-                    <SinglebObjectView>
-                        <h1>Name: {this.state.event_name}</h1>
-                        <p>Description: {this.state.event_description}</p>
-
+			
+                        {/*<h1>Name: {this.state.event_name}</h1>
+                        <p>Description: {this.state.event_description}</p>*/}
+			{/*
                         <Card>
                             <Card.Body>
                                 <Card.Link href={"/group/" + this.state.event_gid}>{this.state.event_g_name}</Card.Link>
                             </Card.Body>
                         </Card>
-
+			
                         <p>Location: {this.state.event_location}</p>
                         <p>Date: {this.state.event_date}</p>
 
+			*/}
 
+			<Jumbotron>
+				<h1>{this.state.event_g_name}</h1>
+				<Button href={"/group/" + this.state.event_gid}> Go to group.</Button> 				
+				<Alert variant="primary" style={{width : '30rem'}}><b>What:</b> {this.state.event_description}</Alert>
+				
+				<Alert variant="primary" style={{width : '30rem'}}><b>Where:</b> {this.state.event_location} </Alert>
+				<Alert variant="primary" style={{width : '30rem'}}><b>Who:</b>{this.state.event_date} </Alert>
+			</Jumbotron>	
 
-			  <ListGroup> 
-			    {this.state.event_users.map((user, i) =>
-                                <ListGroup.Item key={i} user={user}>
-                                    {user.first_name} {user.last_name} {user.email}
-                                </ListGroup.Item>
-                            )}    
+			<CenterView>
+				<Card style={{width : '50rem'}}>
+					<Card.Header as="h2"> People Coming <Card.Header>
+					<ListGroup variant="flush"> 
+					    {this.state.event_users.map((user, i) =>
+	                        	        <ListGroup.Item key={i} user={user}>
+	                        	            {user.first_name} {user.last_name} {user.email}
+	                        	        </ListGroup.Item>
+	                        	    )}    
+					</ListGroup>
+				</Card>
+			</CenterView>
+		
+			{/*
+			<CenterView>
+			<Card style={{width : '50rem'}}>
+				<Card.Header as="h2">
+				Attendees
+				</Card.Header>
 
-			  </ListGroup>
-                        <Card>
-                            <h3>Users attending:</h3>	
                             {this.state.event_users.map((user, i) =>
                                 <Card key={i} user={user}>
                                     <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body>
                                 </Card>
                             )}
                         </Card>
-                    </SinglebObjectView> 
-
+			</CenterView>
+			*/}
                 </div>
             );
         }
