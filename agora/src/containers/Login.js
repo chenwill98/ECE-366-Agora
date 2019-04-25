@@ -37,17 +37,17 @@ class Login extends Component {
 
     //determines if there is currently a user session by whether a cookie exists or not
     componentDidMount () {
-        if (localStorage.getItem('cookie')) {
-            this.setState({user_session: true});
-        }
+        // if (localStorage.getItem('cookie')) {
+        //     this.setState({user_session: true});
+        // }
     }
 
     //kills the process
     componentWillUnmount() {
-        // if (this.state.intervalIsSet) {
-        //     clearInterval(this.state.intervalIsSet);
-        //     this.setState({ intervalIsSet: null });
-        // }
+        if (this.state.intervalIsSet) {
+            clearInterval(this.state.intervalIsSet);
+            this.setState({ intervalIsSet: null });
+        }
     }
 
     //sets the values of the inputs as values in this.state
