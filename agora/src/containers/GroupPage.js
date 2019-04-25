@@ -31,6 +31,7 @@ class GroupPage extends Component {
             // if in a user session
             user_id: localStorage.getItem('userID'),
             user_isAdmin: false,
+            user_belongs: false,
 
             // error related states
             intervalSet: false,
@@ -42,8 +43,10 @@ class GroupPage extends Component {
 
     //fetches all data when the component mounts
     componentDidMount () {
-
-        // get group info
+        console.log('userid:' + this.state.user_id);
+        /**
+         * GET THE GROUP'S INFO
+         */
         axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.group_id}`)
             .then(res => {
                 this.setState( {
@@ -59,7 +62,10 @@ class GroupPage extends Component {
                 console.log("Error requesting group info: " + error.message);
             });
 
-        // get the group's users
+
+        /**
+         * GET THE GROUP'S USERS
+         */
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
             .then ( res => {
                 console.log("Successfully got users.");
@@ -75,7 +81,9 @@ class GroupPage extends Component {
                 console.log("Error requesting get-users: " + error.message);
             });
 
-        // get the group's events
+        /**
+         * GET THE GROUP'S EVENTS
+         */
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-events`)
             .then ( res => {
                 console.log("Successfully got events.");
@@ -91,31 +99,70 @@ class GroupPage extends Component {
                 console.log("Error requesting get-events: " + error.message);
             });
 
-        // find if user is an admin, if so give him certain buttons
-        if (this.state.user_id !== '') {
+
+        /**
+         * CHECK IF USER IS AN ADMIN TO THE GROUP
+         */
+        if (this.state.user_id !== null) {
             fetch( `${this.state.ip}:${this.state.port}/group/${this.state.group_id}/is-admin/${this.state.user_id}`, init_get)
+            .catch( error => {
+                this.setState({
+                    error: true,
+                    error_msg: error.message
+                });
+                console.log("Error requesting is-admin: " + error.message);
+            })
+            .then(res => {
+                res.json().then(data => ({
+                        data: data,
+                        status: res.status
+                    })
+                )
+                    .then(res => {
+                        if (res.status === 200) {
+                            if (res.data === true) {
+                                this.setState({
+                                    user_isAdmin: true,
+                                    user_belongs: true,
+                                });
+                                console.log("Successfully know whether admin:" + this.state.user_isAdmin);
+                            }
+
+                        } else {
+                            this.setState({
+                                error: true,
+                                error_msg: "Error with message: " + res.status
+                            });
+                            console.log("Error requesting is-admin: " + res.status);
+                        }
+                    });
+            });
+            /**
+             * CHECK IF USER BELONGS TO THE GROUP
+             */
+            if (this.state.user_belongs === false) {
+                fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/group/${this.state.group_id}`, init_get)
                 .catch( error => {
                     this.setState({
                         error: true,
                         error_msg: error.message
                     });
-                    console.log("Error requesting is-admin: " + error.message);
+                    console.log("Error requesting if user belongs in group: " + error.message);
                 })
                 .then(res => {
                     res.json().then(data => ({
                             data: data,
                             status: res.status
-                        })
-                    )
-                    .then(res => {
-                        if (res.data !== '') {
-                            console.log("Successfully know whether admin or not.");
+                    })).then(res => {
+                        if (res.status === 200) {
+                            console.log("Successfully know whether user belongs in group");
                             this.setState( {
-                                user_isAdmin: true
+                                user_belongs: true,
                             });
                         }
                     })
                 });
+            }
         }
 
         if (!this.state.intervalSet) {
@@ -156,6 +203,108 @@ class GroupPage extends Component {
     }
 
 
+    /**
+     * joinGroup - Makes a user join a group.
+     */
+    joinGroup() {
+        fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/join-group`,
+        {
+                method: "Post",
+                credentials: "include",
+                body: JSON.stringify({'groupname': this.state.group_name})
+            }
+        )
+        .catch( error => {
+            this.setState({
+                error: true,
+                error_msg: error.message
+            });
+            console.log("Error joining group: " + error.message);
+        })
+        .then(res => {
+            if (res.status === 200) {
+                this.setState( {
+                    user_belongs: true
+                });
+                console.log("Successfully joined group.");
+            }
+            else {
+                this.setState({
+                    error: true,
+                    error_msg: "Response: " + res.status
+                });
+                console.log("Error joining group, status:" + res.status);
+            }
+        });
+    }
+
+
+    /**
+     * leaveGroup - Deletes the connection between a user and a group.
+     */
+    leaveGroup() {
+        fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/leave-group`,
+            {
+                method: "Post",
+                credentials: "include",
+                body: JSON.stringify({'groupname': this.state.group_name})
+            }
+        )
+        .catch( error => {
+            this.setState({
+                error: true,
+                error_msg: error.message
+            });
+            console.log("Error joining group: " + error.message);
+        })
+        .then(res => {
+            if (res.status === 200) {
+                this.setState( {
+                    user_belongs: false
+                });
+                console.log("Successfully left group.");
+            }
+            else {
+                this.setState({
+                    error: true,
+                    error_msg: "Response: " + res.status
+                })
+                console.log("Error leaving group.");
+            }
+        });
+    }
+
+
+    /**
+     * makeAdmin - Makes a user an admin.
+     */
+    makeAdmin(user2admin_id) {
+        fetch(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/update-admins`,
+            {
+                method: "Post",
+                credentials: "include",
+                body: JSON.stringify({'user_id': user2admin_id, 'make_admin': 1})
+            }
+        )
+        .catch( error => {
+            this.setState({
+                error: true,
+                error_msg: error.message
+            });
+            console.log("Error joining group: " + error.message);
+        })
+        .then(res => {
+            if (res.status === 200) {
+                console.log("Successfully made someone an admin.");
+            }
+            else {
+                console.log("Failed to make someone an admin.");
+            }
+        });
+    }
+
+
+
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalIsSet) {
@@ -187,14 +336,17 @@ class GroupPage extends Component {
                         <h1>Name: {this.state.group_name}</h1>
                         <p>Description: {this.state.group_description}</p>
 
-                        {this.state.user_isAdmin && <Button variant="raised" href="/eventCreate">Create Event</Button>}
-                        {this.state.user_isAdmin && <Button variant="raised" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="raised" href="/eventCreate">Create Event</Button>}
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
+                        {this.state.user_id  && !this.state.user_belongs && <Button variant="raised" onClick={() => this.joinGroup()}>Join Group</Button>}
+                        {this.state.user_id  && this.state.user_belongs && <Button variant="raised" onClick={() => this.leaveGroup()}>Leave Group</Button>}
 
                         <Card>
                             <h3>Users:</h3>
                         {this.state.group_users.map((user, i) =>
                             <Card key={i} user={user}>
-                                <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body>
+                                <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title>
+                                    {user.uid != this.state.user_id && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}</Card.Body>
                             </Card>
                         )}
                         </Card>
@@ -213,6 +365,7 @@ class GroupPage extends Component {
             );
         }
     }
+
 }
 
 

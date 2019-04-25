@@ -7,6 +7,11 @@ import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Navigation from '../components/Navigation.js';
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
+
 
 class SignUp extends Component {
     constructor(props) {
@@ -19,7 +24,6 @@ class SignUp extends Component {
 
             // user related states
             user_id: "",
-            user_cookie: "",
             user_name: "",
             user_surname: "",
             user_email: "",
@@ -35,12 +39,7 @@ class SignUp extends Component {
         };
     }
 
-    //determines if there is currently a user session by whether a cookie exists or not
-    componentDidMount () {
-        if (localStorage.getItem('cookie')) {
-            this.setState({user_session: true});
-        }
-    }
+    componentDidMount () {}
 
     //kills the process
     componentWillUnmount() {
@@ -111,7 +110,7 @@ class SignUp extends Component {
             return (
                 <Redirect to="/login"/>
             );
-        } else if (this.state.user_session) {
+        } else if (cookies.get("USER_TOKEN")) {
             return(
                 <Redirect to="/home"/>
             );

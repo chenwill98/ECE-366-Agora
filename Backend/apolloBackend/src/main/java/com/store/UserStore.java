@@ -269,7 +269,7 @@ public class UserStore {
         PreparedStatement stmt = null;
         ResultSet  result_set;
 
-        // get the group id of the group we just created
+        // get the group id of the group goup name
         try {
             stmt = connection.prepareStatement("select Groop_id from Groops where Name = ?");
             stmt.setString(1, group_name);
@@ -293,7 +293,7 @@ public class UserStore {
         }
 
         try {
-            stmt = connection.prepareStatement("insert into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?)");
+            stmt = connection.prepareStatement("replace into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?)");
             stmt.setString(1, user_id);
             stmt.setString(2, result_set.getString("Groop_id"));
             stmt.setInt(3, is_admin);

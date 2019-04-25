@@ -561,7 +561,7 @@ public class UserResource implements RouteProvider {
             return cookie_db.get(user_id);
         }
         else {
-            Random rand = new Random(1234);  /* seed corresponds to testing seed so that we can run unit tests */
+            Random rand = new Random();  /* seed corresponds to testing seed so that we can run unit tests */
             Integer new_cookie_id = rand.nextInt(1000000);
             cookie_db.put(user_id, new_cookie_id);
             return new_cookie_id;
@@ -623,6 +623,7 @@ public class UserResource implements RouteProvider {
             String[] tokens = ctx.request().headers().get("Cookie").split("=");
             String cookie_id = String.valueOf(cookie_db.get(Integer.valueOf(ctx.pathArgs().get("id"))));
 
+            System.out.println(cookie_id + "," + tokens[1]);
             if (cookie_id == null || !tokens[0].equals("USER_TOKEN") || !cookie_id.equals(tokens[1]))
                 return Response.forStatus(Status.FORBIDDEN);
 

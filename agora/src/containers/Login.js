@@ -22,7 +22,6 @@ class Login extends Component {
 
             // user related states
             user_id: "",
-            user_cookie: "",
             user_email: "",
             user_password: "",
             user_session: false,
@@ -71,37 +70,36 @@ class Login extends Component {
                 'pass_hash': this.state.user_password
             });
             axios.post(`${this.state.ip}:${this.state.port}/login`, data)
-                .then(res => {
-                    if (res.status === 200) {
+            .then(res => {
+                if (res.status === 200) {
 
-                        // set cookie and local storage from response
-                        cookies.set('USER_TOKEN', res.data[0], { path: '/' });
-                        localStorage.setItem('userID', res.data[1]);
-
-                        this.setState({
-                            user_session: true
-                        });
-                    }
-                    else {
-                        this.setState({
-                            error: true,
-                            error_msg:  "Error logging in user. Status code: " + res.status
-                        });
-                        console.log("Error requesting cookie: " + res.status);
-                    }
-                })
-                .catch(error => { //not catching error with connecting? only catches errors returned by backend?
+                    // set cookie and local storage from response
+                    cookies.set('USER_TOKEN', res.data[0], { path: '/' });
+                    localStorage.setItem('userID', res.data[1]);
+                    this.setState( {
+                        success: true
+                    });
+                }
+                else {
                     this.setState({
                         error: true,
-                        error_msg:  "Error logging in user: " + error.message
+                        error_msg:  "Error logging in user. Status code: " + res.status
                     });
-                    console.log("Error requesting cookie: " + error.message);
+                    console.log("Error requesting cookie: " + res.status);
+                }
+            })
+            .catch(error => { //not catching error with connecting? only catches errors returned by backend?
+                this.setState({
+                    error: true,
+                    error_msg:  "Error logging in user: " + error.message
                 });
+                console.log("Error requesting cookie: " + error.message);
+            });
         }
     };
 
     render() {
-        if (this.state.user_session) {
+        if (cookies.get("USER_TOKEN")) {
             return(
                 <Redirect to="/home"/>
             )

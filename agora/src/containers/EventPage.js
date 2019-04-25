@@ -5,6 +5,13 @@ import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
 
+
+let init = {
+    method: "Get",
+    credentials: "include"
+};
+
+
 class EventPage extends Component {
     constructor(props) {
         super(props);
@@ -25,7 +32,7 @@ class EventPage extends Component {
             event_users: [],
 
             // if in a user session
-            user_id: "",
+            user_id: localStorage.getItem('userID'),
             user_isAdmin: false,
 
             // error related states
@@ -40,46 +47,63 @@ class EventPage extends Component {
     componentDidMount () {
         // get the event info
         axios.get( `${this.state.ip}:${this.state.port}/event/${this.state.event_id}`)
+        .then(res => {
+            this.setState( {
+                event_description: res.data.description,
+                event_name: res.data.name,
+                event_gid: res.data.gid,
+                event_location: res.data.location,
+                event_date: res.data.date
+            });
+
+            // get the Group name of the event's parent group.
+            axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}`)
             .then(res => {
                 this.setState( {
-                    event_description: res.data.description,
-                    event_name: res.data.name,
-                    event_gid: res.data.gid,
-                    event_location: res.data.location,
-                    event_date: res.data.date
+                    event_g_name: res.data.name
                 });
-
-                // get the Group name of the event's parent group.
-                console.log(this.state.event_gid);
-                axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}`)
-                    .then(res => {
-                        this.setState( {
-                            event_g_name: res.data.name
-                        });
-                    })
-                    .catch(error => {
-                        this.setState({
-                            error: true,
-                            error_msg: error.message
-                        });
-                        console.log("Error requesting event's parent group info: " + error.message);
-                    });
+                console.log("Success getting the event's group owner.");
             })
             .catch(error => {
                 this.setState({
                     error: true,
-                    error_msg:  "Error requesting the details of an event: " + error.message
+                    error_msg: error.message
                 });
-                console.log("Error requesting event: " + error.message);
+                console.log("Error requesting event's parent group info: " + error.message);
             });
+        })
+        .catch(error => {
+            this.setState({
+                error: true,
+                error_msg:  "Error requesting the details of an event: " + error.message
+            });
+            console.log("Error requesting event: " + error.message);
+        });
 
         // get the event's users
         axios.get(`${this.state.ip}:${this.state.port}/event/${this.state.event_id}/get-users`)
-            .then( res => {
-                this.setState( {
-                    event_users: res.data
+        .then( res => {
+            this.setState( {
+                event_users: res.data
+            });
+            console.log("Success getting the event's users.");
+        });
+
+        // check if you belong to this event and if you are an admin
+        fetch( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}/is-admin/${this.state.user_id}`, init)
+        .then(res => {
+            res.json().then(data => ({
+                    data: data,
+                    status: res.status
                 })
+            ).then(res => {
+                if (res.data !== '') {
+                    this.setState( {
+                        user_isAdmin: res.data
+                    });
+                }
             })
+        });
 
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
@@ -106,7 +130,7 @@ class EventPage extends Component {
                         <p> {this.state.error_msg}</p>
                     </SinglebObjectView>
                 </div>
-                    );
+            );
         }
         else {
             return (
