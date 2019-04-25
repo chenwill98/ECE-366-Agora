@@ -11,7 +11,7 @@ const cookies = new Cookies();
 class Navigation extends Component {
     logOut = () => {
         cookies.remove('USER_TOKEN', { path: '/' });
-        localStorage.setItem('userID', '');
+        localStorage.setItem('userID', null);
         this.props.history.push('/login');
     }
 

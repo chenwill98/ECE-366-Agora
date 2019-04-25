@@ -241,13 +241,8 @@ public class GroupStore {
         }
 
         try {
-            result_set.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            return result_set.getBoolean("Is_admin");
+            if (result_set.next())
+                return result_set.getBoolean("Is_admin");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -523,4 +518,36 @@ public class GroupStore {
         return groups;
     }
 
+
+    /**
+     * isBelonging - Checks whether a user belongs to a group.
+     * @param id The user ID
+     * @param gid The group ID
+     * @return boolean.
+     */
+    public Boolean isBelonging(String id, String gid) {
+        PreparedStatement stmt = null;
+        ResultSet result_set = null;
+
+        // prepare the sql statement
+        try {
+            stmt = connection.prepareStatement( "select Is_admin from Groop_memberships where " +
+                                                "User_id = ? and Groop_id = ?");
+            stmt.setInt(1, Integer.valueOf(id));
+            stmt.setInt(2, Integer.valueOf(gid));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // execute the sql
+        try {
+            result_set = stmt.executeQuery();
+            if (result_set.next())
+                return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

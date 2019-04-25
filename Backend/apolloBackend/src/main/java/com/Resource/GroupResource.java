@@ -58,7 +58,7 @@ public class GroupResource implements RouteProvider {
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/create-event", this::createEvent)
-                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
                 Route.<SyncHandler<Response<ByteString>>>create("POST", "/group/<id>/edit-event", this::editEvent)
@@ -76,12 +76,38 @@ public class GroupResource implements RouteProvider {
                 Route.<SyncHandler<Response<List<User>>>>create("GET", "/group/<id>/view-contacts", this::viewContacts)
                         .withMiddleware(handler -> groupAdminSessionMiddleware(handler))
                         .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<Boolean>>>create("GET", "/user/<id>/group/<gid>", this::isBelonging)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware())
+
         );
     }
 
 
-    /* todo: comments and unit tests */
+    /**
+     * isBelonging - Checks whether a user belongs to a group or not.
+     * @param ctx the request context containing a user id and group id in url.
+     * @return Boolean.
+     */
+    private Response<Boolean> isBelonging(RequestContext ctx) {
+        // some basic error checking
+        if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
+                ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
+            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Group ID"));
+        }
+
+        Boolean tmp = store.isBelonging(ctx.pathArgs().get("id"), ctx.pathArgs().get("gid"));
+        return Response.ok().withPayload(tmp);
+    }
+
+
+    /**
+     * getGroups - get all groups.
+     * @param ctx the request context.
+     * @return A list of groups.
+     */
     private Response<List<Group>> getGroups(RequestContext ctx) {
         List<Group> groups = store.getGroups();
 
@@ -195,6 +221,7 @@ public class GroupResource implements RouteProvider {
 
         for (User user : users)
             restricted_info_users.add(new UserBuilder()
+                    .uid(user.uid())
                     .first_name(user.first_name())
                     .last_name(user.last_name())
                     .email("")
@@ -365,7 +392,7 @@ public class GroupResource implements RouteProvider {
             e.printStackTrace();
         }
 
-        Group tmp = store.getGroup(ctx.pathArgs().get("id"));
+        Group tmp = store.getGroupByID(ctx.pathArgs().get("id"));
         if (tmp == null) {
             return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("No such group found"));
         }
