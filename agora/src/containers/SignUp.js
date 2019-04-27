@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card, Col, Alert, Image } from "react-bootstrap";
+import {Form, Button, Card, Col, Alert, Image, Jumbotron} from "react-bootstrap";
 import "../styles/SignUp.css";
 import { Redirect } from 'react-router-dom'
 import WelcomeNav from '../components/WelcomeNav.js';
@@ -119,69 +119,71 @@ class SignUp extends Component {
         } else if (this.state.error === false) {
                 return (
                     <div className='p-5'>
-                        {/*<WelcomeNav/>*/}
                         <CenterView>
-                            <Image src={require("../images/Logo.png")} style={{width: '40rem'}} rounded fluid/>
+                            <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
                         </CenterView>
-                        <CenterView>
-                            <Card border="primary" style={{width: '40rem'}}>
-                                <Card.Header as="h5">Organize events and connect with others on Agora
-                                    today!</Card.Header>
-                                <Card.Body>
-                                    <Card.Title>Sign Up</Card.Title>
-                                    <Card.Text>
-                                        {this.state.error ?
-                                            <Alert dismissible variant="danger"
-                                                   onClick={() => this.setState({error: false})}>
-                                                {this.state.error_msg}
-                                            </Alert>
+                        <hr />
+                        <Jumbotron fluid>
+                            <CenterView>
+                                <Card border="primary" style={{width: '40rem'}}>
+                                    <Card.Header as="h5">Organize events and connect with others on Agora
+                                        today!</Card.Header>
+                                    <Card.Body>
+                                        <Card.Title>Sign Up</Card.Title>
+                                        <Card.Text>
+                                            {this.state.error ?
+                                                <Alert dismissible variant="danger"
+                                                       onClick={() => this.setState({error: false})}>
+                                                    {this.state.error_msg}
+                                                </Alert>
+                                                : ''}
+                                            <Form onSubmit={this.handleSubmit}>
+                                                <Form.Group controlId="user_email">
+                                                    <Form.Label>Email address</Form.Label>
+                                                    <Form.Control type="email"
+                                                                  placeholder="Enter email"
+                                                                  onChange={this.handleChange}/>
+                                                </Form.Group>
+                                                <Form.Row>
+                                                    <Form.Group as={Col} controlId="user_name">
+                                                        <Form.Label>First Name</Form.Label>
+                                                        <Form.Control type="first_name"
+                                                                      placeholder="First Name"
+                                                                      onChange={this.handleChange}/>
+                                                    </Form.Group>
+                                                    <Form.Group as={Col} controlId="user_surname">
+                                                        <Form.Label>Last Name</Form.Label>
+                                                        <Form.Control type="last_name"
+                                                                      placeholder="Last Name"
+                                                                      onChange={this.handleChange}/>
+                                                    </Form.Group>
+                                                </Form.Row>
+                                                <Form.Group controlId="user_password">
+                                                    <Form.Label>Password</Form.Label>
+                                                    <Form.Control type="password"
+                                                                  placeholder="Password"
+                                                                  onChange={this.handleChange}/>
+                                                    <Form.Text className="text-muted">
+                                                        We'll never share your password with anyone else besides Zuckerberg
+                                                    </Form.Text>
+                                                </Form.Group>
+                                                <Button variant="primary" type="submit" onClick={() => this.SignUp()} block>
+                                                    Sign Up
+                                                </Button>
+                                            </Form>
+                                        </Card.Text>
+                                        <Card.Link href="/login">Already have an account?</Card.Link>
+                                        <Card.Text>
+                                            {this.state.already_user ?
+                                                <Alert variant="danger">
+                                                    A user with this email was already created!
+                                                </Alert>
                                             : ''}
-                                        <Form onSubmit={this.handleSubmit}>
-                                            <Form.Group controlId="user_email">
-                                                <Form.Label>Email address</Form.Label>
-                                                <Form.Control type="email"
-                                                              placeholder="Enter email"
-                                                              onChange={this.handleChange}/>
-                                            </Form.Group>
-                                            <Form.Row>
-                                                <Form.Group as={Col} controlId="user_name">
-                                                    <Form.Label>First Name</Form.Label>
-                                                    <Form.Control type="first_name"
-                                                                  placeholder="First Name"
-                                                                  onChange={this.handleChange}/>
-                                                </Form.Group>
-                                                <Form.Group as={Col} controlId="user_surname">
-                                                    <Form.Label>Last Name</Form.Label>
-                                                    <Form.Control type="last_name"
-                                                                  placeholder="Last Name"
-                                                                  onChange={this.handleChange}/>
-                                                </Form.Group>
-                                            </Form.Row>
-                                            <Form.Group controlId="user_password">
-                                                <Form.Label>Password</Form.Label>
-                                                <Form.Control type="password"
-                                                              placeholder="Password"
-                                                              onChange={this.handleChange}/>
-                                                <Form.Text className="text-muted">
-                                                    We'll never share your password with anyone else besides Zuckerberg
-                                                </Form.Text>
-                                            </Form.Group>
-                                            <Button variant="primary" type="submit" onClick={() => this.SignUp()} block>
-                                                Sign Up
-                                            </Button>
-                                        </Form>
-                                    </Card.Text>
-                                    <Card.Link href="/login">Already have an account?</Card.Link>
-                                    <Card.Text>
-                                        {this.state.already_user ?
-                                            <Alert variant="danger">
-                                                A user with this email was already created!
-                                            </Alert>
-                                        : ''}
-                                    </Card.Text>
-                                </Card.Body>
-                            </Card>
-                        </CenterView>
+                                        </Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            </CenterView>
+                        </Jumbotron>
                     </div>
                 );
         }

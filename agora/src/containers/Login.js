@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Form, Button, Card, Alert, Image } from "react-bootstrap";
+import { Form, Button, Card, Alert, Image, Jumbotron } from "react-bootstrap";
 import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
 import WelcomeNav from '../components/WelcomeNav.js';
@@ -104,44 +104,46 @@ class Login extends Component {
         } else {
             return (
                 <div className='p-5'>
-                    {/*<WelcomeNav/>*/}
                     <CenterView>
-                        <Image src={require("../images/Logo.png")} style={{width: '40rem'}} rounded fluid/>
+                        <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
                     </CenterView>
-                    <CenterView>
-                        <Card border="primary" style={{width: '40rem'}}>
-                            <Card.Header className="text-center" as="h5">Login</Card.Header>
-                            <Card.Body>
-                                <Card.Text>
-                                    <Form onSubmit={this.handleSubmit}>
-                                        {this.state.error ?
-                                            <Alert dismissible variant="danger"
-                                                   onClick={() => this.setState({error: false})}>
-                                                {this.state.error_msg}
-                                            </Alert>
-                                            : ''}
-                                        <Form.Group controlId="user_email">
-                                            <Form.Label>Email address</Form.Label>
-                                            <Form.Control type="email"
-                                                          placeholder="Enter email"
-                                                          onChange={this.handleChange}/>
-                                        </Form.Group>
-                                        <Form.Group controlId="user_password">
-                                            <Form.Label>Password</Form.Label>
-                                            <Form.Control type="password"
-                                                          placeholder="Password"
-                                                          onChange={this.handleChange}/>
-                                        </Form.Group>
-                                        <Button variant="primary" type="submit" onClick={() => this.Login()} block>
-                                            Login
-                                        </Button>
-                                    </Form>
-                                </Card.Text>
-                                <Card.Link href="/signup">Don't have an account?</Card.Link>
-                                <Card.Link href="#">Forgot your password?</Card.Link>
-                            </Card.Body>
-                        </Card>
-                    </CenterView>
+                    <hr />
+                    <Jumbotron fluid>
+                        <CenterView>
+                            <Card border="primary" style={{width: '40rem'}}>
+                                <Card.Header className="text-center" as="h5">Login</Card.Header>
+                                <Card.Body>
+                                    <Card.Text>
+                                        <Form onSubmit={this.handleSubmit}>
+                                            {this.state.error ?
+                                                <Alert dismissible variant="danger"
+                                                       onClick={() => this.setState({error: false})}>
+                                                    {this.state.error_msg}
+                                                </Alert>
+                                                : ''}
+                                            <Form.Group controlId="user_email">
+                                                <Form.Label>Email address</Form.Label>
+                                                <Form.Control type="email"
+                                                              placeholder="Enter email"
+                                                              onChange={this.handleChange}/>
+                                            </Form.Group>
+                                            <Form.Group controlId="user_password">
+                                                <Form.Label>Password</Form.Label>
+                                                <Form.Control type="password"
+                                                              placeholder="Password"
+                                                              onChange={this.handleChange}/>
+                                            </Form.Group>
+                                            <Button variant="primary" type="submit" onClick={() => this.Login()} block>
+                                                Login
+                                            </Button>
+                                        </Form>
+                                    </Card.Text>
+                                    <Card.Link href="/signup">Don't have an account?</Card.Link>
+                                    <Card.Link href="#">Forgot your password?</Card.Link>
+                                </Card.Body>
+                            </Card>
+                        </CenterView>
+                    </Jumbotron>;
                 </div>
             );
         }

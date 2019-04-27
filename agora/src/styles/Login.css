@@ -2,4 +2,9 @@
     body {
         background-color: #F6F6F6;
     }
+    .half-rule {
+        margin-left: 0;
+        text-align: center;
+        width: 50%;
+    }
 }
