@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Form, Button, Card, Alert, Image, Jumbotron } from "react-bootstrap";
+import { Form, Button, Card, Alert, Image, Jumbotron, InputGroup } from "react-bootstrap";
 import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
-import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
@@ -123,15 +122,22 @@ class Login extends Component {
                                                 : ''}
                                             <Form.Group controlId="user_email">
                                                 <Form.Label>Email address</Form.Label>
-                                                <Form.Control type="email"
-                                                              placeholder="Enter email"
-                                                              onChange={this.handleChange}/>
+                                                <InputGroup>
+                                                    <InputGroup.Prepend>
+                                                        <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
+                                                    </InputGroup.Prepend>
+                                                    <Form.Control type="email"
+                                                                  placeholder="Enter email"
+                                                                  aria-describedby="inputGroupPrepend"
+                                                                  onChange={this.handleChange}/>
+                                                </InputGroup>
                                             </Form.Group>
                                             <Form.Group controlId="user_password">
                                                 <Form.Label>Password</Form.Label>
                                                 <Form.Control type="password"
                                                               placeholder="Password"
                                                               onChange={this.handleChange}/>
+                                                              required
                                             </Form.Group>
                                             <Button variant="primary" type="submit" onClick={() => this.Login()} block>
                                                 Login
@@ -139,7 +145,7 @@ class Login extends Component {
                                         </Form>
                                     </Card.Text>
                                     <Card.Link href="/signup">Don't have an account?</Card.Link>
-                                    <Card.Link href="#">Forgot your password?</Card.Link>
+                                    <Card.Link className="pull-right" href="#">Forgot your password?</Card.Link>
                                 </Card.Body>
                             </Card>
                         </CenterView>

@@ -18,7 +18,13 @@ class Navigation extends Component {
     render() {
         return (
             <Navbar fixed="bottom" bg="primary" variant="dark" expand="lg">
-                <Navbar.Brand href="/home">Agora</Navbar.Brand>
+                <Navbar.Brand href="/">
+                    <img
+                        src={require("../images/Logo2.PNG")}
+                        width="152"
+                        height="30"
+                    />
+                </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">

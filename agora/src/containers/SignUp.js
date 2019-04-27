@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import {Form, Button, Card, Col, Alert, Image, Jumbotron} from "react-bootstrap";
+import {Form, Button, Card, Col, Alert, Image, Jumbotron, InputGroup } from "react-bootstrap";
 import "../styles/SignUp.css";
 import { Redirect } from 'react-router-dom'
-import WelcomeNav from '../components/WelcomeNav.js';
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Navigation from '../components/Navigation.js';
@@ -140,9 +139,14 @@ class SignUp extends Component {
                                             <Form onSubmit={this.handleSubmit}>
                                                 <Form.Group controlId="user_email">
                                                     <Form.Label>Email address</Form.Label>
-                                                    <Form.Control type="email"
-                                                                  placeholder="Enter email"
-                                                                  onChange={this.handleChange}/>
+                                                    <InputGroup>
+                                                        <InputGroup.Prepend>
+                                                            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
+                                                        </InputGroup.Prepend>
+                                                        <Form.Control type="email"
+                                                                      placeholder="Enter email"
+                                                                      onChange={this.handleChange}/>
+                                                    </InputGroup>
                                                 </Form.Group>
                                                 <Form.Row>
                                                     <Form.Group as={Col} controlId="user_name">
