@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
-import { Form, Button, Card, Alert } from "react-bootstrap";
+import { Form, Button, Card, Alert, Image } from "react-bootstrap";
 import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
 import WelcomeNav from '../components/WelcomeNav.js';
@@ -103,11 +103,14 @@ class Login extends Component {
             )
         } else {
             return (
-                <div className='mt-5'>
-                    <WelcomeNav/>
+                <div className='p-5'>
+                    {/*<WelcomeNav/>*/}
+                    <CenterView>
+                        <Image src={require("../images/Logo.png")} style={{width: '40rem'}} rounded fluid/>
+                    </CenterView>
                     <CenterView>
                         <Card border="primary" style={{width: '40rem'}}>
-                            <Card.Header as="h5">Login</Card.Header>
+                            <Card.Header className="text-center" as="h5">Login</Card.Header>
                             <Card.Body>
                                 <Card.Text>
                                     <Form onSubmit={this.handleSubmit}>
@@ -129,7 +132,7 @@ class Login extends Component {
                                                           placeholder="Password"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
-                                        <Button variant="primary" type="submit" onClick={() => this.Login()}>
+                                        <Button variant="primary" type="submit" onClick={() => this.Login()} block>
                                             Login
                                         </Button>
                                     </Form>

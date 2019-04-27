@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from "axios";
-import { Form, Button, Card, Col, Alert } from "react-bootstrap";
+import { Form, Button, Card, Col, Alert, Image } from "react-bootstrap";
 import "../styles/SignUp.css";
 import { Redirect } from 'react-router-dom'
 import WelcomeNav from '../components/WelcomeNav.js';
@@ -118,8 +118,11 @@ class SignUp extends Component {
             );
         } else if (this.state.error === false) {
                 return (
-                    <div className='mt-5'>
-                        <WelcomeNav/>
+                    <div className='p-5'>
+                        {/*<WelcomeNav/>*/}
+                        <CenterView>
+                            <Image src={require("../images/Logo.png")} style={{width: '40rem'}} rounded fluid/>
+                        </CenterView>
                         <CenterView>
                             <Card border="primary" style={{width: '40rem'}}>
                                 <Card.Header as="h5">Organize events and connect with others on Agora
@@ -163,7 +166,7 @@ class SignUp extends Component {
                                                     We'll never share your password with anyone else besides Zuckerberg
                                                 </Form.Text>
                                             </Form.Group>
-                                            <Button variant="primary" type="submit" onClick={() => this.SignUp()}>
+                                            <Button variant="primary" type="submit" onClick={() => this.SignUp()} block>
                                                 Sign Up
                                             </Button>
                                         </Form>
@@ -177,7 +180,6 @@ class SignUp extends Component {
                                         : ''}
                                     </Card.Text>
                                 </Card.Body>
-
                             </Card>
                         </CenterView>
                     </div>
