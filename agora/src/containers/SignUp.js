@@ -39,7 +39,9 @@ class SignUp extends Component {
         };
     }
 
-    componentDidMount () {}
+    componentDidMount () {
+
+    }
 
     //kills the process
     componentWillUnmount() {
