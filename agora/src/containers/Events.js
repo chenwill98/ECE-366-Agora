@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Card } from "react-bootstrap";
+import { Card, CardColumns, Jumbotron } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
+import Footer from "../components/Footer";
 
 
 let init = {
@@ -120,28 +121,51 @@ export default class Events extends Component {
             return (
                 <div className='p-5'>
                     <Navigation/>
-                    <CenterView>
-                        <Card>
-                            <Card.Header as="h5">Your Events</Card.Header>
-                        </Card>
-                        {this.state.user_events.map((events, i) =>
-                            <Card key={i} event={events}>
-                                <Card.Body>
-                                    {events.name}
-                                </Card.Body>
-                            </Card>
-                        )}
-                        <Card>
-                            <Card.Header as="h5">All Events</Card.Header>
-                        </Card>
-                        {this.state.total_events.map((events, i) =>
-                            <Card key={i} event={events}>
-                                <Card.Body>
-                                    {events.name}
-                                </Card.Body>
-                            </Card>
-                        )}
-                    </CenterView>
+                    <main>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>Your Events</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.user_events.map((events, i) =>
+                                    <Card key={i} event={events}>
+                                        <Card.Header as="h5">
+                                            <Card.Link href={"/event/" + events.id}>
+                                                {events.name}
+                                            </Card.Link>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            {events.description}
+                                        </Card.Body>
+                                    </Card>)
+                                }
+                            </CardColumns>
+                        </Jumbotron>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>All Events</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.total_events.map((events, i) =>
+                                    <Card key={i} event={events}>
+                                        <Card.Header as="h5">
+                                            <Card.Link href={"/event/" + events.id}>
+                                                {events.name}
+                                            </Card.Link>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            {events.description}
+                                        </Card.Body>
+                                    </Card>
+                                )}
+                            </CardColumns>
+                        </Jumbotron>
+                    </main>
+                    <Footer/>
                 </div>
             );
         }
