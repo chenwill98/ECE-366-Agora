@@ -152,9 +152,6 @@ class Login extends Component {
 
                         </CenterView>
                     </Jumbotron>
-                    <footer>
-                        This is a footer
-                    </footer>
                 </div>
             );
         }

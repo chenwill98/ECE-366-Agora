@@ -72,7 +72,7 @@ export default class Events extends Component {
                     .then(res => {
                         if (res.data !== '') {
                             this.setState( {
-                                user_events: res.data.events
+                                user_events: res.data
                             });
                             console.log("Successfully got user's events.");
                         }
@@ -85,7 +85,7 @@ export default class Events extends Component {
         axios.get( `${this.state.ip}:${this.state.port}/event/get-events`)
         .then(res => {
             this.setState( {
-                total_events: res.data.events
+                total_events: res.data
             });
             console.log("Successfully got all events.");
         })
@@ -124,17 +124,21 @@ export default class Events extends Component {
                         <Card>
                             <Card.Header as="h5">Your Events</Card.Header>
                         </Card>
-                        {this.state.user_events && this.state.user_events.map((events, i) =>
+                        {this.state.user_events.map((events, i) =>
                             <Card key={i} event={events}>
-
+                                <Card.Body>
+                                    {events.name}
+                                </Card.Body>
                             </Card>
                         )}
                         <Card>
                             <Card.Header as="h5">All Events</Card.Header>
                         </Card>
-                        {this.state.total_events && this.state.total_events.map((events, i) =>
+                        {this.state.total_events.map((events, i) =>
                             <Card key={i} event={events}>
-
+                                <Card.Body>
+                                    {events.name}
+                                </Card.Body>
                             </Card>
                         )}
                     </CenterView>

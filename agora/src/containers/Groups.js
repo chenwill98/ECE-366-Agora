@@ -118,28 +118,30 @@ export default class Groups extends Component {
             return (
                 <div className='mt-5'>
                     <Navigation/>
-                    <CenterView>
-                        <Card>
-                            <Card.Header as="h5">Your groups</Card.Header>
-                        </Card>
-                        {this.state.user_groups.map((groups, i) =>
+                    <main>
+                        <CenterView>
+                            <Card>
+                                <Card.Header as="h5">Your groups</Card.Header>
+                            </Card>
+                            {this.state.user_groups.map((groups, i) =>
                                 <Card key={i} group={groups}>
                                     <Card.Body>
                                         {groups.name}
                                     </Card.Body>
                                 </Card>)
-                        }
-                        <Card>
-                            <Card.Header as="h5">All groups</Card.Header>
-                        </Card>
-                        {this.state.total_groups.map((groups, i) =>
-                            <Card key={i} group={groups}>
-                                <Card.Body>
-                                    {groups.name}
-                                </Card.Body>
+                            }
+                            <Card>
+                                <Card.Header as="h5">All groups</Card.Header>
                             </Card>
-                        )}
-                    </CenterView>
+                            {this.state.total_groups.map((groups, i) =>
+                                <Card key={i} group={groups}>
+                                    <Card.Body>
+                                        {groups.name}
+                                    </Card.Body>
+                                </Card>
+                            )}
+                        </CenterView>
+                    </main>
                 </div>
             );
         }

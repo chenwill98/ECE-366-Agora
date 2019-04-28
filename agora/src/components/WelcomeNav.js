@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Navbar, Nav } from "react-bootstrap";
-// import Logo from '../images/AgoraLogo.svg';
+import "../styles/Navigation.css";
 
 
 export default class Navigation extends Component {

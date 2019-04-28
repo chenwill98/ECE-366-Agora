@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Nav } from "react-bootstrap";
 import Cookies from "universal-cookie";
+import "../styles/Navigation.css";
 import { withRouter } from 'react-router-dom';
 
 const cookies = new Cookies();
