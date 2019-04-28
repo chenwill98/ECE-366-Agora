@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card } from "react-bootstrap";
+import { Carousel, Image } from "react-bootstrap";
 import "../styles/Welcome.css";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
@@ -17,20 +17,52 @@ export default class Welcome extends Component {
         }
         else {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <WelcomeNav/>
                     <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
-                            <Card.Body>
-                                <Card.Title>Welcome to Agora!</Card.Title>
-                                <Card.Text>
-                                    Experience the latest in bleeding-edge event organization technology and meet up with your
-                                    friends today!
-                                </Card.Text>
-
-                            </Card.Body>
-                        </Card>
+                        <a href="/">
+                            <Image src={require("../images/Logo.png")}
+                                   style={{width: '20rem'}}
+                                   rounded
+                                   fluid/>
+                        </a>
                     </CenterView>
+                    <hr width="50%"/>
+                    <CenterView>
+                        <Carousel>
+                            <Carousel.Item>
+                                <img
+                                    className="d-block w-100 h-100"
+                                    src={require("../images/CH.jpg")}
+                                    alt="Third slide"
+                                />
+                                <Carousel.Caption>
+                                    <p>Now available in Chicago!</p>
+                                </Carousel.Caption>
+                            </Carousel.Item>
+                            <Carousel.Item>
+                                <img
+                                    className="d-block w-100 h-100"
+                                    src={require("../images/NYC.jpg")}
+                                    alt="Third slide"
+                                />
+                                <Carousel.Caption>
+                                    <p>Meet up with friends in NYC!</p>
+                                </Carousel.Caption>
+                            </Carousel.Item>
+                            <Carousel.Item>
+                                <img
+                                    className="d-block w-100 h-100"
+                                    src={require("../images/SF.jpg")}
+                                    alt="Third slide"
+                                />
+                                <Carousel.Caption>
+                                    <p>San Francisco is perfect for hanging out in!</p>
+                                </Carousel.Caption>
+                            </Carousel.Item>
+                        </Carousel>
+                    </CenterView>
+                    <hr width="50%"/>
                 </div>
             )
         }

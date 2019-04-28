@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "shards-ui/dist/css/shards.min.css";
+import 'shards-ui/dist/css/shards.min.css';
 import { Route, Switch, BrowserRouter as Router } from 'react-router-dom'
 import SignUp from './containers/SignUp.js';
 import Login from './containers/Login.js';
