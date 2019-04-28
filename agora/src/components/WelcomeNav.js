@@ -12,6 +12,7 @@ export default class Navigation extends Component {
                         src={require("../images/Brand2.png")}
                         width="30"
                         height="30"
+                        alt={"Brand2"}
                     />
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Carousel, Image, Row, Col } from "react-bootstrap";
+import { Carousel, Image } from "react-bootstrap";
 import "../styles/Welcome.css";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';

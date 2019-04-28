@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Nav, NavDropdown } from "react-bootstrap";
+import { Navbar, Nav } from "react-bootstrap";
 import Cookies from "universal-cookie";
 import { withRouter } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ class Navigation extends Component {
         cookies.remove('USER_TOKEN', { path: '/' });
         localStorage.setItem('userID', null);
         this.props.history.push('/login');
-    }
+    };
 
     render() {
         return (
