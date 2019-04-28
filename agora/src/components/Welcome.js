@@ -4,6 +4,7 @@ import "../styles/Welcome.css";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
 import WelcomeNav from './WelcomeNav.js';
+import Footer from './Footer.js';
 import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
@@ -63,6 +64,25 @@ export default class Welcome extends Component {
                         </Carousel>
                     </CenterView>
                     <hr width="50%"/>
+                    <CenterView>
+                        <div className="row">
+                            <div className="col-lg-4">
+                                <h2 className="text-center">Create groups</h2>
+                                <p>With Agora, creating groups with friends has never been easier.</p>
+                            </div>
+                            <div className="col-lg-4">
+                                <h2 className="text-center">Join events</h2>
+                                <p>Join your friends' events or explore your interests by finding all available
+                                events.</p>
+                            </div>
+                            <div className="col-lg-4">
+                                <h2 className="text-center">Connect</h2>
+                                <p>Agora makes it super easy to connect and meet with friends or make new ones!
+                                    Sign up today!</p>
+                            </div>
+                        </div>
+                    </CenterView>
+                    <Footer/>
                 </div>
             )
         }

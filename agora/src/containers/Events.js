@@ -102,7 +102,7 @@ export default class Events extends Component {
     render() {
         if (this.state.error) {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <Navigation/>
                     <CenterView>
                         <Card border="primary" style={{width: '40rem'}}>
@@ -118,7 +118,7 @@ export default class Events extends Component {
             );
         } else {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <Navigation/>
                     <CenterView>
                         <Card>
