@@ -4,6 +4,7 @@ import { Form, Button, Card, Alert, Image, Jumbotron, InputGroup } from "react-b
 import "../styles/Login.css";
 import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
+import Footer from "../components/Footer.js";
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
 
@@ -152,9 +153,7 @@ class Login extends Component {
 
                         </CenterView>
                     </Jumbotron>
-                    <footer>
-                        This is a footer
-                    </footer>
+                    <Footer/>
                 </div>
             );
         }

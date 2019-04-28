@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { Card } from "react-bootstrap";
+import { Card, CardColumns, Jumbotron } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
+import SearchBar from "../components/SearchBar";
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
-
+import Footer from "../components/Footer";
 
 const cookies = new Cookies();
-
 
 let init = {
     method: "Get",
@@ -75,19 +75,18 @@ export default class Groups extends Component {
                         if (res.data !== '') {
                             console.log("Successfully got user groups.");
                             this.setState( {
-                                user_groups: res.data.groups,
+                                user_groups: res.data
                             });
                         }
                     })
             });
         }
 
-
         //fetches all of the groups available for browsing
         axios.get( `${this.state.ip}:${this.state.port}/group/get-groups`)
         .then(res => {
             this.setState( {
-                total_groups: res.data.groups
+                total_groups: res.data
             });
             console.log("Successfully got all groups.");
         })
@@ -103,7 +102,7 @@ export default class Groups extends Component {
     render() {
         if (this.state.error) {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <Navigation/>
                     <CenterView>
                         <Card border="primary" style={{width: '40rem'}}>
@@ -117,28 +116,51 @@ export default class Groups extends Component {
                     </CenterView>
                 </div>
             );
-        }
-        else {
+        } else {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <Navigation/>
-                    <CenterView>
-                        <Card>
-                            <Card.Header as="h5">Your groups</Card.Header>
-                        </Card>
-
-                        {this.state.user_groups && this.state.user_groups
-                            .map((groups, i) => <Card key={i} group={groups}></Card>)
-                        }
-                        <Card>
-                            <Card.Header as="h5">All groups</Card.Header>
-                        </Card>
-                        {this.state.total_groups && this.state.total_groups.map((groups, i) =>
-                            <Card key={i} group={groups}>
-
-                            </Card>
-                        )}
-                    </CenterView>
+                    {/*<SearchBar/>*/}
+                    <main>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>Your Groups</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.user_groups.map((groups, i) =>
+                                    <Card key={i} group={groups}>
+                                        <Card.Body>
+                                            {groups.name}
+                                        </Card.Body>
+                                    </Card>)
+                                }
+                            </CardColumns>
+                        </Jumbotron>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>All Groups</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.total_groups.map((groups, i) =>
+                                    <Card key={i} group={groups}>
+                                        <Card.Header as="h5">
+                                            <Card.Link href={"/group/" + groups.id}>
+                                                {groups.name}
+                                            </Card.Link>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            {groups.description}
+                                        </Card.Body>
+                                    </Card>
+                                )}
+                            </CardColumns>
+                        </Jumbotron>
+                    </main>
+                    <Footer/>
                 </div>
             );
         }

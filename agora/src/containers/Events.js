@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Card } from "react-bootstrap";
+import { Card, CardColumns, Jumbotron } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
+import Footer from "../components/Footer";
 
 
 let init = {
@@ -72,7 +73,7 @@ export default class Events extends Component {
                     .then(res => {
                         if (res.data !== '') {
                             this.setState( {
-                                user_events: res.data.events
+                                user_events: res.data
                             });
                             console.log("Successfully got user's events.");
                         }
@@ -85,7 +86,7 @@ export default class Events extends Component {
         axios.get( `${this.state.ip}:${this.state.port}/event/get-events`)
         .then(res => {
             this.setState( {
-                total_events: res.data.events
+                total_events: res.data
             });
             console.log("Successfully got all events.");
         })
@@ -100,12 +101,12 @@ export default class Events extends Component {
 
     /// render file ///
     render() {
-        if (this.state.error)
+        if (this.state.error) {
             return (
-                <div className='mt-5'>
+                <div className='p-5'>
                     <Navigation/>
                     <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
+                        <Card border="primary" style={{width: '40rem'}}>
                             <Card.Body>
                                 <Card.Title>Error</Card.Title>
                                 <Card.Text>
@@ -116,28 +117,55 @@ export default class Events extends Component {
                     </CenterView>
                 </div>
             );
-        else {
+        } else {
             return (
-                <div>
+                <div className='p-5'>
                     <Navigation/>
-                    <CenterView>
-                        <Card>
-                            <Card.Header as="h5">Your groups</Card.Header>
-                        </Card>
-                        {this.state.user_events && this.state.user_events.map((events, i) =>
-                            <Card key={i} event={events}>
-
-                            </Card>
-                        )}
-                        <Card>
-                            <Card.Header as="h5">All groups</Card.Header>
-                        </Card>
-                        {this.state.total_events && this.state.total_events.map((events, i) =>
-                            <Card key={i} event={events}>
-
-                            </Card>
-                        )}
-                    </CenterView>
+                    <main>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>Your Events</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.user_events.map((events, i) =>
+                                    <Card key={i} event={events}>
+                                        <Card.Header as="h5">
+                                            <Card.Link href={"/event/" + events.id}>
+                                                {events.name}
+                                            </Card.Link>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            {events.description}
+                                        </Card.Body>
+                                    </Card>)
+                                }
+                            </CardColumns>
+                        </Jumbotron>
+                        <Jumbotron>
+                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
+                                <h3>All Events</h3>
+                            </div>
+                            <hr/>
+                            <CardColumns>
+                                {this.state.total_events.map((events, i) =>
+                                    <Card key={i} event={events}>
+                                        <Card.Header as="h5">
+                                            <Card.Link href={"/event/" + events.id}>
+                                                {events.name}
+                                            </Card.Link>
+                                        </Card.Header>
+                                        <Card.Body>
+                                            {events.description}
+                                        </Card.Body>
+                                    </Card>
+                                )}
+                            </CardColumns>
+                        </Jumbotron>
+                    </main>
+                    <Footer/>
                 </div>
             );
         }

@@ -6,6 +6,7 @@ import { Redirect } from 'react-router-dom'
 import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Navigation from '../components/Navigation.js';
+import Footer from "../components/Footer.js";
 import Cookies from "universal-cookie";
 
 
@@ -190,6 +191,7 @@ class SignUp extends Component {
                                 </Card>
                             </CenterView>
                         </Jumbotron>
+                        <Footer/>
                     </div>
                 );
         }
