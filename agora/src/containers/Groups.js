@@ -6,9 +6,7 @@ import CenterView from '../components/CenterView.js';
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
 
-
 const cookies = new Cookies();
-
 
 let init = {
     method: "Get",
@@ -75,19 +73,18 @@ export default class Groups extends Component {
                         if (res.data !== '') {
                             console.log("Successfully got user groups.");
                             this.setState( {
-                                user_groups: res.data.groups,
+                                user_groups: res.data
                             });
                         }
                     })
             });
         }
 
-
         //fetches all of the groups available for browsing
         axios.get( `${this.state.ip}:${this.state.port}/group/get-groups`)
         .then(res => {
             this.setState( {
-                total_groups: res.data.groups
+                total_groups: res.data
             });
             console.log("Successfully got all groups.");
         })
@@ -117,8 +114,7 @@ export default class Groups extends Component {
                     </CenterView>
                 </div>
             );
-        }
-        else {
+        } else {
             return (
                 <div className='mt-5'>
                     <Navigation/>
@@ -126,16 +122,21 @@ export default class Groups extends Component {
                         <Card>
                             <Card.Header as="h5">Your groups</Card.Header>
                         </Card>
-
-                        {this.state.user_groups && this.state.user_groups
-                            .map((groups, i) => <Card key={i} group={groups}></Card>)
+                        {this.state.user_groups.map((groups, i) =>
+                                <Card key={i} group={groups}>
+                                    <Card.Body>
+                                        {groups.name}
+                                    </Card.Body>
+                                </Card>)
                         }
                         <Card>
                             <Card.Header as="h5">All groups</Card.Header>
                         </Card>
-                        {this.state.total_groups && this.state.total_groups.map((groups, i) =>
+                        {this.state.total_groups.map((groups, i) =>
                             <Card key={i} group={groups}>
-
+                                <Card.Body>
+                                    {groups.name}
+                                </Card.Body>
                             </Card>
                         )}
                     </CenterView>

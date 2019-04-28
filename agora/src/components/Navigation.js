@@ -18,11 +18,12 @@ class Navigation extends Component {
     render() {
         return (
             <Navbar fixed="bottom" bg="primary" variant="dark" expand="lg">
-                <Navbar.Brand href="/">
+                <Navbar.Brand href="/home">
                     <img
                         src={require("../images/Logo2.PNG")}
-                        width="152"
-                        height="30"
+                        width="100"
+                        height="20"
+                        alt={"Logo2"}
                     />
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -42,7 +43,7 @@ class Navigation extends Component {
                         </Nav.Link>
                     </Nav>
                     <Nav className="ml-auto">
-                        <Nav.Link href="/groups">
+                        <Nav.Link href="/account">
                             <i className="fas fa-user"></i>
                             &nbsp; My Account
                         </Nav.Link>

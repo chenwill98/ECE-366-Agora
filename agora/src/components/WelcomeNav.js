@@ -10,8 +10,8 @@ export default class Navigation extends Component {
                 <Navbar.Brand href="/">
                     <img
                         src={require("../images/Brand2.png")}
-                        width="30"
-                        height="30"
+                        width="20"
+                        height="20"
                         alt={"Brand2"}
                     />
                 </Navbar.Brand>

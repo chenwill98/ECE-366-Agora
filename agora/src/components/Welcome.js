@@ -57,7 +57,7 @@ export default class Welcome extends Component {
                                     alt="Third slide"
                                 />
                                 <Carousel.Caption>
-                                    <p>San Francisco is perfect for hanging out in!</p>
+                                    <p>San Francisco is the perfect place to hang out!</p>
                                 </Carousel.Caption>
                             </Carousel.Item>
                         </Carousel>

@@ -100,12 +100,12 @@ export default class Events extends Component {
 
     /// render file ///
     render() {
-        if (this.state.error)
+        if (this.state.error) {
             return (
                 <div className='mt-5'>
                     <Navigation/>
                     <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
+                        <Card border="primary" style={{width: '40rem'}}>
                             <Card.Body>
                                 <Card.Title>Error</Card.Title>
                                 <Card.Text>
@@ -116,13 +116,13 @@ export default class Events extends Component {
                     </CenterView>
                 </div>
             );
-        else {
+        } else {
             return (
-                <div>
+                <div className='mt-5'>
                     <Navigation/>
                     <CenterView>
                         <Card>
-                            <Card.Header as="h5">Your groups</Card.Header>
+                            <Card.Header as="h5">Your Events</Card.Header>
                         </Card>
                         {this.state.user_events && this.state.user_events.map((events, i) =>
                             <Card key={i} event={events}>
@@ -130,7 +130,7 @@ export default class Events extends Component {
                             </Card>
                         )}
                         <Card>
-                            <Card.Header as="h5">All groups</Card.Header>
+                            <Card.Header as="h5">All Events</Card.Header>
                         </Card>
                         {this.state.total_events && this.state.total_events.map((events, i) =>
                             <Card key={i} event={events}>

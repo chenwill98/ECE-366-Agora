@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
-import { Card } from "react-bootstrap";
+import {Card, Image} from "react-bootstrap";
 import "../styles/Welcome.css";
 import CenterView from '../components/CenterView.js';
-import Navigation from '../components/Navigation.js';
 
 export default class PageNotFound extends Component {
     render() {
         return (
-            <div className='mt-5'>
-                <Navigation/>
+            <div className='p-5'>
+                <CenterView>
+                    <a href="/home">
+                        <Image src={require("../images/Logo.png")}
+                               style={{width: '20rem'}}
+                               rounded
+                               fluid/>
+                    </a>
+                </CenterView>
+                <hr width="50%"/>
                 <CenterView>
                     <Card border="primary" style={{ width: '40rem'}}>
                         <Card.Body>
@@ -16,7 +23,6 @@ export default class PageNotFound extends Component {
                             <Card.Text>
                                 Sorry, this page doesn't exist!
                             </Card.Text>
-
                         </Card.Body>
                     </Card>
                 </CenterView>
