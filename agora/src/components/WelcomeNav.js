@@ -17,8 +17,14 @@ export default class Navigation extends Component {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <Nav.Link href="/signup">Sign Up</Nav.Link>
-                        <Nav.Link href="/login">Login</Nav.Link>
+                        <Nav.Link href="/signup">
+                            <i className="fas fa-user-plus"></i>
+                            &nbsp; Sign Up
+                        </Nav.Link>
+                        <Nav.Link href="/login">
+                            <i className="fas fa-sign-in-alt"></i>
+                            &nbsp; Login
+                        </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>

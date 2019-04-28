@@ -28,17 +28,28 @@ class Navigation extends Component {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
-                        <Nav.Link href="/home">Home</Nav.Link>
-                        <Nav.Link href="/groups">Groups</Nav.Link>
-                        <Nav.Link href="/events">Events</Nav.Link>
+                        <Nav.Link href="/home">
+                            <i className="fas fa-home"></i>
+                            &nbsp; Home
+                        </Nav.Link>
+                        <Nav.Link href="/groups">
+                            <i className="fas fa-users"></i>
+                            &nbsp; Groups
+                        </Nav.Link>
+                        <Nav.Link href="/events">
+                            <i className="far fa-calendar-alt"></i>
+                            &nbsp; Events
+                        </Nav.Link>
                     </Nav>
                     <Nav className="ml-auto">
-                        <NavDropdown drop="up" title="Profile" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="/account">My Account</NavDropdown.Item>
-                            <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item onClick={() => this.logOut()}>Sign Out</NavDropdown.Item>
-                        </NavDropdown>
+                        <Nav.Link href="/groups">
+                            <i className="fas fa-user"></i>
+                            &nbsp; My Account
+                        </Nav.Link>
+                        <Nav.Link onClick={() => this.logOut()}>
+                            <i className="fas fa-sign-out-alt"></i>
+                            &nbsp; Sign Out
+                        </Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Navbar>
