@@ -119,7 +119,9 @@ class SignUp extends Component {
                 return (
                     <div className='p-5'>
                         <CenterView>
-                            <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
+                            <a href="/">
+                                <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
+                            </a>
                         </CenterView>
                         <hr />
                         <Jumbotron fluid>
@@ -137,17 +139,6 @@ class SignUp extends Component {
                                                 </Alert>
                                                 : ''}
                                             <Form onSubmit={this.handleSubmit}>
-                                                <Form.Group controlId="user_email">
-                                                    <Form.Label>Email address</Form.Label>
-                                                    <InputGroup>
-                                                        <InputGroup.Prepend>
-                                                            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-                                                        </InputGroup.Prepend>
-                                                        <Form.Control type="email"
-                                                                      placeholder="Enter email"
-                                                                      onChange={this.handleChange}/>
-                                                    </InputGroup>
-                                                </Form.Group>
                                                 <Form.Row>
                                                     <Form.Group as={Col} controlId="user_name">
                                                         <Form.Label>First Name</Form.Label>
@@ -162,6 +153,17 @@ class SignUp extends Component {
                                                                       onChange={this.handleChange}/>
                                                     </Form.Group>
                                                 </Form.Row>
+                                                <Form.Group controlId="user_email">
+                                                    <Form.Label>Email address</Form.Label>
+                                                    <InputGroup>
+                                                        <InputGroup.Prepend>
+                                                            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
+                                                        </InputGroup.Prepend>
+                                                        <Form.Control type="email"
+                                                                      placeholder="Enter email"
+                                                                      onChange={this.handleChange}/>
+                                                    </InputGroup>
+                                                </Form.Group>
                                                 <Form.Group controlId="user_password">
                                                     <Form.Label>Password</Form.Label>
                                                     <Form.Control type="password"

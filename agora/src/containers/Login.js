@@ -104,7 +104,9 @@ class Login extends Component {
             return (
                 <div className='p-5'>
                     <CenterView>
-                        <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
+                        <a href="/">
+                            <Image src={require("../images/Logo.png")} style={{width: '20rem'}} rounded fluid/>
+                        </a>
                     </CenterView>
                     <hr />
                     <Jumbotron fluid>
@@ -137,7 +139,6 @@ class Login extends Component {
                                                 <Form.Control type="password"
                                                               placeholder="Password"
                                                               onChange={this.handleChange}/>
-                                                              required
                                             </Form.Group>
                                             <Button variant="primary" type="submit" onClick={() => this.Login()} block>
                                                 Login
@@ -148,8 +149,12 @@ class Login extends Component {
                                     <Card.Link className="pull-right" href="#">Forgot your password?</Card.Link>
                                 </Card.Body>
                             </Card>
+
                         </CenterView>
-                    </Jumbotron>;
+                    </Jumbotron>
+                    <footer>
+                        This is a footer
+                    </footer>
                 </div>
             );
         }

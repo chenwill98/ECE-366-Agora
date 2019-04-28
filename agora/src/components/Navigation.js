@@ -31,6 +31,8 @@ class Navigation extends Component {
                         <Nav.Link href="/home">Home</Nav.Link>
                         <Nav.Link href="/groups">Groups</Nav.Link>
                         <Nav.Link href="/events">Events</Nav.Link>
+                    </Nav>
+                    <Nav className="ml-auto">
                         <NavDropdown drop="up" title="Profile" id="basic-nav-dropdown">
                             <NavDropdown.Item href="/account">My Account</NavDropdown.Item>
                             <NavDropdown.Item href="/settings">Settings</NavDropdown.Item>
