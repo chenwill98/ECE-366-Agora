@@ -133,7 +133,7 @@ class Dashboard extends Component{
                 <div>
                     <Navigation/>
 
-                    <h1>Name {formatName(this.state.user_first_name, this.state.user_last_name)}! </h1>
+                    <h1>Name: {formatName(this.state.user_first_name, this.state.user_last_name)} </h1>
 
                     <Button variant="primary">Change Password</Button>
 
