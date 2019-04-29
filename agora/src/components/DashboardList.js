@@ -1,19 +1,13 @@
 import React from "react";
 import "../styles/DashboardList.css";
-import * as PropTypes from "prop-types";
-
 
 function Contact(props) {
     return (
         <div className="contact">
-            <span>{props.name}</span>
+            <a href={"/group/" + props.id}><span>{props.name}</span></a>
         </div>
     );
 }
-
-Contact.propTypes = {
-    name: PropTypes.string.isRequired
-};
 
 function DashboardList(props) {
 
