@@ -172,49 +172,47 @@ export default class Groups extends Component {
                             <main role="main" className="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
                                 <Card>
                                     <Card.Body>
-                                    <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
-                                        {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
-                                        <h3>Your Groups</h3>
-                                    </div>
-                                    <hr/>
-                                    <CardColumns>
-                                        {this.state.user_groups.map((groups, i) =>
-                                            <Card key={i} group={groups}>
-                                                <Card.Header as="h5">
-                                                    <Card.Link href={"/group/" + groups.id}>
-                                                        {groups.name}
-                                                    </Card.Link>
-                                                </Card.Header>
-                                                <Card.Body>
-                                                    {groups.description}
-                                                </Card.Body>
-                                            </Card>
-                                        )}
-                                    </CardColumns>
+                                        <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                            <h3>Your Groups</h3>
+                                        </div>
+                                        <hr/>
+                                        <CardColumns>
+                                            {this.state.user_groups.map((groups, i) =>
+                                                <Card key={i} group={groups}>
+                                                    <Card.Header as="h5">
+                                                        <Card.Link href={"/group/" + groups.id}>
+                                                            {groups.name}
+                                                        </Card.Link>
+                                                    </Card.Header>
+                                                    <Card.Body>
+                                                        {groups.description}
+                                                    </Card.Body>
+                                                </Card>
+                                            )}
+                                        </CardColumns>
                                     </Card.Body>
                                 </Card>
                                 <hr/>
                                 <Card>
                                     <Card.Body>
-                                    <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
-                                        {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
-                                        <h3>All Groups</h3>
-                                    </div>
-                                    <hr/>
-                                    <CardColumns>
-                                        {this.state.other_groups.map((groups, i) =>
-                                            <Card key={i} group={groups}>
-                                                <Card.Header as="h5">
-                                                    <Card.Link href={"/group/" + groups.id}>
-                                                        {groups.name}
-                                                    </Card.Link>
-                                                </Card.Header>
-                                                <Card.Body>
-                                                    {groups.description}
-                                                </Card.Body>
-                                            </Card>
-                                        )}
-                                    </CardColumns>
+                                        <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                            <h3>All Groups</h3>
+                                        </div>
+                                        <hr/>
+                                        <CardColumns>
+                                            {this.state.other_groups.map((groups, i) =>
+                                                <Card key={i} group={groups}>
+                                                    <Card.Header as="h5">
+                                                        <Card.Link href={"/group/" + groups.id}>
+                                                            {groups.name}
+                                                        </Card.Link>
+                                                    </Card.Header>
+                                                    <Card.Body>
+                                                        {groups.description}
+                                                    </Card.Body>
+                                                </Card>
+                                            )}
+                                        </CardColumns>
                                     </Card.Body>
                                 </Card>
                             </main>
