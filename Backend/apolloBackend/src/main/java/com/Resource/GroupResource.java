@@ -251,7 +251,7 @@ public class GroupResource implements RouteProvider {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(node);
+
         // check that all fields are filled
         if (    node.get("name").asText() == null           || node.get("name").asText().isEmpty()          ||
                 node.get("description").asText() == null    || node.get("description").asText().isEmpty()   ||
@@ -277,6 +277,7 @@ public class GroupResource implements RouteProvider {
                         .date(new SimpleDateFormat("yyyy-MM-dd")
                                 .format(new Date(node.get("date").asText())))
                         .build();
+
             }
             else {
                 new_event = new EventBuilder()
@@ -288,7 +289,6 @@ public class GroupResource implements RouteProvider {
                                 .format(new Date(node.get("date").asText())))
                         .build();
             }
-
             if (store.createEvent(new_event))
                 return Response.ok();
         }

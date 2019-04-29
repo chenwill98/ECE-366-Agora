@@ -25,6 +25,7 @@ class EventCreate extends Component {
             event_location: "",
             event_date: "",
             event_time: "",
+            event_success: false,
 
             user_session: false,
 
@@ -36,9 +37,6 @@ class EventCreate extends Component {
     }
     //determines if there is currently a user session by whether a cookie exists or not
     componentDidMount () {
-        if (localStorage.getItem('cookie')) {
-            this.setState({user_session: true});
-        }
     }
 
 
@@ -81,15 +79,15 @@ class EventCreate extends Component {
         .catch(error => {
             this.setState({
                 error: true,
-                error_msg: "Error creating the group: " + error.message
+                error_msg: "Error creating the event: " + error.message
             });
-            console.log("Error posting group: " + error.message);
+            console.log("Error creating event: " + error.message);
         })
         .then(res => {
             if (res.status === 200) {
-                if (!this.state.error) { //why does this show up as false???
+                if (!this.state.error) {
                     this.setState({
-                        group_success: true
+                        event_success: true
                     });
                 }
                 console.log("Successfully created event.");
@@ -107,7 +105,7 @@ class EventCreate extends Component {
 
 
     render() {
-        if (this.state.group_success) {
+        if (this.state.event_success) {
             return (
                 <Redirect to="/home"/>
             );

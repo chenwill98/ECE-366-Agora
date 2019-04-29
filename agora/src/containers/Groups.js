@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, CardColumns, Jumbotron } from "react-bootstrap";
+import { Card, CardColumns } from "react-bootstrap";
 import axios from "axios";
 import Navigation from "../components/Navigation.js";
 import CenterView from '../components/CenterView.js';
