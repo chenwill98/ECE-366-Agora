@@ -45,7 +45,7 @@ class Navigation extends Component {
                     </Nav>
                     <Nav className="ml-auto">
                         <Nav.Link href="/account">
-                            <i className="fas fa-user"></i>
+                            <i className="fas fa-user-circle"></i>
                             &nbsp; My Account
                         </Nav.Link>
                         <Nav.Link onClick={() => this.logOut()}>

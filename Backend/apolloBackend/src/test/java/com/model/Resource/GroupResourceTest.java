@@ -66,7 +66,7 @@ public class GroupResourceTest {
                 .id(1)
                 .name("Test Event")
                 .gid(test_group.id())
-                .date("someDate")
+                .date("01/01/2020")
                 .description("this is a test event")
                 .location("test place")
                 .build();
@@ -96,9 +96,19 @@ public class GroupResourceTest {
                 .thenReturn(real_obj_mapper.readTree(Optional
                 .of(ByteString.of(real_obj_mapper.writeValueAsBytes(test_event))).get().utf8()));
 
-        when(event_store.getEvent(test_event.name())).thenReturn(test_event);
+        when(event_store.getEvent(test_event.name())).thenReturn(null);
 
-        when(store.createEvent(test_event)).thenReturn(true);
+        Event test_event2 = new EventBuilder()
+                .id(1)
+                .name("Test Event")
+                .gid(test_group.id())
+                .date("2020-01-01")
+                .description("this is a test event")
+                .location("test place")
+                .build();
+
+
+        when(store.createEvent(test_event2)).thenReturn(true);
 
         Response<ByteString> actual_response = test_group_resource.createEvent(ctx_test);
 
@@ -146,7 +156,7 @@ public class GroupResourceTest {
 
     @Test
     public void updateAdmins() throws Exception {
-        when(store.getGroup(String.valueOf(test_group.id()))).thenReturn(test_group);
+        when(store.getGroupByID(String.valueOf(test_group.id()))).thenReturn(test_group);
 
         when(object_mapper.readTree(Optional
                 .of(ByteString.of(real_obj_mapper.writeValueAsBytes(ImmutableMap

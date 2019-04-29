@@ -43,7 +43,7 @@ class GroupPage extends Component {
 
     //fetches all data when the component mounts
     componentDidMount () {
-        console.log('userid:' + this.state.user_id);
+
         /**
          * GET THE GROUP'S INFO
          */
@@ -53,6 +53,7 @@ class GroupPage extends Component {
                     group_description: res.data.description,
                     group_name: res.data.name
                 });
+                localStorage.setItem('groupID', this.state.group_id);
             })
             .catch(error => {
                 this.setState({
@@ -154,8 +155,8 @@ class GroupPage extends Component {
                             data: data,
                             status: res.status
                     })).then(res => {
-                        if (res.status === 200) {
-                            console.log("Successfully know whether user belongs in group");
+                        if (res.data === true) {
+                            console.log("User belongs in group");
                             this.setState( {
                                 user_belongs: true,
                             });

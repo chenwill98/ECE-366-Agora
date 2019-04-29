@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import axios from "axios";
 import { Form, Button, Card, Alert } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'
+import {Backend_Route} from "../BackendRoute";
 
 class GroupCreate extends Component {
     constructor(props) {
@@ -11,8 +11,8 @@ class GroupCreate extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // group related states
             group_id: "",
@@ -20,7 +20,7 @@ class GroupCreate extends Component {
             group_name: "",
             group_success: false,
 
-            user_id: "",
+            user_id: localStorage.getItem('userID'),
             user_isAdmin: true,
             user_session: false,
 
@@ -32,10 +32,8 @@ class GroupCreate extends Component {
     }
     //determines if there is currently a user session by whether a cookie exists or not
     componentDidMount () {
-        if (localStorage.getItem('cookie')) {
-            this.setState({user_session: true});
-        }
     }
+
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalSet) {
@@ -57,22 +55,44 @@ class GroupCreate extends Component {
 
     //sends a request to create a group that doesn't already exist
     GroupCreate = () => {
-        axios.post(`${this.state.ip}:${this.state.port}/group/create`, {
-            group_name: this.state.name,
-            group_description: this.state.description
+        fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/create-group`,
+        {
+                method: "Post",
+                credentials: "include",
+                body: JSON.stringify({
+                    'name': this.state.group_name,
+                    'description': this.state.group_description
+                })
+            }
+        )
+        .catch(error => {
+            this.setState({
+                error: true,
+                error_msg: "Error creating the group: " + error.message
+            });
+            console.log("Error posting group: " + error.message);
         })
-            .catch(error => {
+        .then(res => {
+            if (res.status === 200) {
+                if (!this.state.error) {
+                    this.setState({
+                        group_success: true
+                    });
+                }
+                console.log("Successfully created group.");
+            }
+            else {
                 this.setState({
                     error: true,
-                    error_msg: "Error creating the group: " + error.message
-                });
-                console.log("Error posting group: " + error.message);
-            });
-        //if everything is fine, then redirect to group page
-        if (!this.state.error) { //why does this show up as false???
-            this.setState({group_success: true});
-        }
+                    error_msg: "Response: " + res.status
+                })
+                console.log("Error creating group.");
+            }
+        });
     };
+
+
+
     render() {
         if (this.state.group_success) {
             return (

@@ -13,10 +13,8 @@ import com.store.GroupStore;
 import okio.ByteString;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class GroupResource implements RouteProvider {
@@ -263,8 +261,8 @@ public class GroupResource implements RouteProvider {
         }
 
         // make sure that the group does not exist yet
-
-        if (event_store.getEvent(node.get("name").asText()) != null) {
+        Event res = event_store.getEvent(node.get("name").asText());
+        if (res == null) {
 
             Event new_event;
 
@@ -276,8 +274,10 @@ public class GroupResource implements RouteProvider {
                         .description(node.get("description").asText())
                         .gid(Integer.valueOf(ctx.pathArgs().get("id")))
                         .location(node.get("location").asText())
-                        .date(node.get("date").asText())
+                        .date(new SimpleDateFormat("yyyy-MM-dd")
+                                .format(new Date(node.get("date").asText())))
                         .build();
+
             }
             else {
                 new_event = new EventBuilder()
@@ -285,10 +285,10 @@ public class GroupResource implements RouteProvider {
                         .description(node.get("description").asText())
                         .gid(Integer.valueOf(ctx.pathArgs().get("id")))
                         .location(node.get("location").asText())
-                        .date(node.get("date").asText())
+                        .date(new SimpleDateFormat("yyyy-MM-dd")
+                                .format(new Date(node.get("date").asText())))
                         .build();
             }
-
             if (store.createEvent(new_event))
                 return Response.ok();
         }
