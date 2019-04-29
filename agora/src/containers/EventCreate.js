@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import axios from "axios";
 import { Form, Button, Card, Alert, Col } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'
+import {Backend_Route} from "../BackendRoute";
+
+
 
 class EventCreate extends Component {
     constructor(props) {
@@ -11,10 +13,11 @@ class EventCreate extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
-            // events related states
+            group_owner_id: localStorage.getItem('groupID'),
+
             event_id: "",
             event_description: "",
             event_name: "",
@@ -37,6 +40,8 @@ class EventCreate extends Component {
             this.setState({user_session: true});
         }
     }
+
+
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalSet) {
@@ -44,6 +49,8 @@ class EventCreate extends Component {
             this.setState({ intervalSet: null });
         }
     }
+
+
     //sets the values of the inputs as values in this.state
     handleChange = event => {
         this.setState({
@@ -58,25 +65,47 @@ class EventCreate extends Component {
 
     //sends a request to create a group that doesn't already exist
     EventCreate = () => {
-        axios.post(`${this.state.ip}:${this.state.port}/eventCreate`, {
-            event_name: this.state.name,
-            event_description: this.state.description,
-            event_location: this.state.location,
-            event_date: this.state.date,
-            event_time: this.state.time
+
+        fetch(`${this.state.ip}:${this.state.port}/group/${this.state.group_owner_id}/create-event`,
+            {
+                    method: "Post",
+                    credentials: "include",
+                    body: JSON.stringify({
+                        'name': this.state.event_name,
+                        'description': this.state.event_description,
+                        'date': this.state.event_date + ' ' + this.state.event_time + ':00',
+                        'location': this.state.event_location
+                    })
+                }
+        )
+        .catch(error => {
+            this.setState({
+                error: true,
+                error_msg: "Error creating the group: " + error.message
+            });
+            console.log("Error posting group: " + error.message);
         })
-            .catch(error => {
+        .then(res => {
+            if (res.status === 200) {
+                if (!this.state.error) { //why does this show up as false???
+                    this.setState({
+                        group_success: true
+                    });
+                }
+                console.log("Successfully created event.");
+            }
+            else {
                 this.setState({
                     error: true,
-                    error_msg: "Error creating the group: " + error.message
-                });
-                console.log("Error posting group: " + error.message);
-            });
-        //if everything is fine, then redirect to group page
-        if (!this.state.error) { //why does this show up as false???
-            this.setState({group_success: true});
-        }
+                    error_msg: "Response: " + res.status
+                })
+                console.log("Error creating event.");
+            }
+        });
     };
+
+
+
     render() {
         if (this.state.group_success) {
             return (
@@ -109,34 +138,34 @@ class EventCreate extends Component {
                                     <Form onSubmit={this.handleSubmit}>
                                         <Form.Group controlId="event_name">
                                             <Form.Label>Event Name</Form.Label>
-                                            <Form.Control type="name"
+                                            <Form.Control type="event_name"
                                                           placeholder="Name"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
 
                                         <Form.Group controlId="event_description">
                                             <Form.Label>Event Description</Form.Label>
-                                            <Form.Control type="description"
+                                            <Form.Control type="event_description"
                                                           placeholder="Description"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
 
                                         <Form.Group controlId="event_location">
                                             <Form.Label>Event Location</Form.Label>
-                                            <Form.Control type="location"
+                                            <Form.Control type="event_location"
                                                           placeholder="Location"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
                                         <Form.Row>
                                             <Form.Group as={Col} controlId="event_date">
                                                 <Form.Label>Date</Form.Label>
-                                                <Form.Control type="date"
+                                                <Form.Control type="event_date"
                                                               placeholder="MM/DD/YYY"
                                                               onChange={this.handleChange}/>
                                             </Form.Group>
                                             <Form.Group as={Col} controlId="event_time">
                                                 <Form.Label>Time</Form.Label>
-                                                <Form.Control type="time"
+                                                <Form.Control type="event_time"
                                                               placeholder="00:00 AM"
                                                               onChange={this.handleChange}/>
                                             </Form.Group>
@@ -150,11 +179,9 @@ class EventCreate extends Component {
                         </Card>
                     </CenterView>
                 </div>
-        );
+            );
         }
     }
-
-
-
 }
-    export default EventCreate;
+
+export default EventCreate;

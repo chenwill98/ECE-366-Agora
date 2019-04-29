@@ -339,6 +339,7 @@ public class UserResource implements RouteProvider {
     public Response<ByteString> joinGroup(RequestContext ctx) {
 
         JsonNode node = validateEmailHelper(ctx, true);
+
         if (node != null) {
 
             if (group_store.getGroup(node.get("groupname").asText()) != null) {

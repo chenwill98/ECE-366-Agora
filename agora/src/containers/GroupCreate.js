@@ -4,6 +4,7 @@ import { Form, Button, Card, Alert } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'
+import {Backend_Route} from "../BackendRoute";
 
 class GroupCreate extends Component {
     constructor(props) {
@@ -11,8 +12,8 @@ class GroupCreate extends Component {
 
         this.state = {
             // backend related states
-            ip: "http://localhost",
-            port: "8080",
+            ip: Backend_Route.ip,
+            port: Backend_Route.port,
 
             // group related states
             group_id: "",

@@ -191,7 +191,7 @@ public class GroupStore {
                                                 "values (?, ?, ?, ?, ?)");
             stmt.setString(1, new_event.name());
             stmt.setString(2, new_event.description());
-            stmt.setInt(3, new_event.id());
+            stmt.setInt(3, new_event.gid());
             stmt.setString(4, new_event.location());
             stmt.setString(5, new_event.date());
         } catch (SQLException e) {
