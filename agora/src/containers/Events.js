@@ -26,7 +26,7 @@ export default class Events extends Component {
             user_id: localStorage.getItem('userID'),
             user_cookie: "",
             user_events: [],
-            total_events: [],
+            other_events: [],
 
             // error related states
             intervalSet: false,
@@ -38,6 +38,7 @@ export default class Events extends Component {
     //fetches all data when the component mounts
     componentDidMount() {
         this.getData();
+        this.removeDup(this.state.other_events, this.state.user_events);
         // if (!this.state.intervalSet) {
         //     let interval = setInterval(this.getData, 1000);
         //     this.setState({intervalSet: interval});
@@ -53,7 +54,6 @@ export default class Events extends Component {
     }
 
     getData = () => {
-
         if (this.state.user_id) {
             //fetches all of the user's groups
             fetch( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/events`, init)
@@ -80,13 +80,11 @@ export default class Events extends Component {
                     })
             });
         }
-
-
         //fetches all of the groups available for browsing
         axios.get( `${this.state.ip}:${this.state.port}/event/get-events`)
         .then(res => {
             this.setState( {
-                total_events: res.data
+                other_events: res.data
             });
             console.log("Successfully got all events.");
         })
@@ -97,6 +95,11 @@ export default class Events extends Component {
             });
             console.log("Error requesting all events: " + error.message);
         });
+    };
+
+    // removes the duplicate objects so other_events doesn't contain redundant events to the user_events
+    removeDup = (array, subset) => {
+        this.setState({array: array.filter(obj => !subset.includes(obj))});
     };
 
     /// render file ///
@@ -119,9 +122,10 @@ export default class Events extends Component {
             );
         } else {
             return (
-                <div className='p-5'>
+                <div>
                     <Navigation/>
-                    <main>
+
+                    <main className='p-5'>
                         <Jumbotron>
                             <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
                                 {/*<span className="text-uppercase page-subtitle">Dashboard</span>*/}
@@ -139,8 +143,8 @@ export default class Events extends Component {
                                         <Card.Body>
                                             {events.description}
                                         </Card.Body>
-                                    </Card>)
-                                }
+                                    </Card>
+                                )}
                             </CardColumns>
                         </Jumbotron>
                         <Jumbotron>
@@ -150,7 +154,7 @@ export default class Events extends Component {
                             </div>
                             <hr/>
                             <CardColumns>
-                                {this.state.total_events.map((events, i) =>
+                                {this.state.other_events.map((events, i) =>
                                     <Card key={i} event={events}>
                                         <Card.Header as="h5">
                                             <Card.Link href={"/event/" + events.id}>
