@@ -346,8 +346,10 @@ class GroupPage extends Component {
                             <h3>Users:</h3>
                         {this.state.group_users.map((user, i) =>
                             <Card key={i} user={user}>
-                                <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title>
-                                    {user.uid != this.state.user_id && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}</Card.Body>
+                                <Card.Body>
+                                    <Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title>
+                                    {user.uid != this.state.user_id && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
+                                </Card.Body>
                             </Card>
                         )}
                         </Card>
@@ -356,7 +358,9 @@ class GroupPage extends Component {
                             <h3>Events:</h3>
                             {this.state.group_events.map((event, i) =>
                                 <Card key={i} user={event}>
-                                    <Card.Body><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></Card.Body>
+                                    <Card.Body>
+                                        <Card.Link href={"/event/" + event.id}>{event.name}</Card.Link>
+                                    </Card.Body>
                                 </Card>
                             )}
                         </Card>
