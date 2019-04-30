@@ -578,7 +578,8 @@ public class UserResource implements RouteProvider {
     private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
+//        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
+        headers.put("Access-Control-Allow-Origin", "http://199.98.27.114:8000");
         headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
         headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
         headers.put("Access-Control-Allow-Credentials", "true");

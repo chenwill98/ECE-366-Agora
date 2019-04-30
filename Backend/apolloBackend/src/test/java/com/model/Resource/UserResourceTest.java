@@ -69,7 +69,8 @@ public class UserResourceTest {
                 .location("test place")
                 .build();
 
-        when(ctx_test.pathArgs()).thenReturn(Collections.singletonMap("id", String.valueOf(test_user.uid())));
+        when(ctx_test.pathArgs()).thenReturn(ImmutableMap.of("id", String.valueOf(test_user.uid()),
+                                            "eid", String.valueOf(test_event.id()) ));
     }
 
 
@@ -227,16 +228,6 @@ public class UserResourceTest {
 
     @Test
     public void joinEvent() throws Exception {
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                .of("eventname", test_event.name())))));
-
-        when(object_mapper.readTree(Optional
-                .of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                        .of("eventname", test_event.name())))).get().utf8()))
-                .thenReturn(real_object_mapper.readTree(Optional
-                        .of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                                .of("eventname", test_event.name())))).get().utf8()));
-
         when(store.userJoinEvent(String.valueOf(test_user.uid()), String.valueOf(test_event.id()))).thenReturn(true);
 
         Response<ByteString> actual_response = test_user_resource.joinEvent(ctx_test);
@@ -246,17 +237,7 @@ public class UserResourceTest {
 
     @Test
     public void leaveEvent() throws Exception {
-        when(request_test.payload()).thenReturn(Optional.of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                .of("eventname", test_event.name())))));
-
-        when(object_mapper.readTree(Optional
-                .of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                        .of("eventname", test_event.name())))).get().utf8()))
-                .thenReturn(real_object_mapper.readTree(Optional
-                        .of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
-                                .of("eventname", test_event.name())))).get().utf8()));
-
-        when(store.userLeaveEvent(String.valueOf(test_user.uid()), test_event.name())).thenReturn(true);
+        when(store.userLeaveEvent(String.valueOf(test_user.uid()), String.valueOf(test_event.id()))).thenReturn(true);
 
         Response<ByteString> actual_response = test_user_resource.leaveEvent(ctx_test);
 
