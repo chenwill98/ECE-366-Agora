@@ -163,21 +163,9 @@ class Dashboard extends Component{
                 <div>
                     <Navigation/>
 
-                    <h1>Name {formatName(this.state.user_first_name, this.state.user_last_name)}! </h1>
-
-                    <Button variant="primary" onClick={() => this.gotoChangePassword()}>Change Password</Button>
-
-                    <DashboardTabs>
-                        <div label="Groups">
-                            <DashboardList contacts={this.state.user_groups} />
-                        </div>
-                        <div label="Events">
-                            <DashboardList contacts={this.state.user_events} />
-                        </div>
-                    </DashboardTabs>
                     <h1>Name: {formatName(this.state.user_first_name, this.state.user_last_name)} </h1>
                     <hr />
-                    <Button variant="primary">Change Password</Button>
+                    <Button variant="primary" href="changePassword" >Change Password</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button variant="primary" href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
                     <hr />
