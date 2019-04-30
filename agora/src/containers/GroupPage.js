@@ -337,10 +337,10 @@ class GroupPage extends Component {
                         <h1>Name: {this.state.group_name}</h1>
                         <p>Description: {this.state.group_description}</p>
 
-                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="raised" href="/eventCreate">Create Event</Button>}
-                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
-                        {this.state.user_id  && !this.state.user_belongs && <Button variant="raised" onClick={() => this.joinGroup()}>Join Group</Button>}
-                        {this.state.user_id  && this.state.user_belongs && <Button variant="raised" onClick={() => this.leaveGroup()}>Leave Group</Button>}
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>}
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
+                        {this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}
+                        {this.state.user_id  && this.state.user_belongs && <Button variant="primary" onClick={() => this.leaveGroup()}>Leave Group</Button>}
 
                         <Card>
                             <h3>Users:</h3>
