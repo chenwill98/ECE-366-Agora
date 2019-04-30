@@ -7,8 +7,10 @@ import Navigation from "../components/Navigation.js";
 import Cookies from "universal-cookie";
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tabs';
-import Sonnet from 'react-bootstrap/Tabs';
 import "../styles/DashboardList.css";
+import Jumbotron from 'react-bootstrap/Jumbotron'
+import { Card, CardColumns } from "react-bootstrap";
+import Footer from "../components/Footer";
 
 const cookies = new Cookies();
 
@@ -19,47 +21,64 @@ let init = {
 
 function ContactGroup(props) {
     return (
-        <div className="contact">
-            <a href={"/group/" + props.ID}><span>{props.name}</span></a>
-        </div>
+
+    <Card>
+        <Card.Header as="h5">
+        <Card.Title><a href={"/group/" + props.ID}><span>{props.name}</span></a></Card.Title>
+        </Card.Header>
+        <Card.Body>
+            <Card.Text>
+                {props.DESC}
+            </Card.Text>
+        </Card.Body>
+    </Card>
+
     );
 }
 function ContactEvent(props) {
     return (
-        <div className="contact">
-            <a href={"/Event/" + props.ID}><span>{props.name}</span></a>
-        </div>
+        <CardColumns>;
+            <Card>
+                <Card.Header as="h5">
+                    <Card.Title><a href={"/event/" + props.ID}><span>{props.name}</span></a></Card.Title>
+                </Card.Header>
+                <Card.Body>
+                    <Card.Text>
+                        {props.DESC}
+                    </Card.Text>
+                </Card.Body>
+            </Card>
+        </CardColumns>
     );
 }
 
 function GroupList(props) {
-
-    if (props == null || props.contacts == null ) {
+    if (props == null || props.Groups == null ) {
         return;
     }
     else {
-
         return (
             <div>
-                {props.contacts.map(c => <ContactGroup key={c.id} name={c.name} ID={c.id}/>)}
+                {props.Groups.map(c => <ContactGroup key={c.id} name={c.name} ID={c.id} DESC={c.description}/>)}
             </div>
         );
     }
 }
+
 function EventList(props) {
-
-    if (props == null || props.contacts == null ) {
+    if (props == null || props.Events == null ) {
         return;
     }
     else {
 
         return (
             <div>
-                {props.contacts.map(c => <ContactEvent key={c.id} name={c.name}/>)}
+                {props.Events.map(c => <ContactEvent key={c.id} name={c.name} ID={c.id}/>)}
             </div>
         );
     }
 }
+
 function formatName(first, last) {
     return first + ' ' + last;
 }
@@ -181,20 +200,42 @@ class Dashboard extends Component{
             return (
                 <div>
                     <Navigation/>
-                    <h1>Name: {formatName(this.state.user_first_name, this.state.user_last_name)} </h1>
-                    <hr />
-                    <Button variant="primary">Change Password</Button>
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <Button variant="primary" href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
-                    <hr />
+                    <Jumbotron fluid>
+                        <container>
+                        <h1>Welcome back  {formatName(this.state.user_first_name, this.state.user_last_name)}!</h1>
+                            <h4> <font color="gray"> Email:  {this.state.user_email} </font></h4>
+                            <p>
+                            <Button variant="primary" size="lg">Change Password</Button>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <Button variant="primary" size="lg"href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
+                        </p>
+                        </container>
+                    </Jumbotron>;
+                    <Card>
                     <Tabs defaultActiveKey="groups" transition={false} id="tabs">
                         <Tab eventKey="groups" title="Groups">
-                            <Sonnet /> <GroupList contacts={this.state.user_groups} />
+                            <card>
+                                <Card.Body>
+                                <CardColumns>
+                                    <GroupList Groups={this.state.user_groups} />
+                                </CardColumns>
+                                </Card.Body>
+                            </card>
                         </Tab>
                         <Tab eventKey="events" title="Events">
-                            <Sonnet /> <EventList contacts={this.state.user_events} />
+                            <card>
+                                <Card.Body>
+                                <CardColumns>
+                            <EventList Events={this.state.user_events} />
+                            </CardColumns>
+                                </Card.Body>
+                            </card>
                         </Tab>
                     </Tabs>;
+                    </Card>
+                    <div>
+                    <Footer/>
+                    </div>
                 </div>
             );
         }
