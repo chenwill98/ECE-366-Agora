@@ -84,7 +84,7 @@ class GroupCreate extends Component {
             else {
                 this.setState({
                     error: true,
-                    error_msg: "Response: " + res.status
+                    error_msg: res.statusText
                 })
                 console.log("Error creating group.");
             }
@@ -131,9 +131,10 @@ class GroupCreate extends Component {
                                         </Form.Group>
 
                                         <Form.Group controlId="group_description">
-                                            <Form.Label>Group Description</Form.Label>
+                                            <Form.Label as="textarea">Group Description</Form.Label>
                                             <Form.Control type="description"
                                                           placeholder="Description"
+                                                          as="textarea"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
                                         <Button variant="primary" type="submit" onClick={() => this.GroupCreate()}>

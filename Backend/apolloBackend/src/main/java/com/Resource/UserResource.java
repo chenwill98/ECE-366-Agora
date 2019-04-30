@@ -248,6 +248,8 @@ public class UserResource implements RouteProvider {
 
             if (store.createGroup(ctx.pathArgs().get("id"), new_group))
                 return Response.ok();
+            else
+                return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
         }
 
         return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Group already exists!"));
