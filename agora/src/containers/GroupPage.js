@@ -5,6 +5,7 @@ import SingleObjectView from '../components/SingleObjectView.js';
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
+import Footer from "../components/Footer";
 
 let init_get = {
     method: "Get",
@@ -369,7 +370,7 @@ class GroupPage extends Component {
                                 </Card>
                             )}
                         </Card>
-
+                        <Footer/>
                     </SingleObjectView>
                 </div>
             );
