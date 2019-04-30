@@ -4,6 +4,7 @@ import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
+import Button from "react-bootstrap/Button";
 
 
 let init = {
@@ -33,7 +34,7 @@ class EventPage extends Component {
 
             // if in a user session
             user_id: localStorage.getItem('userID'),
-            user_isAdmin: false,
+            user_attendance: -2,
 
             // error related states
             intervalSet: false,
@@ -45,7 +46,9 @@ class EventPage extends Component {
 
     //fetches all data when the component mounts (called right after constructor)
     componentDidMount () {
-        // get the event info
+        /**
+         * GET THE EVENT INFO
+         */
         axios.get( `${this.state.ip}:${this.state.port}/event/${this.state.event_id}`)
         .then(res => {
             this.setState( {
@@ -56,7 +59,9 @@ class EventPage extends Component {
                 event_date: res.data.date
             });
 
-            // get the Group name of the event's parent group.
+            /**
+             * GET THE GROUP NAME OF THE GROUP WHO OWNS THE EVENT
+             */
             axios.get( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}`)
             .then(res => {
                 this.setState( {
@@ -80,30 +85,26 @@ class EventPage extends Component {
             console.log("Error requesting event: " + error.message);
         });
 
-        // get the event's users
-        axios.get(`${this.state.ip}:${this.state.port}/event/${this.state.event_id}/get-users`)
-        .then( res => {
-            this.setState( {
-                event_users: res.data
-            });
-            console.log("Success getting the event's users.");
-        });
-
-        // check if you belong to this event and if you are an admin
-        fetch( `${this.state.ip}:${this.state.port}/group/${this.state.event_gid}/is-admin/${this.state.user_id}`, init)
+        /**
+         * CHECK YOUR ATTENDANCE STATUS FOR THE EVENT
+         */
+        fetch( `${this.state.ip}:${this.state.port}/user/${this.state.user_id}/event/${this.state.event_id}/is-attending`, init)
         .then(res => {
             res.json().then(data => ({
-                    data: data,
+                    data: data,  /***  Integer with value of: 1, 2, or 3. 1:attending \ 2:maybe \ 3:not attending. **/
                     status: res.status
                 })
             ).then(res => {
-                if (res.data !== '') {
-                    this.setState( {
-                        user_isAdmin: res.data
+                if (res.status === 200) {
+                    this.setState({
+                        user_attendance: res.data
                     });
+                    console.log("Got the user attendance: " + this.state.user_attendance);
                 }
-            })
+            });
         });
+
+        this.getEventUsers();
 
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
@@ -120,7 +121,94 @@ class EventPage extends Component {
         }
     }
 
+    /**
+     * GET THE EVENT'S USERS
+     */
+    getEventUsers() {
+        axios.get(`${this.state.ip}:${this.state.port}/event/${this.state.event_id}/get-users`)
+        .then( res => {
+            this.setState( {
+                event_users: res.data
+            });
+            console.log("Success getting the event's users.");
+        });
+    }
 
+
+    /**
+     * joinEvent - Updates a user's attendance to an event to attending.
+     */
+    joinEvent() {
+        fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/event/${this.state.event_id}/join`,
+            {
+                method: "Get",
+                credentials: "include"
+            }
+        )
+            .catch( error => {
+                this.setState({
+                    error: true,
+                    error_msg: error.message
+                });
+                console.log("Error updating your event attendance: " + error.message);
+            })
+            .then(res => {
+                if (res.status === 200) {
+                    this.setState( {
+                        user_attendance: 1
+                    });
+                    console.log("Successfully attending event.");
+                    this.getEventUsers();
+                }
+                else {
+                    this.setState({
+                        error: true,
+                        error_msg: "Response: " + res.status
+                    });
+                    console.log("Error joining group, status:" + res.status);
+                }
+            });
+    }
+
+
+    /**
+     * leaveEvent- Changes the attendance of an event to not attending.
+     */
+    leaveEvent() {
+        fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/event/${this.state.event_id}/leave`,
+            {
+                method: "Get",
+                credentials: "include"
+            }
+        )
+            .catch( error => {
+                this.setState({
+                    error: true,
+                    error_msg: error.message
+                });
+                console.log("Error updating your event attendance: " + error.message);
+            })
+            .then(res => {
+                if (res.status === 200) {
+                    this.setState( {
+                        user_attendance: 3
+                    });
+                    console.log("Successfully updated attendance of event to not attending.");
+                    this.getEventUsers();
+                }
+                else {
+                    this.setState({
+                        error: true,
+                        error_msg: "Error updating your event attendance status: " + res.status
+                    })
+                    console.log("Error updating event status event.");
+                }
+            });
+    }
+
+    /**
+     * RENDERING
+     */
     render() {
         if (this.state.error) {
             return (
@@ -148,7 +236,10 @@ class EventPage extends Component {
                         </Card>
 
                         <p>Location: {this.state.event_location}</p>
-                        <p>Date: {this.state.event_date}</p>
+                        <p>Date: {this.state.event_date.substr(0, 16)}</p>
+
+                        {this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
+                        {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
 
                         <Card>
                             <h3>Users attending:</h3>

@@ -162,7 +162,7 @@ public class EventStore {
             stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email from Event_attendance EA " +
                                                 "inner join Users U on U.User_id = EA.User_id " +
                                                 "inner join Events E on E.Event_id = EA.Event_id" +
-                                                " where E.Event_id = ?");
+                                                " where E.Event_id = ? and EA.Is_attending = 'YES'");
             stmt.setString(1, id);
         } catch (SQLException e) {
             e.printStackTrace();

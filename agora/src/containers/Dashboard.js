@@ -18,22 +18,15 @@ let init = {
 };
 
 
-function ContactGroup(props) {
+function Contact(props) {
     return (
         <div className="contact">
-            <a href={"/group/" + props.ID}><span>{props.name}</span></a>
-        </div>
-    );
-}
-function ContactEvent(props) {
-    return (
-        <div className="contact">
-            <a href={"/Event/" + props.ID}><span>{props.name}</span></a>
+            <a href={"/group/" + props.name}><span>{props.name}</span></a>
         </div>
     );
 }
 
-function GroupList(props) {
+function DashboardList(props) {
 
     if (props == null || props.contacts == null ) {
         return;
@@ -42,21 +35,7 @@ function GroupList(props) {
 
         return (
             <div>
-                {props.contacts.map(c => <ContactGroup key={c.id} name={c.name} ID={c.id}/>)}
-            </div>
-        );
-    }
-}
-function EventList(props) {
-
-    if (props == null || props.contacts == null ) {
-        return;
-    }
-    else {
-
-        return (
-            <div>
-                {props.contacts.map(c => <ContactEvent key={c.id} name={c.name}/>)}
+                {props.contacts.map(c => <Contact key={c.id} name={c.name}/>)}
             </div>
         );
     }
@@ -168,6 +147,11 @@ class Dashboard extends Component{
         }
     }
 
+
+    gotoChangePassword = () => {
+        this.props.history.push('/changepassword');
+    };
+
     ////////////////////////////
     render() {
         // confirm that the user session exists, otherwise redirect to login.
@@ -178,18 +162,19 @@ class Dashboard extends Component{
             return (
                 <div>
                     <Navigation/>
+
                     <h1>Name: {formatName(this.state.user_first_name, this.state.user_last_name)} </h1>
                     <hr />
-                    <Button variant="primary">Change Password</Button>
+                    <Button variant="primary" href="changePassword" >Change Password</Button>
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <Button variant="primary" href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
                     <hr />
                     <Tabs defaultActiveKey="groups" transition={false} id="tabs">
                         <Tab eventKey="groups" title="Groups">
-                            <Sonnet /> <GroupList contacts={this.state.user_groups} />
+                            <Sonnet /> <DashboardList contacts={this.state.user_groups} />
                         </Tab>
                         <Tab eventKey="events" title="Events">
-                            <Sonnet /> <EventList contacts={this.state.user_events} />
+                            <Sonnet /> <DashboardList contacts={this.state.user_events} />
                         </Tab>
                     </Tabs>;
                 </div>

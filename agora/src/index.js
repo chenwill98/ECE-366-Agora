@@ -15,6 +15,7 @@ import GroupPage from './containers/GroupPage.js';
 import GroupCreate from './containers/GroupCreate.js';
 import EventCreate from './containers/EventCreate.js';
 import PageNotFound from './containers/PageNotFound';
+import ChangePassword from "./containers/ChangePassword";
 
 const routing = (
     <Router>
@@ -30,6 +31,7 @@ const routing = (
                 <Route path="/event/:event_id" exact component={EventPage} />
                 <Route path="/groupcreate" exact component={GroupCreate} />
                 <Route path="/eventcreate" exact component={EventCreate} />
+                <Route path="/changepassword" exact component={ChangePassword} />
                 <Route component={PageNotFound} />
             </Switch>
         </div>

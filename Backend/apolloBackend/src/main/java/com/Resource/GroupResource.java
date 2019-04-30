@@ -285,7 +285,7 @@ public class GroupResource implements RouteProvider {
                         .description(node.get("description").asText())
                         .gid(Integer.valueOf(ctx.pathArgs().get("id")))
                         .location(node.get("location").asText())
-                        .date(new SimpleDateFormat("yyyy-MM-dd")
+                        .date(new SimpleDateFormat("yyyy-MM-dd HH:mm")
                                 .format(new Date(node.get("date").asText())))
                         .build();
             }

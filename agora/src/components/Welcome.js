@@ -38,7 +38,7 @@ export default class Welcome extends Component {
                                     alt="Third slide"
                                 />
                                 <Carousel.Caption>
-                                    <p>Now available in Chicago!</p>
+                                    <p>Welcome to Agora!</p>
                                 </Carousel.Caption>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -48,7 +48,7 @@ export default class Welcome extends Component {
                                     alt="Third slide"
                                 />
                                 <Carousel.Caption>
-                                    <p>Meet up with friends in NYC!</p>
+                                    <p>The event platform for the masses!</p>
                                 </Carousel.Caption>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -58,7 +58,7 @@ export default class Welcome extends Component {
                                     alt="Third slide"
                                 />
                                 <Carousel.Caption>
-                                    <p>San Francisco is the perfect place to hang out!</p>
+                                    <p>Sign up to get started!</p>
                                 </Carousel.Caption>
                             </Carousel.Item>
                         </Carousel>
