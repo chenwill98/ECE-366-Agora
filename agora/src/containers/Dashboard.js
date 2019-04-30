@@ -122,6 +122,11 @@ class Dashboard extends Component{
         }
     }
 
+
+    gotoChangePassword = () => {
+        this.props.history.push('/changepassword');
+    };
+
     ////////////////////////////
     render() {
         // confirm that the user session exists, otherwise redirect to login.
@@ -135,7 +140,7 @@ class Dashboard extends Component{
 
                     <h1>Name {formatName(this.state.user_first_name, this.state.user_last_name)}! </h1>
 
-                    <Button variant="primary">Change Password</Button>
+                    <Button variant="primary" onClick={() => this.gotoChangePassword()}>Change Password</Button>
 
                     <DashboardTabs>
                         <div label="Groups">

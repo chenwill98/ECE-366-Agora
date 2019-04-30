@@ -360,43 +360,17 @@ public class UserStore {
      * userJoinEvent - Joins a user and an event together
      *
      * @param user_id The id of the user who is joining.
-     * @param event_name The name of the event the user is joining.
-     * @param is_attending a 1, 2, or 3. 1:attending \ 2:maybe \ 3:not attending.
+     * @param event_id The name of the event the user is joining.
      *
      * @return boolean - true on success, else false.
      */
-    public boolean userJoinEvent(String user_id, String event_name, int is_attending) throws SQLException {
+    public boolean userJoinEvent(String user_id, String event_id) {
         PreparedStatement stmt = null;
-        ResultSet  result_set;
 
-        // get the event id of the event name
+        // update rsvp
         try {
-            stmt = connection.prepareStatement("select Event_id from Events where Event_name = ?");
-            stmt.setString(1, event_name);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // execute the sql
-        try {
-            result_set = stmt.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        // connect user and event
-        try {
-            result_set.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        String event_id = result_set.getString("Event_id");
-
-        // check that user isn't already rsvp-ed to the event.
-        try {
-            stmt = connection.prepareStatement( "select User_id, Event_id, Is_attending from Event_attendance" +
-                                                " where User_id = ? and Event_id= ?");
+            stmt = connection.prepareStatement( "replace into Event_attendance (Is_attending, User_id, Event_id) " +
+                                            "values (1, ?, ?)");
             stmt.setString(1, user_id);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -404,49 +378,11 @@ public class UserStore {
         }
 
         try {
-            result_set = stmt.executeQuery();
+            stmt.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        }
-
-        if (result_set.next()) {
-            // update rsvp
-            try {
-                stmt = connection.prepareStatement( "update Event_attendance set Is_attending = 1 " +
-                                                    "where User_id = ? AND Event_id =  ?");
-                stmt.setString(1, user_id);
-                stmt.setString(2, event_id);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                stmt.execute();
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-        else {  // create new relationship.
-            try {
-                stmt = connection.prepareStatement( "insert into Event_attendance (User_id, Event_id, Is_attending)" +
-                        " values (?, ?, ?)");
-                stmt.setInt(1, Integer.valueOf(user_id));
-                stmt.setInt(2, Integer.valueOf(result_set.getString("Event_id")));
-                stmt.setInt(3, is_attending);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                stmt.execute();
-                return true;
-            } catch (SQLException e) {
-                e.printStackTrace();
-                return false;
-            }
         }
     }
 
@@ -456,43 +392,20 @@ public class UserStore {
      * rather just updates the status of the user as NOT attending.
      *
      * @param user_id The user in question.
-     * @param event_name The event name in question.
+     * @param event_id The event name in question.
      *
      * @return boolean - true on success, else false.
      */
-    public boolean userLeaveEvent(String user_id, String event_name) {
+    public boolean userLeaveEvent(String user_id, String event_id) {
 
         PreparedStatement stmt = null;
-        ResultSet  result_set;
 
-        // get the event id of the event
-        try {
-            stmt = connection.prepareStatement("select Event_id from Events where Event_name = ?");
-            stmt.setString(1, event_name);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        // execute the sql
-        try {
-            result_set = stmt.executeQuery();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-
-        // disconnect between user and event
-        try {
-            result_set.next();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         try {
             stmt = connection.prepareStatement( "update Event_attendance set Is_attending = 3 " +
                                                 "where User_id = ? AND Event_id =  ?");
             stmt.setString(1, user_id);
-            stmt.setString(2, result_set.getString("Event_id"));
+            stmt.setString(2, event_id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -570,7 +483,7 @@ public class UserStore {
                     "E.DAte_time from Event_attendance EA " +
                     "inner join Users U on U.User_id = EA.User_id " +
                     "inner join Events E on E.Event_id = EA.Event_id " +
-                    "where U.User_id = ?");
+                    "where U.User_id = ? and EA.Is_attending = 1");
             stmt.setString(1, user_id);
         } catch (SQLException e) {
             e.printStackTrace();
@@ -600,5 +513,50 @@ public class UserStore {
             e.printStackTrace();
         }
         return events;
+    }
+
+
+    /**
+     * getUserEventAttendance - Get the attendance status of a user to an event.
+     * @param user_id The user id.
+     * @param event_id The event id.
+     * @return Integer with value of: 1, 2, or 3. 1:attending \ 2:maybe \ 3:not attending.
+     */
+    public Integer getUserEventAttendance(String user_id, String event_id) {
+        PreparedStatement stmt = null;
+        ResultSet  result_set;
+
+        try {
+            stmt = connection.prepareStatement( "Select Is_attending from Event_attendance where User_id = ? and Event_id = ?");
+            stmt.setString(1, user_id);
+            stmt.setString(2, event_id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            result_set = stmt.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        String status = "NO";
+
+
+        try {
+            if (result_set.next()) {
+                status = result_set.getString("Is_attending");
+                if (status.equals("NO"))
+                    return 3;
+                else if (status.equals("YES"))
+                    return 1;
+                else
+                    return 2;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 3;
     }
 }

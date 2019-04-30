@@ -11,7 +11,6 @@ import com.spotify.apollo.RequestContext;
 import com.spotify.apollo.Response;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 
 import java.util.stream.Stream;
@@ -117,11 +116,15 @@ public class UserResource implements RouteProvider {
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/leave-event", this::leaveEvent)
+                Route.<SyncHandler<Response<ByteString>>>create("GET", "/user/<id>/event/<eid>/leave", this::leaveEvent)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
-                Route.<SyncHandler<Response<ByteString>>>create("POST", "/user/<id>/join-event", this::joinEvent)
+                Route.<SyncHandler<Response<ByteString>>>create("GET", "/user/<id>/event/<eid>/join", this::joinEvent)
+                        .withMiddleware(UserResource::userSessionMiddleware)
+                        .withMiddleware(Middleware::syncToAsync)
+                        .withMiddleware(jsonMiddleware()),
+                Route.<SyncHandler<Response<Integer>>>create("GET", "/user/<id>/event/<eid>/is-attending", this::IsAttending)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
                         .withMiddleware(jsonMiddleware()),
@@ -130,6 +133,16 @@ public class UserResource implements RouteProvider {
                 );
     }
 
+
+    /**
+     * IsAttending - Checks whether a user is attending an event.
+     * @param ctx The request context.
+     * @return Integer with value of: 1, 2, or 3. 1:attending \ 2:maybe \ 3:not attending.
+     */
+    public Response<Integer> IsAttending(RequestContext ctx) {
+        return Response.ok().withPayload(
+                store.getUserEventAttendance(ctx.pathArgs().get("id"), ctx.pathArgs().get("eid")));
+    }
 
 
     /**
@@ -262,20 +275,10 @@ public class UserResource implements RouteProvider {
      */
     @VisibleForTesting
     public Response<ByteString> joinEvent(RequestContext ctx) {
-
-        JsonNode node = validateEmailHelper(ctx, false);
-        if (node != null) {
-            try {
-                if(store.userJoinEvent(ctx.pathArgs().get("id"), node.get("eventname").asText(),1))
-                    return Response.ok();
-                else
-                    return Response.forStatus(Status.BAD_REQUEST);
-            } catch (SQLException e) {
-                return Response.forStatus(Status.INTERNAL_SERVER_ERROR);
-            }
-        }
+        if(store.userJoinEvent(ctx.pathArgs().get("id"), ctx.pathArgs().get("eid")))
+            return Response.ok();
         else
-            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
+            return Response.forStatus(Status.BAD_REQUEST);
     }
 
 
@@ -290,15 +293,10 @@ public class UserResource implements RouteProvider {
     @VisibleForTesting
     public Response<ByteString> leaveEvent(RequestContext ctx) {
 
-        JsonNode node = validateEmailHelper(ctx, false);
-        if (node != null) {
-            if (store.userLeaveEvent(ctx.pathArgs().get("id"), node.get("eventname").asText()))
-                return Response.ok();
-            else
-                return Response.forStatus(Status.BAD_REQUEST);
-        }
+        if (store.userLeaveEvent(ctx.pathArgs().get("id"), ctx.pathArgs().get("eid")))
+            return Response.ok();
         else
-            return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Missing Queries"));
+            return Response.forStatus(Status.BAD_REQUEST);
     }
 
 

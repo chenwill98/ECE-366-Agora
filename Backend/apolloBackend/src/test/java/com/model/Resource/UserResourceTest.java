@@ -237,7 +237,7 @@ public class UserResourceTest {
                         .of(ByteString.of(real_object_mapper.writeValueAsBytes(ImmutableMap
                                 .of("eventname", test_event.name())))).get().utf8()));
 
-        when(store.userJoinEvent(String.valueOf(test_user.uid()), test_event.name(), 1)).thenReturn(true);
+        when(store.userJoinEvent(String.valueOf(test_user.uid()), String.valueOf(test_event.id()))).thenReturn(true);
 
         Response<ByteString> actual_response = test_user_resource.joinEvent(ctx_test);
 
