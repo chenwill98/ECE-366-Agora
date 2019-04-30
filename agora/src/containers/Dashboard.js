@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import "../styles/App.css";
 import Button from "react-bootstrap/Button";
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute.js";
@@ -7,11 +6,10 @@ import Navigation from "../components/Navigation.js";
 import Cookies from "universal-cookie";
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tabs';
-import "../styles/DashboardList.css";
 import Jumbotron from 'react-bootstrap/Jumbotron'
 import { Card, CardColumns } from "react-bootstrap";
 import Footer from "../components/Footer";
-
+//
 const cookies = new Cookies();
 
 let init = {
@@ -21,7 +19,6 @@ let init = {
 
 function ContactGroup(props) {
     return (
-
     <Card>
         <Card.Header as="h5">
         <Card.Title><a href={"/group/" + props.ID}><span>{props.name}</span></a></Card.Title>
@@ -32,12 +29,10 @@ function ContactGroup(props) {
             </Card.Text>
         </Card.Body>
     </Card>
-
     );
 }
 function ContactEvent(props) {
     return (
-        <CardColumns>;
             <Card>
                 <Card.Header as="h5">
                     <Card.Title><a href={"/event/" + props.ID}><span>{props.name}</span></a></Card.Title>
@@ -48,7 +43,6 @@ function ContactEvent(props) {
                     </Card.Text>
                 </Card.Body>
             </Card>
-        </CardColumns>
     );
 }
 
