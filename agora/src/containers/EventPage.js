@@ -238,8 +238,8 @@ class EventPage extends Component {
                         <p>Location: {this.state.event_location}</p>
                         <p>Date: {this.state.event_date.substr(0, 16)}</p>
 
-                        {this.state.user_id  && this.state.user_attendance === 3 && <Button variant="raised" onClick={() => this.joinEvent()}>Attend Event</Button>}
-                        {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="raised" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
+                        {this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
+                        {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
 
                         <Card>
                             <h3>Users attending:</h3>
