@@ -1,12 +1,14 @@
 import React, { Component } from "react";
-import DashboardTabs from '../components/DashboardTabs';
-import DashboardList from '../components/DashboardList';
 import "../styles/App.css";
 import Button from "react-bootstrap/Button";
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute.js";
 import Navigation from "../components/Navigation.js";
 import Cookies from "universal-cookie";
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tabs';
+import Sonnet from 'react-bootstrap/Tabs';
+import "../styles/DashboardList.css";
 
 const cookies = new Cookies();
 
@@ -15,6 +17,29 @@ let init = {
     credentials: "include"
 };
 
+
+function Contact(props) {
+    return (
+        <div className="contact">
+            <a href={"/group/" + props.name}><span>{props.name}</span></a>
+        </div>
+    );
+}
+
+function DashboardList(props) {
+
+    if (props == null || props.contacts == null ) {
+        return;
+    }
+    else {
+
+        return (
+            <div>
+                {props.contacts.map(c => <Contact key={c.id} name={c.name}/>)}
+            </div>
+        );
+    }
+}
 
 function formatName(first, last) {
     return first + ' ' + last;
@@ -150,6 +175,20 @@ class Dashboard extends Component{
                             <DashboardList contacts={this.state.user_events} />
                         </div>
                     </DashboardTabs>
+                    <h1>Name: {formatName(this.state.user_first_name, this.state.user_last_name)} </h1>
+                    <hr />
+                    <Button variant="primary">Change Password</Button>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <Button variant="primary" href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
+                    <hr />
+                    <Tabs defaultActiveKey="groups" transition={false} id="tabs">
+                        <Tab eventKey="groups" title="Groups">
+                            <Sonnet /> <DashboardList contacts={this.state.user_groups} />
+                        </Tab>
+                        <Tab eventKey="events" title="Events">
+                            <Sonnet /> <DashboardList contacts={this.state.user_events} />
+                        </Tab>
+                    </Tabs>;
                 </div>
             );
         }
