@@ -5,7 +5,7 @@ import Navigation from '../components/Navigation.js';
 import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
 import Button from "react-bootstrap/Button";
-
+import Footer from "../components/Footer";
 
 let init = {
     method: "Get",
@@ -249,8 +249,8 @@ class EventPage extends Component {
                                 </Card>
                             )}
                         </Card>
+                         <Footer/>
                     </SinglebObjectView>
-
                 </div>
             );
         }
