@@ -137,7 +137,8 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email from Groop_memberships GM " +
+            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email, GM.Is_admin " +
+                                                "from Groop_memberships GM " +
                                                 "inner join Users U on U.User_id = GM.User_id " +
                                                 "inner join Groops G on G.Groop_id = GM.Groop_id" +
                                                 " where G.Groop_id = ?");
@@ -163,7 +164,7 @@ public class GroupStore {
                         .first_name(result_set.getString("First_name"))
                         .last_name(result_set.getString("Last_name"))
                         .email(result_set.getString("Email"))
-                        .pass_hash("")
+                        .pass_hash(String.valueOf(result_set.getInt("Is_admin")))
                         .build());
             }
         } catch (SQLException e) {

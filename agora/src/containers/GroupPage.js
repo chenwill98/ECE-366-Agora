@@ -6,6 +6,7 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
 import Footer from "../components/Footer";
+import {Navbar} from "react-bootstrap";
 
 let init_get = {
     method: "Get",
@@ -247,7 +248,8 @@ class GroupPage extends Component {
         .then(res => {
             if (res.status === 200) {
                 this.setState( {
-                    user_belongs: false
+                    user_belongs: false,
+                    user_isAdmin: false
                 });
                 console.log("Successfully left group.");
                 this.getGroupUsers();
@@ -304,6 +306,7 @@ class GroupPage extends Component {
         })
         .then(res => {
             if (res.status === 200) {
+                this.getGroupUsers();
                 console.log("Successfully made someone an admin.");
             }
             else {
@@ -352,8 +355,15 @@ class GroupPage extends Component {
                         {this.state.group_users.map((user, i) =>
                             <Card key={i} user={user}>
                                 <Card.Body>
-                                    <h4>{user.first_name}  {user.last_name} {user.email}</h4>
-                                    {user.uid != this.state.user_id && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
+                                    {user.pass_hash === "1" && <h5><img
+                                                                        src={require("../images/admin_star.PNG")}
+                                                                        width="20"
+                                                                        height="20"
+                                                                        alt={""}
+                                                                /> {user.first_name}  {user.last_name}</h5>}
+                                    {user.pass_hash !== "1" && <h5>{user.first_name}  {user.last_name}</h5>}
+                                    {user.email !== "" && <h6> - {user.email}</h6>}
+                                    {user.pass_hash !== "1" && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
                                 </Card.Body>
                             </Card>
 

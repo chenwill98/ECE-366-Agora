@@ -19,7 +19,7 @@ class Navigation extends Component {
     render() {
         return (
             <Navbar fixed="bottom" bg="primary" variant="dark" expand="lg">
-                <Navbar.Brand href="/home">
+                <Navbar.Brand href="/">
                     <img
                         src={require("../images/Logo2.PNG")}
                         width="100"
@@ -30,10 +30,12 @@ class Navigation extends Component {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="mr-auto">
+                        {cookies.get("USER_TOKEN") &&
                         <Nav.Link href="/home">
                             <i className="fas fa-home"></i>
                             &nbsp; Home
                         </Nav.Link>
+                        }
                         <Nav.Link href="/groups">
                             <i className="fas fa-users"></i>
                             &nbsp; Groups
@@ -42,9 +44,22 @@ class Navigation extends Component {
                             <i className="far fa-calendar-alt"></i>
                             &nbsp; Events
                         </Nav.Link>
+                        {!cookies.get("USER_TOKEN") &&
+                        <Nav.Link href="/signup">
+                            <i className="fas fa-user-plus"></i>
+                            &nbsp; Sign Up
+                        </Nav.Link>
+                        }
+                        { !cookies.get("USER_TOKEN") &&
+                            <Nav.Link href="/login">
+                            <i className="fas fa-sign-in-alt"></i>
+                            &nbsp; Login
+                            </Nav.Link>
+                        }
                     </Nav>
+                    {cookies.get("USER_TOKEN") &&
                     <Nav className="ml-auto">
-                        <Nav.Link href="/account">
+                        <Nav.Link href="/home">
                             <i className="fas fa-user-circle"></i>
                             &nbsp; My Account
                         </Nav.Link>
@@ -53,6 +68,7 @@ class Navigation extends Component {
                             &nbsp; Sign Out
                         </Nav.Link>
                     </Nav>
+                    }
                 </Navbar.Collapse>
             </Navbar>
         )
