@@ -7,6 +7,7 @@ import CenterView from '../components/CenterView.js';
 import Footer from "../components/Footer.js";
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
+import emailjs from "emailjs-com";
 
 
 const cookies = new Cookies();
@@ -25,6 +26,9 @@ class Login extends Component {
             user_email: "",
             user_password: "",
             user_session: false,
+
+            // form related states
+            forgot:false,
 
             // error related states
             success: false,
@@ -96,6 +100,19 @@ class Login extends Component {
         }
     };
 
+    email = () => {
+        let template_params = {
+            "reply_to": this.state.user_email,
+            "message_html": "message_html_value"
+        };
+
+
+
+        let service_id = "agora_service";
+        let template_id = "template_hlWoe6JV";
+        emailjs.send(service_id, template_id, template_params);
+    };
+
     render() {
         if (cookies.get("USER_TOKEN")) {
             return(
@@ -112,44 +129,81 @@ class Login extends Component {
                     <hr />
                     <Jumbotron fluid>
                         <CenterView>
-                            <Card border="primary" style={{width: '40rem'}}>
-                                <Card.Header className="text-center" as="h5">Login</Card.Header>
-                                <Card.Body>
-                                    <Card.Text>
-                                        <Form onSubmit={this.handleSubmit}>
-                                            {this.state.error ?
-                                                <Alert dismissible variant="danger"
-                                                       onClick={() => this.setState({error: false})}>
-                                                    {this.state.error_msg}
-                                                </Alert>
-                                                : ''}
-                                            <Form.Group controlId="user_email">
-                                                <Form.Label>Email address</Form.Label>
-                                                <InputGroup>
-                                                    <InputGroup.Prepend>
-                                                        <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
-                                                    </InputGroup.Prepend>
-                                                    <Form.Control type="email"
-                                                                  placeholder="Enter email"
-                                                                  aria-describedby="inputGroupPrepend"
+                            {this.state.email ?
+                                <Card border="primary" style={{width: '40rem'}}>
+                                    <Card.Header className="text-center" as="h5">Forgot my password</Card.Header>
+                                    <Card.Body>
+                                        <Card.Text>
+                                            <Form onSubmit={this.handleSubmit}>
+                                                {this.state.error ?
+                                                    <Alert dismissible variant="danger"
+                                                           onClick={() => this.setState({error: false})}>
+                                                        {this.state.error_msg}
+                                                    </Alert>
+                                                    : ''}
+                                                <Form.Group controlId="user_email">
+                                                    <Form.Label>Email address</Form.Label>
+                                                    <InputGroup>
+                                                        <InputGroup.Prepend>
+                                                            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
+                                                        </InputGroup.Prepend>
+                                                        <Form.Control type="email"
+                                                                      placeholder="Enter email"
+                                                                      aria-describedby="inputGroupPrepend"
+                                                                      onChange={this.handleChange}/>
+                                                    </InputGroup>
+                                                    <Form.Text className="text-muted">
+                                                        We'll send your password to your email
+                                                    </Form.Text>
+                                                </Form.Group>
+                                                <Button variant="primary" type="submit" onClick={() => this.email()} block>
+                                                    Retrieve my password!
+                                                </Button>
+                                            </Form>
+                                        </Card.Text>
+                                        <Card.Link href="/login">I remember it now!</Card.Link>
+                                    </Card.Body>
+                                </Card>
+                                :
+                                <Card border="primary" style={{width: '40rem'}}>
+                                    <Card.Header className="text-center" as="h5">Login</Card.Header>
+                                    <Card.Body>
+                                        <Card.Text>
+                                            <Form onSubmit={this.handleSubmit}>
+                                                {this.state.error ?
+                                                    <Alert dismissible variant="danger"
+                                                           onClick={() => this.setState({error: false})}>
+                                                        {this.state.error_msg}
+                                                    </Alert>
+                                                    : ''}
+                                                <Form.Group controlId="user_email">
+                                                    <Form.Label>Email address</Form.Label>
+                                                    <InputGroup>
+                                                        <InputGroup.Prepend>
+                                                            <InputGroup.Text id="inputGroupPrepend">@</InputGroup.Text>
+                                                        </InputGroup.Prepend>
+                                                        <Form.Control type="email"
+                                                                      placeholder="Enter email"
+                                                                      aria-describedby="inputGroupPrepend"
+                                                                      onChange={this.handleChange}/>
+                                                    </InputGroup>
+                                                </Form.Group>
+                                                <Form.Group controlId="user_password">
+                                                    <Form.Label>Password</Form.Label>
+                                                    <Form.Control type="password"
+                                                                  placeholder="Password"
                                                                   onChange={this.handleChange}/>
-                                                </InputGroup>
-                                            </Form.Group>
-                                            <Form.Group controlId="user_password">
-                                                <Form.Label>Password</Form.Label>
-                                                <Form.Control type="password"
-                                                              placeholder="Password"
-                                                              onChange={this.handleChange}/>
-                                            </Form.Group>
-                                            <Button variant="primary" type="submit" onClick={() => this.Login()} block>
-                                                Login
-                                            </Button>
-                                        </Form>
-                                    </Card.Text>
-                                    <Card.Link href="/signup">Don't have an account?</Card.Link>
-                                    <Card.Link className="pull-right" href="#">Forgot your password?</Card.Link>
-                                </Card.Body>
-                            </Card>
+                                                </Form.Group>
+                                                <Button variant="primary" type="submit" onClick={() => this.Login()} block>
+                                                    Login
+                                                </Button>
+                                            </Form>
+                                        </Card.Text>
+                                        <Card.Link href="/signup">Don't have an account?</Card.Link>
+                                        <Card.Link className="pull-right" href="#" onClick={() => this.setState({email: true})}>Forgot your password?</Card.Link>
+                                    </Card.Body>
+                                </Card>}
+
 
                         </CenterView>
                     </Jumbotron>
