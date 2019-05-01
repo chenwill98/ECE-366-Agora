@@ -209,7 +209,7 @@ class EventPage extends Component {
     /**
      * RENDERING
      */
-    render() {
+        render() {
         if (this.state.error) {
             return (
                 <div className='mt-5'>
@@ -227,34 +227,33 @@ class EventPage extends Component {
 
                     <SinglebObjectView>
                         <h1>Name: {this.state.event_name}</h1>
-                        <p>Description: {this.state.event_description}</p>
-
+                        <h5>Description: {this.state.event_description}</h5>
+                        <h5>Location: {this.state.event_location}</h5>
+                        <h5>Date: {this.state.event_date.substr(0, 16)}</h5>
+                        <hr/>
                         <Card>
                             <Card.Body>
-                                <Card.Link href={"/group/" + this.state.event_gid}>{this.state.event_g_name}</Card.Link>
+                                <h4> <Card.Link href={"/group/" + this.state.event_gid}>{this.state.event_g_name}</Card.Link></h4>
                             </Card.Body>
                         </Card>
-
-                        <p>Location: {this.state.event_location}</p>
-                        <p>Date: {this.state.event_date.substr(0, 16)}</p>
-
+                        <hr/>
                         {this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
                         {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
-
-                        <Card>
-                            <h3>Users attending:</h3>
+                        <Card>&nbsp;
+                            <h3>&nbsp;&nbsp;&nbsp;Users attending:</h3>
                             {this.state.event_users.map((user, i) =>
                                 <Card key={i} user={user}>
-                                    <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body>
+                                    <h4> <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body></h4>
                                 </Card>
                             )}
                         </Card>
-                         <Footer/>
+                        <Footer/>
                     </SinglebObjectView>
                 </div>
             );
         }
     }
 }
+
 
 export default EventPage;
