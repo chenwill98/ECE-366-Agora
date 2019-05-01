@@ -7,7 +7,7 @@ import CenterView from '../components/CenterView.js';
 import Footer from "../components/Footer.js";
 import {Backend_Route} from "../BackendRoute.js";
 import Cookies from "universal-cookie";
-import emailjs from "emailjs-com";
+import * as emailjs from 'emailjs-com';
 
 
 const cookies = new Cookies();
@@ -103,14 +103,18 @@ class Login extends Component {
     email = () => {
         let template_params = {
             "reply_to": this.state.user_email,
-            "message_html": "message_html_value"
+            "message_html": "We don't actually have the appropriate routes to retrieve a user's password lmao"
         };
-
-
 
         let service_id = "agora_service";
         let template_id = "template_hlWoe6JV";
-        emailjs.send(service_id, template_id, template_params);
+        let user_id = "user_L6P4JRoGpemcRWO1WNmcG";
+        emailjs.send(service_id, template_id, template_params, user_id)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+            }, function(error) {
+                console.log('FAILED...', error);
+            });
     };
 
     render() {
@@ -135,12 +139,6 @@ class Login extends Component {
                                     <Card.Body>
                                         <Card.Text>
                                             <Form onSubmit={this.handleSubmit}>
-                                                {this.state.error ?
-                                                    <Alert dismissible variant="danger"
-                                                           onClick={() => this.setState({error: false})}>
-                                                        {this.state.error_msg}
-                                                    </Alert>
-                                                    : ''}
                                                 <Form.Group controlId="user_email">
                                                     <Form.Label>Email address</Form.Label>
                                                     <InputGroup>
@@ -152,6 +150,12 @@ class Login extends Component {
                                                                       aria-describedby="inputGroupPrepend"
                                                                       onChange={this.handleChange}/>
                                                     </InputGroup>
+                                                    {this.state.error ?
+                                                        <Alert dismissible variant="danger"
+                                                               onClick={() => this.setState({error: false})}>
+                                                            {this.state.error_msg}
+                                                        </Alert>
+                                                        : ''}
                                                     <Form.Text className="text-muted">
                                                         We'll send your password to your email
                                                     </Form.Text>
@@ -203,8 +207,6 @@ class Login extends Component {
                                         <Card.Link className="pull-right" href="#" onClick={() => this.setState({email: true})}>Forgot your password?</Card.Link>
                                     </Card.Body>
                                 </Card>}
-
-
                         </CenterView>
                     </Jumbotron>
                     <Footer/>
