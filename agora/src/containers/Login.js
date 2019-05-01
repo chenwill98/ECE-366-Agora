@@ -89,7 +89,7 @@ class Login extends Component {
             .catch(error => { //not catching error with connecting? only catches errors returned by backend?
                 this.setState({
                     error: true,
-                    error_msg:  "Error logging in user: " + error.message
+                    error_msg:  "Error logging in. Check that your username and password are correct."
                 });
                 console.log("Error requesting cookie: " + error.message);
             });

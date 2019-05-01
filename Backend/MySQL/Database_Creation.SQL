@@ -34,7 +34,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `AgoraDB`.`Groops` (
   `Groop_id` INT NOT NULL AUTO_INCREMENT,
-  `Description` VARCHAR(45) NOT NULL,
+  `Description` BLOB NOT NULL,
   `Name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`Groop_id`),
   UNIQUE INDEX `Group_id_UNIQUE` (`Groop_id` ASC) VISIBLE)
@@ -47,13 +47,12 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `AgoraDB`.`Events` (
   `Event_id` INT NOT NULL AUTO_INCREMENT,
   `Event_name` VARCHAR(45) NULL,
-  `Description` VARCHAR(45) NULL,
+  `Description` BLOB NULL,
   `Groop_id` INT NULL,
   `Location` VARCHAR(45) NULL,
   `Date_time` DATETIME NULL,
   PRIMARY KEY (`Event_id`),
   UNIQUE INDEX `Event ID_UNIQUE` (`Event_id` ASC) VISIBLE,
-  FULLTEXT INDEX `Descripsearch` (`Description`) INVISIBLE,
   INDEX `Fk_events_groups_idx` (`Groop_id` ASC) VISIBLE,
   CONSTRAINT `fk_events_groups`
     FOREIGN KEY (`Groop_id`)

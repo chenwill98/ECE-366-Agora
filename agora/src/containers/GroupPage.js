@@ -64,23 +64,7 @@ class GroupPage extends Component {
             });
 
 
-        /**
-         * GET THE GROUP'S USERS
-         */
-        axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
-            .then ( res => {
-                console.log("Successfully got users.");
-                this.setState( {
-                   group_users: res.data
-                });
-            })
-            .catch( error => {
-                this.setState({
-                    error: true,
-                    error_msg: error.message
-                });
-                console.log("Error requesting get-users: " + error.message);
-            });
+        this.getGroupUsers();
 
         /**
          * GET THE GROUP'S EVENTS
@@ -228,6 +212,7 @@ class GroupPage extends Component {
                     user_belongs: true
                 });
                 console.log("Successfully joined group.");
+                this.getGroupUsers();
             }
             else {
                 this.setState({
@@ -264,6 +249,7 @@ class GroupPage extends Component {
                     user_belongs: false
                 });
                 console.log("Successfully left group.");
+                this.getGroupUsers();
             }
             else {
                 this.setState({
@@ -273,6 +259,27 @@ class GroupPage extends Component {
                 console.log("Error leaving group.");
             }
         });
+    }
+
+
+    /**
+     * GET THE GROUP'S USERS
+     */
+    getGroupUsers() {
+        axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
+            .then ( res => {
+                console.log("Successfully got users.");
+                this.setState( {
+                    group_users: res.data
+                });
+            })
+            .catch( error => {
+                this.setState({
+                    error: true,
+                    error_msg: error.message
+                });
+                console.log("Error requesting get-users: " + error.message);
+            });
     }
 
 
@@ -305,7 +312,6 @@ class GroupPage extends Component {
     }
 
 
-
     //kills the process
     componentWillUnmount() {
         if (this.state.intervalIsSet) {
@@ -313,7 +319,6 @@ class GroupPage extends Component {
             this.setState({ intervalIsSet: null });
         }
     }
-
 
 
     //// render function ////
