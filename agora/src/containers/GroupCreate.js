@@ -4,6 +4,10 @@ import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
 
 class GroupCreate extends Component {
     constructor(props) {

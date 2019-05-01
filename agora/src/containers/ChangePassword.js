@@ -4,6 +4,7 @@ import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import {Backend_Route} from "../BackendRoute";
 import Cookies from "universal-cookie";
+import {Redirect} from "react-router-dom";
 
 const cookies = new Cookies();
 
