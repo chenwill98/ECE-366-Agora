@@ -404,7 +404,7 @@ class GroupPage extends Component {
                                         <Card.Body>
                                             <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
                                             {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() =>
-                                                this.state.group_users.map((user, j) =>this.massEmail(user.email, user.first_name, this.state.group_name, event.name,`${this.state.ip}:8000/group/${this.state.group_id}`))}>Send Mass RSVP Email</Button>}&nbsp;&nbsp;
+                                                this.state.group_users.map((user, j) =>this.massEmail(user.email, user.first_name, this.state.group_name, event.name,`${this.state.ip}:8000/event/${event.id}`))}>Send Mass RSVP Email</Button>}&nbsp;&nbsp;
                                         </Card.Body>
                                     </Card>
                                 )}
