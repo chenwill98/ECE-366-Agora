@@ -192,11 +192,11 @@ class Dashboard extends Component{
         }
         else {
             return (
-                <div>
+                <div className="p-5">
                     <Navigation/>
                     <Jumbotron fluid>
                         <container>
-                        <h1>Welcome back  {formatName(this.state.user_first_name, this.state.user_last_name)}!</h1>
+                        <h1>Welcome back,  {formatName(this.state.user_first_name, this.state.user_last_name)}!</h1>
                             <h4> <font color="gray"> Email:  {this.state.user_email} </font></h4>
                             <p>
                             <Button variant="primary" size="lg"href="ChangePassword">Change Password</Button>

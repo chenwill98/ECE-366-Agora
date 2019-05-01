@@ -122,7 +122,7 @@ export default class Groups extends Component {
                         user_email: res.data.email
                     });
                 })
-            });
+             });
     };
 
     // removes the duplicate objects so other_groups doesn't contain redundant groups to the user_groups
@@ -173,7 +173,7 @@ export default class Groups extends Component {
                             }
 
                             <main role="main" className="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-                                <Card>
+                                {cookies.get("USER_TOKEN") && <Card>
                                     <Card.Body>
                                         <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
                                             <h3>Your Groups</h3>
@@ -195,6 +195,7 @@ export default class Groups extends Component {
                                         </CardColumns>
                                     </Card.Body>
                                 </Card>
+                                }
                                 <hr/>
                                 <Card>
                                     <Card.Body>

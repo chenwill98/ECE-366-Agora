@@ -99,7 +99,7 @@ class EventCreate extends Component {
                 this.setState({
                     error: true,
                     error_msg: "Response: " + res.status
-                })
+                });
                 console.log("Error creating event.");
             }
         });
@@ -152,6 +152,7 @@ class EventCreate extends Component {
                                             <Form.Label>Event Description</Form.Label>
                                             <Form.Control type="event_description"
                                                           placeholder="Description"
+                                                          as="textarea"
                                                           onChange={this.handleChange}/>
                                         </Form.Group>
 

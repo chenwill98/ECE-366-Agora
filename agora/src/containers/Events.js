@@ -156,41 +156,45 @@ export default class Events extends Component {
                     </nav>
                     <div className="container-fluid">
                         <div className="row">
-                            <nav className="col-md-2 d-none d-md-block bg-light sidebar">
-                                <div className="sidebar-sticky">
-                                    <ul className="nav flex-column">
-                                        <li className="nav-item">
-                                            <a className="nav-link active" href="/groupcreate">
-                                                <i className="fas fa-plus-circle"></i>
-                                                &nbsp; Create Group
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </nav>
-                            <main role="main" className="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-                                <Card>
-                                    <Card.Body>
-                                    <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
-                                        <h3>Your Events</h3>
+                            {cookies.get("USER_TOKEN") &&
+                                <nav className="col-md-2 d-none d-md-block bg-light sidebar">
+                                    <div className="sidebar-sticky">
+                                        <ul className="nav flex-column">
+                                            <li className="nav-item">
+                                                <a className="nav-link active" href="/groupcreate">
+                                                    <i className="fas fa-plus-circle"></i>
+                                                    &nbsp; Create Group
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </div>
-                                    <hr/>
-                                    <CardColumns>
-                                        {this.state.user_events.map((events, i) =>
-                                            <Card key={i} event={events}>
-                                                <Card.Header as="h5">
-                                                    <Card.Link href={"/event/" + events.id}>
-                                                        {events.name}
-                                                    </Card.Link>
-                                                </Card.Header>
-                                                <Card.Body>
-                                                    {events.description}
-                                                </Card.Body>
-                                            </Card>
-                                        )}
-                                    </CardColumns>
-                                    </Card.Body>
-                                </Card>
+                                </nav>
+                            }
+                            <main role="main" className="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+                                {cookies.get("USER_TOKEN") &&
+                                    <Card>
+                                        <Card.Body>
+                                            <div className="text-sm-left mb-3 text-center text-md-left mb-sm-0 col-12 col-sm-4">
+                                                <h3>Your Events</h3>
+                                            </div>
+                                            <hr/>
+                                            <CardColumns>
+                                                {this.state.user_events.map((events, i) =>
+                                                    <Card key={i} event={events}>
+                                                        <Card.Header as="h5">
+                                                            <Card.Link href={"/event/" + events.id}>
+                                                                {events.name}
+                                                            </Card.Link>
+                                                        </Card.Header>
+                                                        <Card.Body>
+                                                            {events.description}
+                                                        </Card.Body>
+                                                    </Card>
+                                                )}
+                                            </CardColumns>
+                                        </Card.Body>
+                                    </Card>
+                                }
                                 <hr/>
                                 <Card>
                                     <Card.Body>
