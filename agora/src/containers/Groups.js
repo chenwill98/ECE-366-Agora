@@ -157,18 +157,21 @@ export default class Groups extends Component {
                     </nav>
                     <div className="container-fluid">
                         <div className="row">
-                            <nav className="col-md-2 d-none d-md-block bg-light sidebar">
-                                <div className="sidebar-sticky">
-                                    <ul className="nav flex-column">
-                                        <li className="nav-item">
-                                            <a className="nav-link active" href="/groupcreate">
-                                                <i className="fas fa-plus-circle"></i>
-                                                &nbsp; Create Group
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </nav>
+                            {cookies.get("USER_TOKEN") &&
+                                <nav className="col-md-2 d-none d-md-block bg-light sidebar">
+                                    <div className="sidebar-sticky">
+                                        <ul className="nav flex-column">
+                                            <li className="nav-item">
+                                                <a className="nav-link active" href="/groupcreate">
+                                                    <i className="fas fa-plus-circle"></i>
+                                                    &nbsp; Create Group
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </nav>
+                            }
+
                             <main role="main" className="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
                                 <Card>
                                     <Card.Body>

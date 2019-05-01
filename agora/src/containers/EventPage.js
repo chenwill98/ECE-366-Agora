@@ -6,6 +6,10 @@ import Card from "react-bootstrap/Card";
 import {Backend_Route} from "../BackendRoute.js";
 import Button from "react-bootstrap/Button";
 import Footer from "../components/Footer";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
 
 let init = {
     method: "Get",
@@ -237,7 +241,7 @@ class EventPage extends Component {
                             </Card.Body>
                         </Card>
                         <hr/>
-                        {this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
+                        {cookies.get("USER_TOKEN") && this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
                         {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
                         <Card>&nbsp;
                             <h3>&nbsp;&nbsp;&nbsp;Users attending:</h3>

@@ -3,6 +3,10 @@ import { Form, Button, Card, Alert } from "react-bootstrap";
 import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import {Backend_Route} from "../BackendRoute";
+import Cookies from "universal-cookie";
+import {Redirect} from "react-router-dom";
+
+const cookies = new Cookies();
 
 class ChangePassword extends Component {
     constructor(props) {
@@ -96,53 +100,59 @@ class ChangePassword extends Component {
 
 
     render() {
-        return (
-            <div className='mt-5'>
-                <Navigation/>
+        // confirm that the user session exists, otherwise redirect to login.
+        if (!cookies.get("USER_TOKEN")) {
+            return <Redirect to="/login"/>;
+        }
+        else {
+            return (
+                <div className='mt-5'>
+                    <Navigation/>
                     <CenterView>
-                        <Card border="primary" style={{ width: '40rem'}}>
-                        <Card.Header as="h5">Change Password</Card.Header>
-                        <Card.Body>
-                            <Card.Text>
-                                {this.state.error ?
-                                    <Alert dismissible variant="danger"
-                                           onClick={() => this.setState({error:false})}>
-                                        {this.state.error_msg}
-                                    </Alert>
-                                    : ''}
-                                <Form onSubmit={this.handleSubmit}>
-                                    <Form.Group controlId="old_pass">
-                                        <Form.Label>Old Password</Form.Label>
-                                        <Form.Control type="old_pass"
-                                                      placeholder="..."
-                                                      onChange={this.handleChange}/>
-                                    </Form.Group>
+                        <Card border="primary" style={{width: '40rem'}}>
+                            <Card.Header as="h5">Change Password</Card.Header>
+                            <Card.Body>
+                                <Card.Text>
+                                    {this.state.error ?
+                                        <Alert dismissible variant="danger"
+                                               onClick={() => this.setState({error: false})}>
+                                            {this.state.error_msg}
+                                        </Alert>
+                                        : ''}
+                                    <Form onSubmit={this.handleSubmit}>
+                                        <Form.Group controlId="old_pass">
+                                            <Form.Label>Old Password</Form.Label>
+                                            <Form.Control type="old_pass"
+                                                          placeholder="..."
+                                                          onChange={this.handleChange}/>
+                                        </Form.Group>
 
-                                    <Form.Group controlId="new_pass">
-                                        <Form.Label>New Password</Form.Label>
-                                        <Form.Control type="new_pass"
-                                                      placeholder="..."
-                                                      onChange={this.handleChange}/>
-                                    </Form.Group>
+                                        <Form.Group controlId="new_pass">
+                                            <Form.Label>New Password</Form.Label>
+                                            <Form.Control type="new_pass"
+                                                          placeholder="..."
+                                                          onChange={this.handleChange}/>
+                                        </Form.Group>
 
-                                    <Form.Group controlId="new_pass2">
-                                        <Form.Label>Confirm New Password</Form.Label>
-                                        <Form.Control type="new_pass2"
-                                                      placeholder="..."
-                                                      onChange={this.handleChange}/>
-                                    </Form.Group>
+                                        <Form.Group controlId="new_pass2">
+                                            <Form.Label>Confirm New Password</Form.Label>
+                                            <Form.Control type="new_pass2"
+                                                          placeholder="..."
+                                                          onChange={this.handleChange}/>
+                                        </Form.Group>
 
 
-                                    <Button variant="primary" type="submit" onClick={() => this.changePassword()}>
-                                        Change Password
-                                    </Button>
-                                </Form>
-                            </Card.Text>
-                        </Card.Body>
-                    </Card>
-                </CenterView>
-            </div>
-        );
+                                        <Button variant="primary" type="submit" onClick={() => this.changePassword()}>
+                                            Change Password
+                                        </Button>
+                                    </Form>
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </CenterView>
+                </div>
+            );
+        }
     }
 }
 export default ChangePassword;

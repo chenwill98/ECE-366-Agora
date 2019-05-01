@@ -6,7 +6,11 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
 import Footer from "../components/Footer";
-import {Navbar} from "react-bootstrap";
+import Cookies from "universal-cookie";
+
+
+const cookies = new Cookies();
+
 
 let init_get = {
     method: "Get",
@@ -347,7 +351,7 @@ class GroupPage extends Component {
 
                         {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>} &nbsp;&nbsp;
                         {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}&nbsp;&nbsp;
-                        {this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}&nbsp;&nbsp;
+                        {cookies.get("USER_TOKEN") && this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}&nbsp;&nbsp;
                         {this.state.user_id  && this.state.user_belongs && <Button variant="primary" onClick={() => this.leaveGroup()}>Leave Group</Button>}
                         <hr/>
                         <Card>&nbsp;
