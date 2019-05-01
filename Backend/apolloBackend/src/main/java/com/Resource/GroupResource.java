@@ -116,7 +116,11 @@ public class GroupResource implements RouteProvider {
     }
 
 
-    /* todo: comments and unit tests */
+    /**
+     * isAdmin - Determisn whether a user is an Admin for a group.
+     * @param ctx Request Context containing the user and group ids.
+     * @return Integers: 1= admin, 0= not and admin.
+     */
     private Response<Boolean> isAdmin(RequestContext ctx) {
         // some basic error checking
         if (ctx.pathArgs().get("gid") == null || ctx.pathArgs().get("gid").isEmpty() ||
@@ -131,7 +135,11 @@ public class GroupResource implements RouteProvider {
     }
 
 
-    /* todo: comments and unit tests */
+    /**
+     * getEvents - Get the events that a group has created.
+     * @param ctx contains the group id.
+     * @return A list of events.
+     */
     private Response<List<Event>> getEvents(RequestContext ctx) {
         // some basic error checking
         if (ctx.pathArgs().get("id") == null || ctx.pathArgs().get("id").isEmpty()) {
@@ -148,7 +156,11 @@ public class GroupResource implements RouteProvider {
     }
 
 
-    /* todo: comments and unit tests */
+    /**
+     * getGroup - Gets the group information from a group id.
+     * @param ctx Request context containing the group id.
+     * @return The Group object (name and description).
+     */
     private Response<Group> getGroup(RequestContext ctx) {
         String id = ctx.pathArgs().get("id");
 
@@ -197,12 +209,14 @@ public class GroupResource implements RouteProvider {
 
 
     /**
-     * getUsersAdmin - Returns a list of users who are members of a certain group
+     * getUsers - Returns a list of users who are members of a certain group
      *
      * @param ctx The request context that contains the group ID to get the users of.
      *
      * @return A response which, on success, contains a paylod with a list of User objects, with only their first names
      * and last names filled in.
+     *
+     * NOTE: The pass_hash contains a string "1" or "0", where 1==user is an admin, and "0"== user is not an admin.
      */
     @VisibleForTesting
     public Response<List<User>> getUsers(RequestContext ctx) {
@@ -223,7 +237,7 @@ public class GroupResource implements RouteProvider {
                     .first_name(user.first_name())
                     .last_name(user.last_name())
                     .email("")
-                    .pass_hash("")
+                    .pass_hash(user.pass_hash())    /* contains Is_admin, not the user's password! */
                     .build());
 
         if (restricted_info_users != null)

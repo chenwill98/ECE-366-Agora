@@ -5,6 +5,8 @@ import SingleObjectView from '../components/SingleObjectView.js';
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
+import Footer from "../components/Footer";
+import {Navbar} from "react-bootstrap";
 
 let init_get = {
     method: "Get",
@@ -246,7 +248,8 @@ class GroupPage extends Component {
         .then(res => {
             if (res.status === 200) {
                 this.setState( {
-                    user_belongs: false
+                    user_belongs: false,
+                    user_isAdmin: false
                 });
                 console.log("Successfully left group.");
                 this.getGroupUsers();
@@ -303,6 +306,7 @@ class GroupPage extends Component {
         })
         .then(res => {
             if (res.status === 200) {
+                this.getGroupUsers();
                 console.log("Successfully made someone an admin.");
             }
             else {
@@ -322,7 +326,7 @@ class GroupPage extends Component {
 
 
     //// render function ////
-    render() {
+   render() {
         if (this.state.error) {
             return (
                 <div className='mt-5'>
@@ -337,46 +341,51 @@ class GroupPage extends Component {
             return (
                 <div className='mt-5'>
                     <Navigation/>
-
                     <SingleObjectView>
                         <h1>Name: {this.state.group_name}</h1>
-                        <p>Description: {this.state.group_description}</p>
+                        <h5>Description: {this.state.group_description}</h5>
 
-                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>}
-                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}
-                        {this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>} &nbsp;&nbsp;
+                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}&nbsp;&nbsp;
+                        {this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}&nbsp;&nbsp;
                         {this.state.user_id  && this.state.user_belongs && <Button variant="primary" onClick={() => this.leaveGroup()}>Leave Group</Button>}
-
-                        <Card>
-                            <h3>Users:</h3>
+                        <hr/>
+                        <Card>&nbsp;
+                            <h3>&nbsp;&nbsp;&nbsp;Users:</h3>
                         {this.state.group_users.map((user, i) =>
                             <Card key={i} user={user}>
                                 <Card.Body>
-                                    <Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title>
-                                    {user.uid != this.state.user_id && this.state.user_isAdmin && <Button variant="raised" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
+                                    {user.pass_hash === "1" && <h5><img
+                                                                        src={require("../images/admin_star.PNG")}
+                                                                        width="20"
+                                                                        height="20"
+                                                                        alt={""}
+                                                                /> {user.first_name}  {user.last_name}</h5>}
+                                    {user.pass_hash !== "1" && <h5>{user.first_name}  {user.last_name}</h5>}
+                                    {user.email !== "" && <h6> - {user.email}</h6>}
+                                    {user.pass_hash !== "1" && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
                                 </Card.Body>
                             </Card>
+
                         )}
                         </Card>
-
-                        <Card>
-                            <h3>Events:</h3>
+                        <hr/>
+                        <Card>&nbsp;
+                            <h3>&nbsp;&nbsp;&nbsp;Events:</h3>
                             {this.state.group_events.map((event, i) =>
                                 <Card key={i} user={event}>
                                     <Card.Body>
-                                        <Card.Link href={"/event/" + event.id}>{event.name}</Card.Link>
+                                        <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
                                     </Card.Body>
                                 </Card>
                             )}
                         </Card>
-
+                        <Footer/>
                     </SingleObjectView>
                 </div>
             );
         }
     }
-
 }
-
 
 export default GroupPage;
