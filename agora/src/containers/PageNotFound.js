@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {Card, Image} from "react-bootstrap";
 import "../styles/Welcome.css";
 import CenterView from '../components/CenterView.js';
+import Footer from "../components/Footer";
 
 export default class PageNotFound extends Component {
     render() {
@@ -26,6 +27,7 @@ export default class PageNotFound extends Component {
                         </Card.Body>
                     </Card>
                 </CenterView>
+                <Footer/>
             </div>
         )
     };
