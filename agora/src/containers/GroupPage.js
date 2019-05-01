@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import Navigation from '../components/Navigation.js';
 import SingleObjectView from '../components/SingleObjectView.js';
-import Card from "react-bootstrap/Card";
+import {Card, CardColumns} from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
 import Footer from "../components/Footer";
@@ -356,33 +356,36 @@ class GroupPage extends Component {
                         <hr/>
                         <Card>&nbsp;
                             <h3>&nbsp;&nbsp;&nbsp;Users:</h3>
-                        {this.state.group_users.map((user, i) =>
-                            <Card key={i} user={user}>
-                                <Card.Body>
-                                    {user.pass_hash === "1" && <h5><img
-                                                                        src={require("../images/admin_star.PNG")}
-                                                                        width="20"
-                                                                        height="20"
-                                                                        alt={""}
-                                                                /> {user.first_name}  {user.last_name}</h5>}
-                                    {user.pass_hash !== "1" && <h5>{user.first_name}  {user.last_name}</h5>}
-                                    {user.email !== "" && <h6> - {user.email}</h6>}
-                                    {user.pass_hash !== "1" && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
-                                </Card.Body>
-                            </Card>
-
-                        )}
+                            <CardColumns>
+                                {this.state.group_users.map((user, i) =>
+                                    <Card key={i} user={user}>
+                                        <Card.Body>
+                                            {user.pass_hash === "1" && <h5><img
+                                                                                src={require("../images/admin_star.PNG")}
+                                                                                width="20"
+                                                                                height="20"
+                                                                                alt={""}
+                                                                        /> {user.first_name}  {user.last_name}</h5>}
+                                            {user.pass_hash !== "1" && <h5>{user.first_name}  {user.last_name}</h5>}
+                                            {user.email !== "" && <p>{user.email}</p>}
+                                            {user.pass_hash !== "1" && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.makeAdmin(user.uid)}>Make Admin</Button>}
+                                        </Card.Body>
+                                    </Card>
+                                )}
+                            </CardColumns>
                         </Card>
                         <hr/>
                         <Card>&nbsp;
                             <h3>&nbsp;&nbsp;&nbsp;Events:</h3>
-                            {this.state.group_events.map((event, i) =>
-                                <Card key={i} user={event}>
-                                    <Card.Body>
-                                        <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
-                                    </Card.Body>
-                                </Card>
-                            )}
+                            <CardColumns>
+                                {this.state.group_events.map((event, i) =>
+                                    <Card key={i} user={event}>
+                                        <Card.Body>
+                                            <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
+                                        </Card.Body>
+                                    </Card>
+                                )}
+                            </CardColumns>
                         </Card>
                         <Footer/>
                     </SingleObjectView>

@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import axios from "axios";
 import SinglebObjectView from '../components/SingleObjectView.js';
 import Navigation from '../components/Navigation.js';
-import Card from "react-bootstrap/Card";
+import {Card, CardColumns} from "react-bootstrap";
 import {Backend_Route} from "../BackendRoute.js";
 import Button from "react-bootstrap/Button";
 import Footer from "../components/Footer";
 import Cookies from "universal-cookie";
+import * as emailjs from "emailjs-com";
 
 
 const cookies = new Cookies();
@@ -210,6 +211,23 @@ class EventPage extends Component {
             });
     }
 
+    massEmail = () => {
+        let template_params = {
+            "reply_to": this.state.user_email,
+            "message_html": "We don't actually have the appropriate routes to retrieve a user's password lmao"
+        };
+
+        let service_id = "agora_service";
+        let template_id = "template_hlWoe6JV";
+        let user_id = "user_L6P4JRoGpemcRWO1WNmcG";
+        emailjs.send(service_id, template_id, template_params, user_id)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+            }, function(error) {
+                console.log('FAILED...', error);
+            });
+    }
+
     /**
      * RENDERING
      */
@@ -234,6 +252,8 @@ class EventPage extends Component {
                         <h5>Description: {this.state.event_description}</h5>
                         <h5>Location: {this.state.event_location}</h5>
                         <h5>Date: {this.state.event_date.substr(0, 16)}</h5>
+                        {cookies.get("USER_TOKEN") && this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
+                        {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending after all?</Button>}
                         <hr/>
                         <Card>
                             <Card.Body>
@@ -241,15 +261,15 @@ class EventPage extends Component {
                             </Card.Body>
                         </Card>
                         <hr/>
-                        {cookies.get("USER_TOKEN") && this.state.user_id  && this.state.user_attendance === 3 && <Button variant="primary" onClick={() => this.joinEvent()}>Attend Event</Button>}
-                        {this.state.user_id  && this.state.user_attendance === 1 && <Button variant="primary" onClick={() => this.leaveEvent()}>Not attending at the end?</Button>}
                         <Card>&nbsp;
                             <h3>&nbsp;&nbsp;&nbsp;Users attending:</h3>
-                            {this.state.event_users.map((user, i) =>
-                                <Card key={i} user={user}>
-                                    <h4> <Card.Body><Card.Title>{user.first_name} {user.last_name} {user.email}</Card.Title></Card.Body></h4>
-                                </Card>
-                            )}
+                            <CardColumns>
+                                    {this.state.event_users.map((user, i) =>
+                                        <Card key={i} user={user}>
+                                            <h5><Card.Body>{user.first_name} {user.last_name} {user.email}</Card.Body></h5>
+                                        </Card>
+                                    )}
+                            </CardColumns>
                         </Card>
                         <Footer/>
                     </SinglebObjectView>
