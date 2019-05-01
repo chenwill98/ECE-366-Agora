@@ -94,7 +94,11 @@ class GroupCreate extends Component {
 
 
     render() {
-        if (this.state.group_success) {
+        // confirm that the user session exists, otherwise redirect to login.
+        if (!cookies.get("USER_TOKEN")) {
+            return <Redirect to="/login"/>;
+        }
+        else if (this.state.group_success) {
             return (
                 <Redirect to="/home"/>
             );

@@ -4,7 +4,10 @@ import CenterView from '../components/CenterView.js';
 import Navigation from '../components/Navigation.js';
 import { Redirect } from 'react-router-dom'
 import {Backend_Route} from "../BackendRoute";
+import Cookies from "universal-cookie";
 
+
+const cookies = new Cookies();
 
 
 class EventCreate extends Component {
@@ -105,7 +108,11 @@ class EventCreate extends Component {
 
 
     render() {
-        if (this.state.event_success) {
+        // confirm that the user session exists, otherwise redirect to login.
+        if (!cookies.get("USER_TOKEN")) {
+            return <Redirect to="/login"/>;
+        }
+        else if (this.state.event_success) {
             return (
                 <Redirect to="/home"/>
             );
