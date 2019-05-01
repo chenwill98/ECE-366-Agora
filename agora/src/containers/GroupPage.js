@@ -156,6 +156,7 @@ class GroupPage extends Component {
                 });
             }
         }
+        this.getContactInfo()
 
         if (!this.state.intervalSet) {
             let interval = setInterval(this.getData, 1000);
@@ -371,7 +372,6 @@ class GroupPage extends Component {
                         <h5>Description: {this.state.group_description}</h5>
 
                         {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>} &nbsp;&nbsp;
-                        {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}&nbsp;&nbsp;
                         {cookies.get("USER_TOKEN") && this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}
                         {this.state.user_id  && this.state.user_belongs && <Button variant="primary" onClick={() => this.leaveGroup()}>Leave Group</Button>}
                         <hr/>
@@ -404,7 +404,7 @@ class GroupPage extends Component {
                                         <Card.Body>
                                             <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
                                             {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() =>
-                                                this.state.group_users.map((user, j) =>this.massEmail(user.email, user.first_name, this.state.group_name, event.name,`${this.state.ip}:8000/event/${event.id}`))}>Send Mass RSVP Email</Button>}&nbsp;&nbsp;
+                                                this.state.group_users.map((user) =>this.massEmail(user.email, user.first_name, this.state.group_name, event.name,`${this.state.ip}:8000/event/${event.id}`))}>Send Mass RSVP Email</Button>}&nbsp;&nbsp;
                                         </Card.Body>
                                     </Card>
                                 )}
