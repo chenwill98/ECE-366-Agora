@@ -7,7 +7,6 @@ import {Backend_Route} from "../BackendRoute.js";
 import Button from "react-bootstrap/Button";
 import Footer from "../components/Footer";
 import Cookies from "universal-cookie";
-import * as emailjs from "emailjs-com";
 
 
 const cookies = new Cookies();
@@ -205,26 +204,9 @@ class EventPage extends Component {
                     this.setState({
                         error: true,
                         error_msg: "Error updating your event attendance status: " + res.status
-                    })
+                    });
                     console.log("Error updating event status event.");
                 }
-            });
-    }
-
-    massEmail = () => {
-        let template_params = {
-            "reply_to": this.state.user_email,
-            "message_html": "We don't actually have the appropriate routes to retrieve a user's password lmao"
-        };
-
-        let service_id = "agora_service";
-        let template_id = "template_hlWoe6JV";
-        let user_id = "user_L6P4JRoGpemcRWO1WNmcG";
-        emailjs.send(service_id, template_id, template_params, user_id)
-            .then(function(response) {
-                console.log('SUCCESS!', response.status, response.text);
-            }, function(error) {
-                console.log('FAILED...', error);
             });
     }
 

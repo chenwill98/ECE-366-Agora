@@ -7,6 +7,7 @@ import Button from "react-bootstrap/Button";
 import {Backend_Route} from "../BackendRoute.js";
 import Footer from "../components/Footer";
 import Cookies from "universal-cookie";
+import * as emailjs from "emailjs-com";
 
 
 const cookies = new Cookies();
@@ -262,7 +263,7 @@ class GroupPage extends Component {
                 this.setState({
                     error: true,
                     error_msg: "Response: " + res.status
-                })
+                });
                 console.log("Error leaving group.");
             }
         });
@@ -319,6 +320,27 @@ class GroupPage extends Component {
         });
     }
 
+    //sends out an email to the specified user with an RSVP invitation
+    massEmail = (email, first_name, group_name, event_name, group_url) => {
+        let template_params = {
+            "reply_to": email,
+            "first_name": first_name,
+            "group_name": group_name,
+            "event_name": event_name,
+            "group_url": group_url
+        };
+        console.log(group_url);
+
+        let service_id = "agora_service";
+        let template_id = "rsvp";
+        let user_id = "user_L6P4JRoGpemcRWO1WNmcG";
+        emailjs.send(service_id, template_id, template_params, user_id)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+            }, function(error) {
+                console.log('FAILED...', error);
+            });
+    };
 
     //kills the process
     componentWillUnmount() {
@@ -327,7 +349,6 @@ class GroupPage extends Component {
             this.setState({ intervalIsSet: null });
         }
     }
-
 
     //// render function ////
    render() {
@@ -351,7 +372,7 @@ class GroupPage extends Component {
 
                         {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" href="/eventCreate">Create Event</Button>} &nbsp;&nbsp;
                         {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() => this.getContactInfo()}>Get Contact Info</Button>}&nbsp;&nbsp;
-                        {cookies.get("USER_TOKEN") && this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}&nbsp;&nbsp;
+                        {cookies.get("USER_TOKEN") && this.state.user_id  && !this.state.user_belongs && <Button variant="primary" onClick={() => this.joinGroup()}>Join Group</Button>}
                         {this.state.user_id  && this.state.user_belongs && <Button variant="primary" onClick={() => this.leaveGroup()}>Leave Group</Button>}
                         <hr/>
                         <Card>&nbsp;
@@ -379,9 +400,11 @@ class GroupPage extends Component {
                             <h3>&nbsp;&nbsp;&nbsp;Events:</h3>
                             <CardColumns>
                                 {this.state.group_events.map((event, i) =>
-                                    <Card key={i} user={event}>
+                                    <Card key={i} event={event}>
                                         <Card.Body>
                                             <h4><Card.Link href={"/event/" + event.id}>{event.name}</Card.Link></h4>
+                                            {this.state.user_id  && this.state.user_isAdmin && <Button variant="primary" onClick={() =>
+                                                this.state.group_users.map((user, j) =>this.massEmail(user.email, user.first_name, this.state.group_name, event.name,`${this.state.ip}:8000/group/${this.state.group_id}`))}>Send Mass RSVP Email</Button>}&nbsp;&nbsp;
                                         </Card.Body>
                                     </Card>
                                 )}
