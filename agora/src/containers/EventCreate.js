@@ -19,8 +19,8 @@ class EventCreate extends Component {
             ip: Backend_Route.ip,
             port: Backend_Route.port,
 
+            // event related states
             group_owner_id: localStorage.getItem('groupID'),
-
             event_id: "",
             event_description: "",
             event_name: "",
@@ -29,8 +29,6 @@ class EventCreate extends Component {
             event_date: "",
             event_time: "",
             event_success: false,
-
-            user_session: false,
 
             // error related states
             intervalSet: false,
@@ -64,7 +62,10 @@ class EventCreate extends Component {
         event.preventDefault();
     };
 
-    //sends a request to create a group that doesn't already exist
+
+    /**
+     * EventCreate - Tells backend to create and event.
+     */
     EventCreate = () => {
 
         fetch(`${this.state.ip}:${this.state.port}/group/${this.state.group_owner_id}/create-event`,
@@ -106,7 +107,7 @@ class EventCreate extends Component {
     };
 
 
-
+    /** RENDER **/
     render() {
         // confirm that the user session exists, otherwise redirect to login.
         if (!cookies.get("USER_TOKEN")) {
@@ -117,14 +118,14 @@ class EventCreate extends Component {
                 <Redirect to="/home"/>
             );
         } else if (this.state.error) {
-                    return (
-                        <div className='mt-5'>
-                            <Navigation/>
-                            <CenterView>
-                                <p>Error: {this.state.error_msg}</p>
-                            </CenterView>
-                        </div>
-                    );
+            return (
+                <div className='mt-5'>
+                    <Navigation/>
+                    <CenterView>
+                        <p>Error: {this.state.error_msg}</p>
+                    </CenterView>
+                </div>
+            );
         } else {
             return (
                 <div className='mt-5'>

@@ -85,6 +85,7 @@ public class UserStore {
         return user;
     }
 
+
     /**
      * getUserWithEmail - Gets a user from the MySQL database.
      *
@@ -200,7 +201,8 @@ public class UserStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement("insert into Users (Email, Passhash, First_name, Last_name) values (?, ?, ?, ?)");
+            stmt = connection.prepareStatement("insert into Users (Email, Passhash, First_name, Last_name) " +
+                                                "values (?, ?, ?, ?)");
             stmt.setString(1, new_user.email());
             stmt.setString(2, new_user.pass_hash());
             stmt.setString(3, new_user.first_name());
@@ -293,7 +295,8 @@ public class UserStore {
         }
 
         try {
-            stmt = connection.prepareStatement("replace into Groop_memberships (User_id, Groop_id, Is_admin) values (?, ?, ?)");
+            stmt = connection.prepareStatement("replace into Groop_memberships (User_id, Groop_id, Is_admin) " +
+                                                "values (?, ?, ?)");
             stmt.setString(1, user_id);
             stmt.setString(2, result_set.getString("Groop_id"));
             stmt.setInt(3, is_admin);
@@ -310,6 +313,14 @@ public class UserStore {
         }
     }
 
+
+    /**
+     * userLeaveGroup - Changes the relationship of a user to a group to be not-belonging.
+     *
+     * @param userid The user id of the user.
+     * @param groupname The groupname of the group.
+     * @return boolean - true on success and false on error.
+     */
     public boolean userLeaveGroup(String userid, String groupname) {
 
         PreparedStatement stmt = null;
@@ -451,7 +462,6 @@ public class UserStore {
 
         List<Group> groups = new ArrayList<>();
 
-
         try {
             while (result_set.next()) {
                 groups.add( new GroupBuilder()
@@ -527,7 +537,8 @@ public class UserStore {
         ResultSet  result_set;
 
         try {
-            stmt = connection.prepareStatement( "Select Is_attending from Event_attendance where User_id = ? and Event_id = ?");
+            stmt = connection.prepareStatement( "Select Is_attending from Event_attendance " +
+                                                "where User_id = ? and Event_id = ?");
             stmt.setString(1, user_id);
             stmt.setString(2, event_id);
         } catch (SQLException e) {
@@ -541,8 +552,7 @@ public class UserStore {
             return null;
         }
 
-        String status = "NO";
-
+        String status = "NO";   /* we want default enum value to be "NO" */
 
         try {
             if (result_set.next()) {

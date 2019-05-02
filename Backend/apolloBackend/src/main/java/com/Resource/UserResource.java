@@ -36,7 +36,6 @@ public class UserResource implements RouteProvider {
     private final UserStore store;                  /* the user store instance used in the UserResource class   */
     private final ObjectMapper object_mapper;       /* used in the middleware for altering response formats     */
     static BiMap<Integer, Integer> cookie_db;       /* cookie IDs mapper: Key = user id, Value = cookie ID      */
-
     private GroupStore group_store;                 /* used to confirm a group exists                           */
 
     /* methods */
@@ -127,11 +126,10 @@ public class UserResource implements RouteProvider {
                 Route.<SyncHandler<Response<Integer>>>create("GET", "/user/<id>/event/<eid>/is-attending", this::IsAttending)
                         .withMiddleware(UserResource::userSessionMiddleware)
                         .withMiddleware(Middleware::syncToAsync)
-                        .withMiddleware(jsonMiddleware()),
-                Route.sync("POST", "/user/<id>/rsvp-event/<eventID>", this::rsvpEvent)
                         .withMiddleware(jsonMiddleware())
                 );
     }
+
 
 
     /**
@@ -253,17 +251,6 @@ public class UserResource implements RouteProvider {
         }
 
         return Response.forStatus(Status.BAD_REQUEST.withReasonPhrase("Group already exists!"));
-    }
-
-
-    /**
-     * rsvpEvent - Not sure about this one quite yet...
-     *
-     * @param ctx
-     * @return
-     */
-    private Response<ByteString> rsvpEvent(RequestContext ctx) {
-        return Response.ok();
     }
 
 
@@ -432,7 +419,6 @@ public class UserResource implements RouteProvider {
     }
 
 
-
     /**
      * createUser - Creates a new user, adding them to the database.
      *
@@ -580,8 +566,8 @@ public class UserResource implements RouteProvider {
     private <T> Middleware<AsyncHandler<Response<T>>, AsyncHandler<Response<ByteString>>> jsonMiddleware() {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
-//        headers.put("Access-Control-Allow-Origin", "http://199.98.27.114:8000");
+//        headers.put("Access-Control-Allow-Origin", "http://localhost:3000");
+        headers.put("Access-Control-Allow-Origin", "http://199.98.27.114:8000");
         headers.put("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
         headers.put("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie");
         headers.put("Access-Control-Allow-Credentials", "true");

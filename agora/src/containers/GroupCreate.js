@@ -34,6 +34,8 @@ class GroupCreate extends Component {
             error_msg: ""
         };
     }
+
+
     //determines if there is currently a user session by whether a cookie exists or not
     componentDidMount () {
     }
@@ -57,7 +59,10 @@ class GroupCreate extends Component {
         event.preventDefault();
     };
 
-    //sends a request to create a group that doesn't already exist
+
+    /**
+     * GroupCreate - Sends a backend request to create a group.
+     */
     GroupCreate = () => {
         fetch(`${this.state.ip}:${this.state.port}/user/${this.state.user_id}/create-group`,
         {
@@ -96,7 +101,7 @@ class GroupCreate extends Component {
     };
 
 
-
+    /** RENDER **/
     render() {
         // confirm that the user session exists, otherwise redirect to login.
         if (!cookies.get("USER_TOKEN")) {

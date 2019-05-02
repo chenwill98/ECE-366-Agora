@@ -20,7 +20,6 @@ public class EventStore {
 
 
     /* methods */
-
     /**
      * EventStore - The constructor of EventStore. This function sets up the
      * mysql connection based on the inputted configuration and throws a
@@ -159,7 +158,8 @@ public class EventStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email from Event_attendance EA " +
+            stmt = connection.prepareStatement( "select U.User_id, U.First_name, U.Last_name, U.Email " +
+                                                "from Event_attendance EA " +
                                                 "inner join Users U on U.User_id = EA.User_id " +
                                                 "inner join Events E on E.Event_id = EA.Event_id" +
                                                 " where E.Event_id = ? and EA.Is_attending = 'YES'");
@@ -205,7 +205,12 @@ public class EventStore {
         return users;
     }
 
-    /* todo: add description */
+
+    /**
+     * getEvents - Get all events from a database.
+     *
+     * @return  A list of events.
+     */
     public List<Event> getEvents() {
         PreparedStatement stmt = null;
         ResultSet result_set = null;

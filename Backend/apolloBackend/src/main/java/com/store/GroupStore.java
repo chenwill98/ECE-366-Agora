@@ -18,7 +18,6 @@ public class GroupStore {
 
 
     /* methods */
-
     /**
      * GroupStore - The constructor of UserStore. This function sets up the
      * mysql connection based on the inputted configuration and throws a
@@ -81,6 +80,7 @@ public class GroupStore {
         return group;
     }
 
+
     /**
      * getGroup - Tries to fetch the group with the given name.
      *
@@ -122,6 +122,7 @@ public class GroupStore {
         }
         return group;
     }
+
 
     /**
      * getUsersAdmin - Gets the list of users who are members of a group.
@@ -174,7 +175,6 @@ public class GroupStore {
     }
 
 
-
     /**
      * createEvent - Adds an event to the database.
      *
@@ -188,7 +188,8 @@ public class GroupStore {
 
         // prepare the sql statement
         try {
-            stmt = connection.prepareStatement( "insert into Events (Event_name, Description, Groop_id, Location, Date_time)" +
+            stmt = connection.prepareStatement( "insert into Events " +
+                                                "(Event_name, Description, Groop_id, Location, Date_time)" +
                                                 "values (?, ?, ?, ?, ?)");
             stmt.setString(1, new_event.name());
             stmt.setString(2, new_event.description());
@@ -442,7 +443,11 @@ public class GroupStore {
     }
 
 
-    /* todo: add comments */
+    /**
+     * getEvents - Get the Events that belong to a specific group (the events the group created).
+     * @param id The group id.
+     * @return A list of events.
+     */
     public List<Event> getEvents(String id) {
         PreparedStatement stmt = null;
         ResultSet result_set = null;
@@ -483,6 +488,10 @@ public class GroupStore {
     }
 
 
+    /**
+     * getGroups - Gets all the groups in the database.
+     * @return A list of groups.
+     */
     public List<Group> getGroups() {
         PreparedStatement stmt = null;
         ResultSet result_set = null;

@@ -50,6 +50,7 @@ class EventPage extends Component {
 
     //fetches all data when the component mounts (called right after constructor)
     componentDidMount () {
+
         /**
          * GET THE EVENT INFO
          */
@@ -89,6 +90,7 @@ class EventPage extends Component {
             console.log("Error requesting event: " + error.message);
         });
 
+
         /**
          * CHECK YOUR ATTENDANCE STATUS FOR THE EVENT
          */
@@ -124,6 +126,7 @@ class EventPage extends Component {
             this.setState({ intervalIsSet: null });
         }
     }
+
 
     /**
      * GET THE EVENT'S USERS

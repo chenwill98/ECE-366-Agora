@@ -57,6 +57,10 @@ export default class Events extends Component {
         // }
     }
 
+
+    /**
+     * getData - gets the relevant data for this container to load as a page (User events and all events).
+     */
     getData = () => {
         if (this.state.user_id && cookies.get("USER_TOKEN")) {
             //fetches all of the user's events
@@ -152,7 +156,6 @@ export default class Events extends Component {
                     <Navigation/>
                     <nav className="navbar bg-white sticky-top flex-md-nowrap p-1">
                         <a className="navbar-brand text-center col-sm-3 col-md-2 mr-0" href="/account">{this.state.user_first_name} {this.state.user_last_name}</a>
-                        <input className="form-control form-control-dark w-100" type="text" placeholder="Search"/>
                     </nav>
                     <div className="container-fluid">
                         <div className="row">

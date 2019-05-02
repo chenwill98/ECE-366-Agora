@@ -129,6 +129,9 @@ class GroupPage extends Component {
                         }
                     });
             });
+
+
+
             /**
              * CHECK IF USER BELONGS TO THE GROUP
              */
@@ -272,7 +275,7 @@ class GroupPage extends Component {
 
 
     /**
-     * GET THE GROUP'S USERS
+     * getGroupUsers - Gets the users that belong to the group.
      */
     getGroupUsers() {
         axios.get(`${this.state.ip}:${this.state.port}/group/${this.state.group_id}/get-users`)
@@ -321,6 +324,7 @@ class GroupPage extends Component {
         });
     }
 
+
     //sends out an email to the specified user with an RSVP invitation
     massEmail = (email, first_name, group_name, event_name, group_url) => {
         let template_params = {
@@ -351,8 +355,10 @@ class GroupPage extends Component {
         }
     }
 
-    //// render function ////
-   render() {
+    /**
+     * RENDER
+     */
+    render() {
         if (this.state.error) {
             return (
                 <div className='mt-5'>

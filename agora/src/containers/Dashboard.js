@@ -204,7 +204,7 @@ class Dashboard extends Component{
                             <Button variant="primary" size="lg"href="groupCreate" > &nbsp;&nbsp;&nbsp;&nbsp;Make Group&nbsp;&nbsp;&nbsp;&nbsp;</Button>
                         </p>
                         </container>
-                    </Jumbotron>;
+                    </Jumbotron>
                     <Card>
                     <Tabs defaultActiveKey="groups" transition={false} id="tabs">
                         <Tab eventKey="groups" title="Groups">
